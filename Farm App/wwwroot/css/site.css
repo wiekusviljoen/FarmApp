@@ -388,3 +388,15 @@ img, canvas, svg { max-width: 100%; }
   .footer .container { font-size: .9rem; }
   .auction-calendar-wrap, .table-responsive { max-width: 100%; }
 }
+
+/* Floating Top button uses the same pill style and reveal motion as Back, stacked above it. */
+.floating-top-button { bottom: max(5.35rem, calc(env(safe-area-inset-bottom) + 4.1rem)); }
+@media (max-width: 575.98px) {
+  .floating-top-button { bottom: max(5rem, calc(env(safe-area-inset-bottom) + 3.9rem)); }
+}
+
+/* Compact, horizontally scrollable category tabs for meat prices. */
+.price-category-tabs { scrollbar-width: thin; padding: .2rem .05rem .55rem; }
+.price-category-tabs .price-category-tab { flex: 0 0 auto; white-space: nowrap; border: 1px solid var(--farm-border); background: #fff; color: var(--farm-green); border-radius: 999px; padding: .6rem 1rem; font-weight: 700; }
+.price-category-tabs .price-category-tab.active { background: var(--farm-green); border-color: var(--farm-green); color: #fff; }
+.price-category-panel { min-width: 0; }

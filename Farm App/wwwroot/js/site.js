@@ -16,3 +16,12 @@
   window.addEventListener('scroll', updateBackButton, { passive: true });
   updateBackButton();
 })();
+
+// Show the floating Top button alongside Back after scrolling down.
+(() => {
+  const topButton = document.getElementById('floatingTopButton');
+  if (!topButton) return;
+  const updateTopButton = () => topButton.classList.toggle('is-visible', window.scrollY > 120);
+  window.addEventListener('scroll', updateTopButton, { passive: true });
+  updateTopButton();
+})();

@@ -6,6 +6,7 @@
 <section class="card p-4 mb-4">
  <div class="d-flex justify-content-between align-items-center flex-wrap gap-2"><h2>Latest published meat prices</h2><button class="btn btn-outline-primary" onclick="loadLivePrices()">Refresh prices</button></div>
 <p class="small text-muted" id="liveStatus">Loading live prices...</p>
+ <div id="priceCategoryTabs" class="price-category-tabs nav nav-pills flex-nowrap overflow-auto gap-2 mb-3" role="tablist" aria-label="Meat price categories"></div>
  <div id="livePriceBlocks" class="mt-3"><p class="text-muted">Loading price categories...</p></div>
  <h3 class="mt-3">Published price trends</h3><p class="small text-muted">Historical entries available on Feedmaster's page. This is not a saved daily price history. Auction prices remain in their own category and are excluded from the meat-price trend chart.</p><canvas id="marketChart" height="150" style="width:100%"></canvas>
  <a href="https://www.feedmaster.com.na/meat-prices" target="_blank" rel="noopener">Source: Feedmaster meat prices</a>
@@ -95,12 +96,26 @@ async function loadLivePrices() {
     const highlight = x.category === 'Sheep' && x.sourceName === 'NC Avg.' ? ' class="table-success fw-semibold"' : '';
     return `<tr${highlight}><td>${x.date}</td><td>${escapeHtml(x.item)}</td><td>${escapeHtml(x.sourceName)}</td><td>${money(x.price)}</td><td>${action}</td></tr>`;
    }).join('');
-   return `<section class="card p-3 mb-3"><h3 class="h4">${categoryInfo[category].title}</h3><p class="small text-muted mb-2">${categoryInfo[category].note}</p><div class="table-responsive"><table class="table table-sm mb-0"><thead><tr><th>Date</th><th>Grade / animal</th><th>Price source</th><th>Price (NAD, as published)</th><th>Action</th></tr></thead><tbody>${rows}</tbody></table></div></section>`;
+   return `<section id="price-panel-${category}" class="card p-3 mb-3 price-category-panel"><h3 class="h4">${categoryInfo[category].title}</h3><p class="small text-muted mb-2">${categoryInfo[category].note}</p><div class="table-responsive"><table class="table table-sm mb-0"><thead><tr><th>Date</th><th>Grade / animal</th><th>Price source</th><th>Price (NAD, as published)</th><th>Action</th></tr></thead><tbody>${rows}</tbody></table></div></section>`;
   }).join('');
+  const availableCategories = Object.keys(categoryInfo).filter(category => items.some(item => item.category === category));
+  const tabs = document.getElementById('priceCategoryTabs');
+  tabs.innerHTML = availableCategories.map((category, index) => `<button type="button" class="nav-link price-category-tab${index === 0 ? ' active' : ''}" role="tab" aria-selected="${index === 0}" aria-controls="price-panel-${category}" onclick="showPriceCategory('${category}')">${categoryInfo[category].title}</button>`).join('');
   document.getElementById('livePriceBlocks').innerHTML = blocks || '<p class="text-muted">No published price rows available.</p>';
+  if (availableCategories.length) showPriceCategory(availableCategories[0]);
   drawMarketChart(data.prices);
   status.textContent = `Updated ${new Date(data.fetchedAt).toLocaleString()}  |  Source values are published prices, not guaranteed buyer offers.`;
  } catch (error) { status.textContent = 'Live price update failed: ' + error.message; }
+}
+function showPriceCategory(category) {
+ document.querySelectorAll('.price-category-panel').forEach(panel => {
+  panel.classList.toggle('d-none', panel.id !== 'price-panel-' + category);
+ });
+ document.querySelectorAll('.price-category-tab').forEach(tab => {
+  const active = tab.getAttribute('aria-controls') === 'price-panel-' + category;
+  tab.classList.toggle('active', active);
+  tab.setAttribute('aria-selected', String(active));
+ });
 }
 function drawMarketChart(rows) {
  const canvas=document.getElementById('marketChart'); if(!canvas)return;
