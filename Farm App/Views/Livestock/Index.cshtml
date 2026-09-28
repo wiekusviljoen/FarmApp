@@ -42,12 +42,12 @@
   <div class="row g-3">
    <div class="col-6"><label class="form-label" for="animalCount">Number of active animals</label><input id="animalCount" type="number" min="0" step="1" value="@ViewBag.ActiveCount" class="form-control" readonly /><small class="text-muted">Automatically counted from active livestock records.</small></div>
    <div class="col-12"><div id="speciesCountSummary" class="small text-muted"></div></div>
-   <div class="col-6"><label class="form-label" for="dailyFeed">Feed per animal per day (kg)</label><input id="dailyFeed" type="number" min="0" step="0.1" value="0.5" class="form-control" /></div>
+   <div class="col-12"><h4 class="h6">Daily supplement by species</h4><div id="feedRationsBySpecies" class="table-responsive"><p class="text-muted small">Loading species rations…</p></div><small class="text-muted">Set the supplement amount in kg per head per day for each species. These are your ration settings, not total grazing intake.</small></div>
    <div class="col-12"><label class="form-label" for="seasonFactor">Rainfall-based supplement factor</label><div class="input-group"><input id="seasonFactor" type="number" min="0" max="2" step="0.05" value="1" class="form-control" /><span class="input-group-text">×</span></div><small class="text-muted" id="seasonFactorNote">Adjust after checking actual grazing and animal condition. Rainfall alone cannot determine feed needs.</small></div>
    <div class="col-8"><label class="form-label" for="durationValue">Feeding duration</label><input id="durationValue" type="number" min="1" step="1" value="30" class="form-control" /></div>
    <div class="col-4"><label class="form-label" for="durationUnit">Unit</label><select id="durationUnit" class="form-select"><option value="1">Days</option><option value="7">Weeks</option><option value="30">Months (30 days)</option></select></div>
   </div>
-  <div class="alert alert-light border mt-3 mb-0"><div id="feedingEstimate" class="fw-bold">Choose a product and enter its price to estimate feed cost.</div><small class="text-muted">Planning estimate only. One average supplement ration is applied to all active animals; mixed species and production stages need different rations. Rainfall is only a rough signal—check actual veld condition, animal body condition and feed-label guidance before feeding.</small></div>
+  <div class="alert alert-light border mt-3 mb-0"><div id="feedingEstimate" class="fw-bold">Choose a product and enter its price to estimate feed cost.</div><small class="text-muted">Planning estimate only. Rations are entered separately by species. Rainfall is only a rough signal—check actual veld condition, animal body condition and feed-label guidance before feeding.</small></div>
  </div></div></div></div></section>
 @section Scripts {
 <script>
@@ -58,6 +58,14 @@ const livestockCounts = @Html.Raw(ViewBag.SpeciesCountsJson);
 function renderSpeciesCountSummary() {
  const el=document.getElementById('speciesCountSummary');
  el.textContent=livestockCounts.length ? 'Registered active stock: '+livestockCounts.map(x=>`${x.species}: ${x.count}`).join(' · ') : 'No active livestock is registered.';
+}
+const rationStoreKey='farmflow.dailyRations.v1';
+function renderRationTable() {
+ const target=document.getElementById('feedRationsBySpecies');
+ let saved={}; try { saved=JSON.parse(localStorage.getItem(rationStoreKey)||'{}'); } catch {}
+ if(!livestockCounts.length){target.innerHTML='<p class="text-muted">No active livestock to calculate.</p>';return;}
+ target.innerHTML='<table class="table table-sm align-middle"><thead><tr><th>Species</th><th>Heads</th><th>Supplement kg/head/day</th></tr></thead><tbody>'+livestockCounts.map(x=>`<tr><td>${escapeHtml(x.species)}</td><td>${x.count}</td><td><input type="number" min="0" max="100" step="0.05" class="form-control form-control-sm feed-ration-input" data-species="${escapeHtml(x.species)}" value="${saved[x.species]??0}" aria-label="Daily supplement for ${escapeHtml(x.species)}" /></td></tr>`).join('')+'</tbody></table>';
+ target.querySelectorAll('.feed-ration-input').forEach(input=>input.addEventListener('input',()=>{const next={};target.querySelectorAll('.feed-ration-input').forEach(x=>next[x.dataset.species]=Number(x.value)||0);localStorage.setItem(rationStoreKey,JSON.stringify(next));updateFeedingEstimate();}));
 }
 async function loadRainfallWeather() {
  const summary=document.getElementById('rainfallWeatherSummary');
@@ -177,11 +185,14 @@ function renderMix() {
 function clearMix() { ingredients.length=0; renderMix(); }
 function updateFeedingEstimate() {
  const product=selectedProduct(), price=Number(document.getElementById('bagPrice').value), bagKg=Number(document.getElementById('bagKg').value)||50;
- const count=Number(document.getElementById('animalCount').value), ration=Number(document.getElementById('dailyFeed').value), factor=Number(document.getElementById('seasonFactor').value);
+ const factor=Number(document.getElementById('seasonFactor').value);
  const days=Number(document.getElementById('durationValue').value)*Number(document.getElementById('durationUnit').value);
+ const rationInputs=[...document.querySelectorAll('.feed-ration-input')];
+ const count=livestockCounts.reduce((sum,x)=>sum+x.count,0);
+ const dailyBaseKg=rationInputs.reduce((sum,input)=>sum+(livestockCounts.find(x=>x.species===input.dataset.species)?.count||0)*(Number(input.value)||0),0);
  const target=document.getElementById('feedingEstimate');
- if(!product || price<=0 || count<=0 || ration<0 || !Number.isFinite(factor) || factor<0 || days<=0){target.textContent='Choose a product, enter its current bag price, and complete the feeding details.';return;}
- const dailyKg=count*ration*factor, totalKg=dailyKg*days, bags=Math.ceil(totalKg/bagKg), totalCost=totalKg/bagKg*price, bagCost=bags*price;
+ if(!product || price<=0 || count<=0 || !Number.isFinite(factor) || factor<0 || days<=0){target.textContent='Choose a product, enter its current bag price, and complete the feeding details.';return;}
+ const dailyKg=dailyBaseKg*factor, totalKg=dailyKg*days, bags=Math.ceil(totalKg/bagKg), totalCost=totalKg/bagKg*price, bagCost=bags*price;
  target.textContent=`${count} active animals · ${days.toLocaleString()} days · ${dailyKg.toLocaleString(undefined,{maximumFractionDigits:1})} kg/day · ${totalKg.toLocaleString(undefined,{maximumFractionDigits:1})} kg total · ${bags.toLocaleString()} bags of ${bagKg} kg · Estimated cost: ${money(totalCost)} (full bags: ${money(bagCost)})`;
 }
 function updatePreviews() {
@@ -191,10 +202,10 @@ function updatePreviews() {
  document.getElementById('ingredientPreview').textContent = bag > 0 && kg > 0 ? `Ingredient estimate: ${money(bag / bagKg * kg)} for ${kg.toFixed(1)} kg  |  ${money(bag / bagKg)} per kg` : 'Enter bag price and kg to preview ingredient cost.';
  updateFeedingEstimate();
 }
-['bagPrice','amountKg','animalCount','dailyFeed','seasonFactor','durationValue','durationUnit','bagKg'].forEach(id => document.getElementById(id).addEventListener('input', updatePreviews));
+['bagPrice','amountKg','seasonFactor','durationValue','durationUnit','bagKg'].forEach(id => document.getElementById(id).addEventListener('input', updatePreviews));
 document.getElementById('bagPrice').addEventListener('change', saveSelectedFeedPrice);
 document.getElementById('bagKg').addEventListener('change', saveSelectedFeedPrice);
 document.getElementById('durationUnit').addEventListener('change', updatePreviews);
-document.addEventListener('DOMContentLoaded', () => { renderSpeciesCountSummary(); initFeedProducts(); updatePreviews(); refreshFeedProducts(); loadRainfallWeather(); });
+document.addEventListener('DOMContentLoaded', () => { renderSpeciesCountSummary(); renderRationTable(); initFeedProducts(); updatePreviews(); refreshFeedProducts(); loadRainfallWeather(); });
 </script>
 }
