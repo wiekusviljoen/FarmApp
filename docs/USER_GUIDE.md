@@ -27,9 +27,18 @@ The dashboard is the starting point. Use it to get an overview and navigate to t
 
 ## 4. Market calculator
 
+The live Feedmaster price table groups its tabs into three farm-friendly categories:
+
+- **Sheep** — Feedmaster's **Mutton** tab, including sheep/lamb grade entries.
+- **Beef** — Feedmaster's **Beef** tab, with grades and the listed price sources.
+- **Wild** — Feedmaster's **Game** tab, with game species and average/minimum/maximum prices.
+
+The separate **Auctions** tab is intentionally not mixed into the meat-price table. The table shows the latest available date for each grade/animal and source; a zero or unavailable quote is omitted.
+
 1. Open the market calculator.
-2. Enter the relevant animal, weight, and price information requested by the page.
-3. Review the estimate before using it for planning.
+2. Review the category, grade/animal, source, and published price.
+3. Use **Use price** to copy a displayed quote into the abattoir comparison, then enter the carcass weight.
+4. Treat the result as an estimate; confirm actual buyer prices, grading, deductions, and fees before a sale.
 
 Calculations are estimates. Confirm buyer prices, grading, deductions, and fees before a sale.
 
