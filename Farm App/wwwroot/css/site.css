@@ -332,3 +332,16 @@ body { overflow-wrap: anywhere; }
 @media (prefers-reduced-motion: reduce) {
   .floating-back-button { transition: none; }
 }
+
+/* Keep livestock columns readable on narrow screens; swipe horizontally instead of squeezing words. */
+.livestock-table-wrap { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.livestock-table { width: 100%; min-width: 700px; table-layout: auto; }
+.livestock-table th, .livestock-table td { white-space: nowrap; vertical-align: middle; }
+.livestock-table th:last-child, .livestock-table td:last-child { min-width: 150px; }
+.livestock-page-header > div { min-width: 0; }
+.livestock-page-header p { margin-bottom: 0; }
+@media (max-width: 575.98px) {
+  .livestock-page-header { align-items: flex-start !important; flex-direction: column; gap: .75rem; }
+  .livestock-add-button { align-self: flex-start; white-space: nowrap; }
+  .livestock-table { min-width: 700px; }
+}
