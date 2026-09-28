@@ -33,6 +33,38 @@
     </div>
 </section>
 
+<section class="dashboard-section" aria-labelledby="agri-news-heading">
+    <div class="section-heading"><div><span class="dashboard-kicker">WHAT IS HAPPENING</span><h2 id="agri-news-heading">Agriculture news</h2><p class="text-muted mb-0">Latest headlines and what they could mean for the industry.</p></div><a class="btn btn-outline-primary" asp-controller="News" asp-action="Index">View all news →</a></div>
+    <div class="row g-3" id="dashboardNews" aria-live="polite"><div class="col-12"><p class="text-muted">Loading latest agriculture news…</p></div></div>
+</section>
+
 <section class="dashboard-note">
     <div class="note-icon">✦</div><div><h2>Practical information, all together</h2><p>Use the tools above to keep records current and make day-to-day farm decisions with the information available.</p></div>
 </section>
+
+@section Scripts {
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+    const container = document.getElementById('dashboardNews');
+    try {
+        const response = await fetch('/News/Feed', { cache: 'no-store' });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || 'News is unavailable.');
+        container.replaceChildren();
+        for (const article of (data.articles || []).slice(0, 3)) {
+            const col = document.createElement('div'); col.className = 'col-12 col-lg-4';
+            const card = document.createElement('article'); card.className = 'card p-4 h-100';
+            const meta = document.createElement('div'); meta.className = 'small text-muted mb-2';
+            meta.textContent = `${article.source || 'Agriculture news'} · ${article.publishedAt ? new Date(article.publishedAt).toLocaleDateString() : 'Date unavailable'}`;
+            const heading = document.createElement('h3'); heading.className = 'h5';
+            const link = document.createElement('a'); link.href = article.url; link.target = '_blank'; link.rel = 'noopener noreferrer'; link.textContent = article.title; heading.appendChild(link);
+            const summary = document.createElement('p'); summary.className = 'text-muted small'; summary.textContent = article.summary || 'Open the story for details.';
+            const impact = document.createElement('div'); impact.className = 'alert alert-light border small mt-auto mb-0';
+            const label = document.createElement('strong'); label.textContent = 'Potential industry impact: '; impact.append(label, document.createTextNode(article.impact || 'Impact not assessed.'));
+            card.append(meta, heading, summary, impact); col.appendChild(card); container.appendChild(col);
+        }
+        if (!container.children.length) container.textContent = 'No agriculture stories available right now.';
+    } catch (error) { container.textContent = 'Agriculture news is temporarily unavailable. Open the news page to try again.'; }
+});
+</script>
+}

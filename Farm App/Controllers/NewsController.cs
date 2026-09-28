@@ -78,7 +78,7 @@ public class NewsController : Controller
                 var dateText = Text(item, "pubDate", "published", "updated", "date");
                 DateTimeOffset? date = DateTimeOffset.TryParse(dateText, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out var parsedDate) ? parsedDate : null;
                 var category = string.Join(", ", item.Elements().Where(e => e.Name.LocalName == "category").Select(e => Clean(e.Value)).Where(x => x.Length > 0).Distinct().Take(4));
-                articles.Add(new NewsArticle(title, parsed.ToString(), date, description, feed.Name, category));
+                articles.Add(new NewsArticle(title, parsed.ToString(), date, description, feed.Name, category, AssessImpact(title, description, category)));
             }
             return articles;
         }
@@ -91,6 +91,20 @@ public class NewsController : Controller
         return AgricultureTerms.Any(term => text.Contains(term, StringComparison.Ordinal));
     }
 
+    private static string AssessImpact(string title, string summary, string category)
+    {
+        var text = $"{title} {summary} {category}".ToLowerInvariant();
+        if (new[] { "foot-and-mouth", "foot and mouth", "fmd", "disease outbreak", "quarantine", "movement ban", "livestock restriction" }.Any(x => text.Contains(x))) return "Animal health & movement: could restrict livestock transport, sales, and market access; check official veterinary notices before moving animals.";
+        if (new[] { "drought", "dry spell", "water shortage", "low rainfall", "heatwave" }.Any(x => text.Contains(x))) return "Weather & grazing: may reduce veld growth and water availability, increasing pressure on feed budgets and herd condition.";
+        if (new[] { "rainfall", "good rains", "flood", "storm", "rain forecast" }.Any(x => text.Contains(x))) return "Weather & production: could affect grazing, water supplies, planting, and access roads; local conditions determine the net effect.";
+        if (new[] { "meat price", "beef price", "sheep price", "livestock price", "auction", "abattoir", "export market", "meatco" }.Any(x => text.Contains(x))) return "Livestock markets: may influence selling prices, buyer demand, and timing or route of sales; compare with local prices.";
+        if (new[] { "feed price", "animal feed", "fertiliser", "fuel price", "input cost" }.Any(x => text.Contains(x))) return "Farm costs: may change feed or input expenses and affect margins; check supplier prices and cost per animal.";
+        if (new[] { "export", "trade agreement", "market access", "tariff", "import" }.Any(x => text.Contains(x))) return "Trade & demand: may open or limit sales channels and affect demand or prices, depending on products and markets.";
+        if (new[] { "subsidy", "grant", "funding", "loan", "support scheme" }.Any(x => text.Contains(x))) return "Finance & investment: may affect access to funding for eligible producers; verify requirements, deadlines, and terms.";
+        if (new[] { "crop", "maize", "wheat", "grain", "horticulture", "harvest", "irrigation" }.Any(x => text.Contains(x))) return "Crop production: may affect yields, input needs, irrigation, or supply, with knock-on effects for food prices and livestock feed.";
+        return "Industry outlook: may affect costs, production, demand, or policy. This is a general estimate; check the full report and local conditions.";
+    }
+
     private static string Text(XElement item, params string[] names) => item.Elements().FirstOrDefault(e => names.Contains(e.Name.LocalName, StringComparer.OrdinalIgnoreCase))?.Value ?? "";
     private static string Clean(string? value)
     {
@@ -101,5 +115,5 @@ public class NewsController : Controller
     }
     private static string NormalizeUrl(string url) => url.TrimEnd('/');
 
-    public record NewsArticle(string Title, string Url, DateTimeOffset? PublishedAt, string Summary, string Source, string Category);
+    public record NewsArticle(string Title, string Url, DateTimeOffset? PublishedAt, string Summary, string Source, string Category, string Impact);
 }

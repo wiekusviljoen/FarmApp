@@ -72,6 +72,12 @@ function renderNews() {
         const summary = document.createElement('p');
         summary.className = 'text-muted mb-3';
         summary.textContent = article.summary || 'Open the publisher’s article for the full report.';
+        const impact = document.createElement('div');
+        impact.className = 'alert alert-light border small mb-3';
+        const impactLabel = document.createElement('strong');
+        impactLabel.textContent = 'Potential industry impact: ';
+        impact.appendChild(impactLabel);
+        impact.appendChild(document.createTextNode(article.impact || 'Impact not assessed.'));
         const footer = document.createElement('div');
         footer.className = 'mt-auto';
         const sourceLink = document.createElement('a');
@@ -81,7 +87,7 @@ function renderNews() {
         sourceLink.className = 'btn btn-sm btn-outline-secondary';
         sourceLink.textContent = 'Read full story';
         footer.appendChild(sourceLink);
-        card.append(meta, heading, summary, footer);
+        card.append(meta, heading, summary, impact, footer);
         col.appendChild(card);
         list.appendChild(col);
     }
