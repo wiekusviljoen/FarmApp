@@ -10,6 +10,71 @@ public class MarketController : Controller
     public IActionResult Index() => View();
 
     [HttpGet]
+    public async Task<IActionResult> FeedProducts()
+    {
+        const string source = "https://www.feedmaster.com.na/products";
+        var pages = new[]
+        {
+            (Path: "/products/sheep", Group: "Sheep"),
+            (Path: "/products/beef-cattle", Group: "Cattle"),
+            (Path: "/products/goats", Group: "Goats"),
+            (Path: "/products/game", Group: "Game"),
+            (Path: "/products/pigs", Group: "Pigs"),
+            (Path: "/products/broilers", Group: "Poultry"),
+            (Path: "/products/layers", Group: "Poultry"),
+            (Path: "/products/dairy-cattle", Group: "Dairy"),
+            (Path: "/products/horses", Group: "Horses"),
+            (Path: "/products", Group: "Feedmaster products")
+        };
+        try
+        {
+            using var client = new HttpClient { Timeout = TimeSpan.FromSeconds(30) };
+            client.DefaultRequestHeaders.UserAgent.ParseAdd("FarmFlow/1.0");
+            var pageResults = await Task.WhenAll(pages.Select(async page =>
+            {
+                try
+                {
+                    var pageUrl = new Uri(new Uri("https://www.feedmaster.com.na"), page.Path);
+                    return (page.Group, Html: await client.GetStringAsync(pageUrl));
+                }
+                catch { return (page.Group, Html: ""); }
+            }));
+
+            var products = new List<object>();
+            foreach (var page in pageResults)
+            {
+                var starts = Regex.Matches(page.Html, @"<div\b[^>]*class=[""'][^""']*product-grid-card");
+                for (var i = 0; i < starts.Count; i++)
+                {
+                    var start = starts[i].Index;
+                    var end = i + 1 < starts.Count ? starts[i + 1].Index : page.Html.Length;
+                    var card = page.Html[start..end];
+                    var titleMatch = Regex.Match(card, @"<h5\b[^>]*class=[""'][^""']*product-grid-title[^""']*[""'][^>]*>(.*?)</h5>", RegexOptions.Singleline | RegexOptions.IgnoreCase);
+                    if (!titleMatch.Success) continue;
+                    var name = WebUtility.HtmlDecode(Regex.Replace(titleMatch.Groups[1].Value, "<[^>]+>", " ")).Trim();
+                    name = Regex.Replace(name, @"T$", "").Trim();
+                    var massMatch = Regex.Match(card, @"Mass:\s*([^<]+)", RegexOptions.IgnoreCase);
+                    var massText = massMatch.Success ? massMatch.Groups[1].Value.Trim() : "";
+                    var weightMatch = Regex.Match(massText, @"(\d+(?:[.,]\d+)?)\s*(?:kg|Kg)", RegexOptions.IgnoreCase);
+                    var bagKg = weightMatch.Success && decimal.TryParse(weightMatch.Groups[1].Value.Replace(",", "."), NumberStyles.Number, CultureInfo.InvariantCulture, out var parsed) ? parsed : 50m;
+                    var linkMatch = Regex.Match(card, @"<a\b[^>]*href=[""']([^""']+)[""'][^>]*>", RegexOptions.IgnoreCase);
+                    products.Add(new { name, group = page.Group, mass = massText, bagKg, url = linkMatch.Success ? linkMatch.Groups[1].Value : source });
+                }
+            }
+
+            var unique = products.GroupBy(p => p.GetType().GetProperty("name")!.GetValue(p)!.ToString(), StringComparer.OrdinalIgnoreCase)
+                .Select(g => g.First()).ToList();
+            if (unique.Count == 0)
+                return StatusCode(502, new { error = "Feedmaster's product catalog returned no recognizable products.", source });
+            return Json(new { source, fetchedAt = DateTimeOffset.Now, products = unique });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(502, new { error = "Could not refresh Feedmaster's product catalog: " + ex.Message, source });
+        }
+    }
+
+    [HttpGet]
     public async Task<IActionResult> LiveMeat()
     {
         const string source = "https://www.feedmaster.com.na/meat-prices";
@@ -20,13 +85,14 @@ public class MarketController : Controller
             var html = await client.GetStringAsync(source);
             var rows = new List<object>();
 
-            // Feedmaster publishes separate tabs. Map its terminology to farm-friendly groups:
-            // Beef -> Beef, Mutton -> Sheep, Game -> Wild. Auctions are deliberately excluded.
+            // Keep Feedmaster's meat and auction sections distinct:
+            // Beef -> Beef, Mutton -> Sheep, Game -> Wild, Auctions -> Auctions.
             var tabs = new[]
             {
                 new { Id = "beef", Category = "Beef", ItemHeader = "Grade", PriceHeaders = new[] { "Meatco", "FMM", "Beefcor", "RMAA" } },
                 new { Id = "mutton", Category = "Sheep", ItemHeader = "Grade", PriceHeaders = new[] { "NC Avg.", "FMM", "Aranos", "BMP", "Namibia Avg.", "RMAA" } },
-                new { Id = "game", Category = "Wild", ItemHeader = "Grade", PriceHeaders = new[] { "Avg.", "Min", "Max" } }
+                new { Id = "game", Category = "Wild", ItemHeader = "Grade", PriceHeaders = new[] { "Avg.", "Min", "Max" } },
+                new { Id = "auctions", Category = "Auctions", ItemHeader = "Type", PriceHeaders = new[] { "Price" } }
             };
 
             string Clean(string htmlPart) =>
@@ -75,7 +141,7 @@ public class MarketController : Controller
                             date = date.ToString("yyyy-MM-dd"),
                             category = tab.Category,
                             item,
-                            sourceName = column.Name,
+                            sourceName = tab.Category == "Auctions" ? "Feedmaster Auctions" : column.Name,
                             price
                         });
                     }

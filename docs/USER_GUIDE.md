@@ -33,12 +33,21 @@ The live Feedmaster price table groups its tabs into three farm-friendly categor
 - **Beef** — Feedmaster's **Beef** tab, with grades and the listed price sources.
 - **Wild** — Feedmaster's **Game** tab, with game species and average/minimum/maximum prices.
 
-The separate **Auctions** tab is intentionally not mixed into the meat-price table. The table shows the latest available date for each grade/animal and source; a zero or unavailable quote is omitted.
+The **Auctions** tab appears as its own **Auctions** category and is not mixed with meat grades. The table shows the latest available date for each grade/animal and source; a zero or unavailable quote is omitted. Auction prices are excluded from the meat-price trend chart because the pricing basis may differ.
 
-1. Open the market calculator.
-2. Review the category, grade/animal, source, and published price.
+1. Open the market calculator and use **Refresh prices** for the latest Feedmaster meat and auction figures.
+2. Review the category, grade/animal, source, date, and published price.
 3. Use **Use price** to copy a displayed quote into the abattoir comparison, then enter the carcass weight.
 4. Treat the result as an estimate; confirm actual buyer prices, grading, deductions, and fees before a sale.
+
+### Feed product and feeding-cost calculator
+
+- Use **Refresh products** to pull the current product names and package sizes from Feedmaster's public product catalog.
+- Choose a product, enter the current supplier price for its bag, and change the bag size only if your actual package differs (the displayed catalog mass is the default).
+- The current bag price is saved in this browser/device for that product and the last-updated time is shown. It is not a supplier-provided live price: Feedmaster does not publish bag prices on its public catalog.
+- Add the selected product and amount to the mix to calculate ingredient cost.
+- In **Feeding duration estimator**, enter animal count, daily feed per animal, and a duration in days, weeks, or 30-day months. The calculator estimates total feed, whole bags required, and cost by kg and by full bags.
+- Confirm current prices and appropriate rations with your supplier or animal nutrition adviser before purchasing or feeding.
 
 Calculations are estimates. Confirm buyer prices, grading, deductions, and fees before a sale.
 

@@ -5,8 +5,8 @@ A farm management web application built with ASP.NET Core MVC and SQLite.
 ## What it does
 
 - **Livestock register** — create and maintain animal records.
-- **Market calculator** — estimate livestock value using price and weight inputs.
-- **Feed-mix calculator** — calculate a feed mix from entered ingredients.
+- **Market calculator** — view live Feedmaster meat and auction categories (Sheep/Mutton, Beef, Wild/Game, Auctions) and compare prices.
+- **Feed-mix & feeding planner** — refresh the Feedmaster product catalog, save locally updated bag prices, build ingredient mixes, and estimate feed quantities and cost over a chosen feeding duration.
 - **Weather & fire conditions** — view forecast information and precipitation visualization.
 - **Responsive interface** — designed for desktop, tablet, and mobile.
 
