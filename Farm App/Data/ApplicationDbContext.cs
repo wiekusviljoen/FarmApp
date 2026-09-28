@@ -7,6 +7,7 @@ namespace Farm_App.Data;
 public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : IdentityDbContext(options)
 {
     public DbSet<Livestock> Livestock => Set<Livestock>();
+    public DbSet<RainfallRecord> RainfallRecords => Set<RainfallRecord>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
