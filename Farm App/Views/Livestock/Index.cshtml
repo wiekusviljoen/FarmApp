@@ -7,3 +7,150 @@
 @foreach (var a in Model) { <tr><td><strong>@a.TagNumber</strong></td><td>@a.Species</td><td>@a.Breed</td><td>@a.Sex</td><td>@a.Camp</td><td>@a.Status</td><td class="text-end text-nowrap"><a asp-action="Edit" asp-route-id="@a.Id" class="btn btn-sm btn-outline-primary">Edit</a> <a asp-action="Delete" asp-route-id="@a.Id" class="btn btn-sm btn-outline-danger">Delete</a></td></tr> }
 @if (!Model.Any()) { <tr><td colspan="7" class="text-center text-muted py-4">No animal records yet. Add your first animal to get started.</td></tr> }
 </tbody></table></div>
+<section class="card p-4 mt-4"><h2>Animal feed & cost calculator</h2><p class="text-muted">Feed products, bag prices, mix costs, and feeding estimates.</p><div class="row g-4"><div class="col-12"><div class="card p-4 h-100">
+  <h2>Animal feed cost calculator</h2>
+  <p>Choose a Feedmaster product, keep its bag price up to date, and calculate mix costs.</p>
+  <div class="mb-3"><div class="d-flex justify-content-between align-items-center gap-2"><label class="form-label" for="feedName">Feed product</label><button type="button" class="btn btn-sm btn-outline-secondary" onclick="refreshFeedProducts()">Refresh products</button></div><select id="feedName" class="form-select"><option value="">Loading product list...</option></select><small class="text-muted d-block mt-1" id="feedCatalogStatus">Feedmaster product catalog</small></div>
+  <div class="row g-2 mb-3"><div class="col-sm-7"><label class="form-label">Current bag price (NAD)</label><input id="bagPrice" type="number" min="0" step="0.01" class="form-control" placeholder="Enter current supplier price" /></div><div class="col-sm-5"><label class="form-label">Bag size (kg)</label><input id="bagKg" type="number" min="1" step="1" class="form-control" value="50" /></div></div>
+  <p class="small text-muted" id="feedPriceStatus">Enter the current supplier price; it will be saved for this product on this device.</p>
+  <div class="mb-3"><label class="form-label">Amount used (kg)</label><input id="amountKg" type="number" min="0" step="0.1" class="form-control" placeholder="Kg in your mix" /></div>
+  <p class="small fw-bold" id="ingredientPreview">Enter bag price and kg to preview ingredient cost.</p>
+  <button class="btn btn-primary" onclick="addIngredient()">Add ingredient</button>
+  <div class="table-responsive mt-4"><table class="table" id="ingredients"><thead><tr><th>Ingredient</th><th>Kg</th><th>Cost (NAD)</th></tr></thead><tbody></tbody></table></div>
+  <p class="fw-bold" id="mixTotals">Mix total: NAD 0.00  |  Cost per kg: NAD 0.00</p>
+  <button class="btn btn-outline-secondary" onclick="clearMix()">Clear mix</button>
+  <hr class="my-4" />
+  <h3>Feeding duration estimator</h3>
+  <p>Estimate feed required and total cost for a selected product over a feeding period.</p>
+  <div class="row g-3">
+   <div class="col-6"><label class="form-label" for="animalCount">Number of animals</label><input id="animalCount" type="number" min="1" step="1" value="100" class="form-control" /></div>
+   <div class="col-6"><label class="form-label" for="dailyFeed">Feed per animal per day (kg)</label><input id="dailyFeed" type="number" min="0.01" step="0.1" value="0.5" class="form-control" /></div>
+   <div class="col-8"><label class="form-label" for="durationValue">Feeding duration</label><input id="durationValue" type="number" min="1" step="1" value="30" class="form-control" /></div>
+   <div class="col-4"><label class="form-label" for="durationUnit">Unit</label><select id="durationUnit" class="form-select"><option value="1">Days</option><option value="7">Weeks</option><option value="30">Months (30 days)</option></select></div>
+  </div>
+  <div class="alert alert-light border mt-3 mb-0"><div id="feedingEstimate" class="fw-bold">Choose a product and enter its price to estimate feed cost.</div><small class="text-muted">This is a planning estimate based on your daily ration; confirm the correct ration for your animals.</small></div>
+ </div></div></div></div></section>
+@section Scripts {
+<script>
+const money = n => 'NAD ' + Number(n).toFixed(2);
+function escapeHtml(s) { return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+const feedProducts = [
+ {name:'Feedlot 80',group:'Beef cattle',bagKg:50},{name:'Bush Improver Lick',group:'Beef cattle / sheep',bagKg:50},
+ {name:'Cattle Lick 40',group:'Beef cattle',bagKg:50},{name:'Eco-Grassveld Lick',group:'General livestock',bagKg:50},
+ {name:'Cattle Mix 4:1:5',group:'Beef cattle',bagKg:50},{name:'Beefpro 14 Pellets',group:'Beef cattle',bagKg:50},
+ {name:'Rangeland Grower Meal',group:'Cattle / sheep / goats',bagKg:50},{name:'Feed Concentrate HPC 30',group:'Cattle / sheep / goats',bagKg:50},
+ {name:'Breker 12',group:'Cattle / sheep / goats',bagKg:50},{name:'Enerfeed',group:'Cattle / sheep / goats',bagKg:50},
+ {name:'Enermol',group:'Cattle / sheep / goats',bagKg:50},{name:'Yellow Maize Meal No.1',group:'Cattle / sheep / goats',bagKg:50},
+ {name:'Yellow Maize Meal No.2',group:'Cattle / sheep / goats',bagKg:50},{name:'Lucerne Pellets',group:'Cattle / sheep / game',bagKg:50},
+ {name:'Dry Veld Concentrate',group:'Cattle / sheep / goats',bagKg:50},{name:'Complete Sheep Finisher',group:'Sheep',bagKg:50},
+ {name:'Ram-Lam-Ewe Pellets',group:'Sheep',bagKg:50},{name:'Production Lick',group:'Sheep / goats',bagKg:40},
+ {name:'Super Lambing Lick',group:'Sheep / goats',bagKg:50},{name:'Creep Feed',group:'Sheep / goats',bagKg:50},
+ {name:'Stud Feed',group:'Sheep / goats',bagKg:50},{name:'Game Lick',group:'Game',bagKg:50},
+ {name:'Standard Game Pellets',group:'Game',bagKg:50},{name:'Stud Game Pellets',group:'Game',bagKg:50},
+ {name:'Game Block',group:'Game / horses',bagKg:20},{name:'Futterfos P6',group:'Minerals',bagKg:50},
+ {name:'Futterfos Block',group:'Minerals',bagKg:20},{name:'Futterfos',group:'Minerals',bagKg:40},
+ {name:'Veefos P12',group:'Minerals',bagKg:50},{name:'Dryveld Block',group:'Minerals',bagKg:20},
+ {name:'Energy Block',group:'Minerals',bagKg:20},{name:'Cow Calf Lick',group:'Beef cattle',bagKg:50},
+ {name:'Calf Starter',group:'Dairy / calves',bagKg:50},{name:'Calf Grower',group:'Dairy / calves',bagKg:50},
+ {name:'Layer Mash',group:'Poultry',bagKg:50},{name:'Broiler Starter',group:'Poultry',bagKg:50},
+ {name:'Broiler Grower',group:'Poultry',bagKg:50},{name:'Enerfeed (pig feed)',group:'Pigs',bagKg:50},
+ {name:'Enermol (pig feed)',group:'Pigs',bagKg:50}
+];
+const feedPriceStoreKey = 'farmflow.feedPrices.v1';
+function readFeedPrices() { try { return JSON.parse(localStorage.getItem(feedPriceStoreKey) || '{}'); } catch { return {}; } }
+let feedPrices = readFeedPrices();
+function selectedProduct() { return feedProducts.find(p => p.name === document.getElementById('feedName').value); }
+function renderFeedProductOptions(keepName = '') {
+ const select = document.getElementById('feedName');
+ const groups = [...new Set(feedProducts.map(p => p.group))];
+ select.innerHTML = '<option value="">Choose a feed product...</option>' + groups.map(group =>
+  '<optgroup label="' + escapeHtml(group) + '">' + feedProducts.filter(p => p.group === group).map(p =>
+   '<option value="' + escapeHtml(p.name) + '">' + escapeHtml(p.name) + ' (' + p.bagKg + ' kg)</option>').join('') + '</optgroup>').join('');
+ if (keepName && feedProducts.some(p => p.name === keepName)) select.value = keepName;
+}
+function initFeedProducts() {
+ const select = document.getElementById('feedName');
+ select.addEventListener('change', loadSelectedProduct);
+ renderFeedProductOptions();
+ loadSelectedProduct();
+}
+async function refreshFeedProducts() {
+ const status = document.getElementById('feedCatalogStatus');
+ const keepName = document.getElementById('feedName').value;
+ status.textContent = 'Refreshing product catalog from Feedmaster...';
+ try {
+  const response = await fetch('/Market/FeedProducts');
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.error || 'Catalog unavailable');
+  const refreshed = data.products.map(p => {
+   const group = p.group || 'Feedmaster products';
+   return {name:p.name, group, bagKg:Number(p.bagKg)||50};
+  });
+  if (!refreshed.length) throw new Error('No products were returned.');
+  feedProducts.splice(0, feedProducts.length, ...refreshed);
+  renderFeedProductOptions(keepName);
+  loadSelectedProduct();
+  status.textContent = 'Catalog refreshed ' + new Date(data.fetchedAt).toLocaleString() + '  |  ' + refreshed.length + ' products.';
+ } catch (error) {
+  status.textContent = 'Could not refresh catalog: ' + error.message + '  |  Showing available saved choices.';
+ }
+}
+function loadSelectedProduct() {
+ const product = selectedProduct();
+ const priceInput = document.getElementById('bagPrice');
+ const saved = product && feedPrices[product.name];
+ document.getElementById('bagKg').value = saved ? saved.bagKg : (product ? product.bagKg : 50);
+ priceInput.value = saved ? saved.price : '';
+ document.getElementById('feedPriceStatus').textContent = saved
+  ? 'Saved price: ' + money(saved.price) + ' per ' + saved.bagKg + ' kg bag  |  Updated ' + new Date(saved.updatedAt).toLocaleString() + ' (stored on this device).'
+  : 'No saved price for this product. Enter the latest supplier price; it will be saved on this device.';
+ updatePreviews();
+}
+function saveSelectedFeedPrice() {
+ const product = selectedProduct(), value = Number(document.getElementById('bagPrice').value);
+ const bagKg = Number(document.getElementById('bagKg').value);
+ if (!product || document.getElementById('bagPrice').value === '' || !Number.isFinite(value) || value <= 0 || !Number.isFinite(bagKg) || bagKg <= 0) return;
+ feedPrices[product.name] = {price:value, updatedAt:new Date().toISOString(), bagKg};
+ localStorage.setItem(feedPriceStoreKey, JSON.stringify(feedPrices));
+ document.getElementById('feedPriceStatus').textContent = 'Price saved: ' + money(value) + ' per ' + bagKg + ' kg bag  |  Updated just now (this device only).';
+ updatePreviews();
+}
+const ingredients = [];
+function addIngredient() {
+ const product = selectedProduct();
+ const name = product ? product.name : '';
+ const price = Number(document.getElementById('bagPrice').value);
+ const bagKg = Number(document.getElementById('bagKg').value) || 50;
+ const kg = Number(document.getElementById('amountKg').value);
+ if (!name || price <= 0 || !Number.isFinite(price) || kg <= 0) { alert('Choose a product and enter its current bag price and kg used.'); return; }
+ ingredients.push({name, kg, cost: price / bagKg * kg}); renderMix();
+}
+function renderMix() {
+ const total = ingredients.reduce((s,x) => s+x.cost,0), kg = ingredients.reduce((s,x) => s+x.kg,0);
+ document.querySelector('#ingredients tbody').innerHTML = ingredients.map(x => `<tr><td>${escapeHtml(x.name)}</td><td>${x.kg.toFixed(1)}</td><td>${money(x.cost)}</td></tr>`).join('');
+ document.getElementById('mixTotals').textContent = `Mix total: ${money(total)}  |  Total weight: ${kg.toFixed(1)} kg  |  Cost per kg: ${money(kg ? total/kg : 0)}`;
+}
+function clearMix() { ingredients.length=0; renderMix(); }
+function updateFeedingEstimate() {
+ const product=selectedProduct(), price=Number(document.getElementById('bagPrice').value), bagKg=Number(document.getElementById('bagKg').value)||50;
+ const count=Number(document.getElementById('animalCount').value), ration=Number(document.getElementById('dailyFeed').value);
+ const days=Number(document.getElementById('durationValue').value)*Number(document.getElementById('durationUnit').value);
+ const target=document.getElementById('feedingEstimate');
+ if(!product || price<=0 || count<=0 || ration<=0 || days<=0){target.textContent='Choose a product, enter its current bag price, and complete the feeding details.';return;}
+ const totalKg=count*ration*days, bags=Math.ceil(totalKg/bagKg), totalCost=totalKg/bagKg*price, bagCost=bags*price;
+ target.textContent=`${days.toLocaleString()} days  |  ${totalKg.toLocaleString(undefined,{maximumFractionDigits:1})} kg feed needed  |  ${bags.toLocaleString()} bags of ${bagKg} kg  |  Estimated cost by kg: ${money(totalCost)}  |  Cost if buying full bags: ${money(bagCost)}`;
+}
+function updatePreviews() {
+ const bag = Number(document.getElementById('bagPrice').value) || 0;
+ const bagKg = Number(document.getElementById('bagKg').value) || 50;
+ const kg = Number(document.getElementById('amountKg').value) || 0;
+ document.getElementById('ingredientPreview').textContent = bag > 0 && kg > 0 ? `Ingredient estimate: ${money(bag / bagKg * kg)} for ${kg.toFixed(1)} kg  |  ${money(bag / bagKg)} per kg` : 'Enter bag price and kg to preview ingredient cost.';
+ updateFeedingEstimate();
+}
+['bagPrice','amountKg','animalCount','dailyFeed','durationValue','durationUnit','bagKg'].forEach(id => document.getElementById(id).addEventListener('input', updatePreviews));
+document.getElementById('bagPrice').addEventListener('change', saveSelectedFeedPrice);
+document.getElementById('bagKg').addEventListener('change', saveSelectedFeedPrice);
+document.getElementById('durationUnit').addEventListener('change', updatePreviews);
+document.addEventListener('DOMContentLoaded', () => { initFeedProducts(); updatePreviews(); refreshFeedProducts(); });
+</script>
+}
