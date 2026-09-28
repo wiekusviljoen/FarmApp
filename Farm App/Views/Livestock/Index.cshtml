@@ -2,11 +2,15 @@
 @{ ViewData["Title"] = "Livestock"; }
 <div class="livestock-page-header d-flex justify-content-between align-items-center mb-4"><div><h1>Livestock register</h1><p class="text-muted">Track animal IDs, species, breed, camp, and status.</p></div><a class="btn btn-primary livestock-add-button" asp-action="Create">+ Add animal</a></div>
 @if (TempData["Message"] is string message) { <div class="alert alert-success">@message</div> }
+<div class="nav nav-pills gap-2 mb-3 flex-nowrap overflow-auto" role="tablist" aria-label="Farm registers"><button type="button" class="nav-link active" role="tab" aria-selected="true" aria-controls="livestockTabPanel" onclick="showLivestockTab('livestockTabPanel',this)">🐑 Livestock register</button><button type="button" class="nav-link" role="tab" aria-selected="false" aria-controls="rainTabPanel" onclick="showLivestockTab('rainTabPanel',this)">🌧️ Rain register</button><button type="button" class="nav-link" role="tab" aria-selected="false" aria-controls="feedTabPanel" onclick="showLivestockTab('feedTabPanel',this)">🌾 Feed calculator</button></div>
+<section id="livestockTabPanel" class="livestock-tab-panel">
 <form method="get" class="row g-2 mb-3"><div class="col-sm-8"><input name="q" value="@ViewBag.Query" class="form-control" placeholder="Search tag, species, or camp" /></div><div class="col-auto"><button class="btn btn-outline-primary">Search</button> <a class="btn btn-outline-secondary" asp-action="Index">Clear</a></div></form>
 <div class="table-responsive livestock-table-wrap"><table class="table table-striped align-middle livestock-table"><thead><tr><th>Tag / ID</th><th>Species</th><th>Breed</th><th>Sex</th><th>Camp</th><th>Status</th><th></th></tr></thead><tbody>
 @foreach (var a in Model) { <tr><td><strong>@a.TagNumber</strong></td><td>@a.Species</td><td>@a.Breed</td><td>@a.Sex</td><td>@a.Camp</td><td>@a.Status</td><td class="text-end text-nowrap"><a asp-action="Edit" asp-route-id="@a.Id" class="btn btn-sm btn-outline-primary">Edit</a> <a asp-action="Delete" asp-route-id="@a.Id" class="btn btn-sm btn-outline-danger">Delete</a></td></tr> }
 @if (!Model.Any()) { <tr><td colspan="7" class="text-center text-muted py-4">No animal records yet. Add your first animal to get started.</td></tr> }
 </tbody></table></div>
+</section>
+<section id="rainTabPanel" class="livestock-tab-panel d-none">
 <section class="card p-4 mt-4" id="rainfallRegister">
  <div class="d-flex flex-wrap justify-content-between align-items-start gap-2"><div><h2>🌧️ Rain register & local rainfall</h2><p class="text-muted mb-2">Record measured rain by date and camp, and compare it with local weather data.</p></div><button type="button" class="btn btn-outline-primary" onclick="loadRainfallWeather()">Refresh online rain</button></div>
  <div class="alert alert-light border" id="rainfallWeatherSummary" aria-live="polite">Loading local rainfall data…</div>
@@ -30,6 +34,8 @@
  @if (!((IEnumerable<Farm_App.Models.RainfallRecord>)ViewBag.RainfallEntries).Any()) { <tr><td colspan="5" class="text-center text-muted">No manual rainfall entries yet.</td></tr> }
  </tbody></table></div>
 </section>
+</section>
+<section id="feedTabPanel" class="livestock-tab-panel d-none">
 <section class="card p-4 mt-4"><h2>Animal feed & cost calculator</h2><p class="text-muted">Feed products, bag prices, mix costs, and feeding estimates.</p><div class="row g-4"><div class="col-12"><div class="card p-4 h-100">
   <h2>Animal feed cost calculator</h2>
   <p>Choose a Feedmaster product, keep its bag price up to date, and calculate mix costs.</p>
@@ -55,8 +61,13 @@
   </div>
   <div class="alert alert-light border mt-3 mb-0"><div id="feedingEstimate" class="fw-bold">Choose a product and enter its price to estimate feed cost.</div><small class="text-muted">Planning estimate only. Rations are entered separately by species. Rainfall is only a rough signal—check actual veld condition, animal body condition and feed-label guidance before feeding.</small></div>
  </div></div></div></div></section>
+</section>
 @section Scripts {
 <script>
+function showLivestockTab(panelId, button) {
+ document.querySelectorAll('.livestock-tab-panel').forEach(panel => panel.classList.toggle('d-none', panel.id !== panelId));
+ document.querySelectorAll('[aria-controls="livestockTabPanel"], [aria-controls="rainTabPanel"], [aria-controls="feedTabPanel"]').forEach(tab => { const active = tab === button; tab.classList.toggle('active', active); tab.setAttribute('aria-selected', String(active)); });
+}
 const money = n => 'NAD ' + Number(n).toFixed(2);
 function escapeHtml(s) { return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 const manualRain30 = @ViewBag.ManualRain30.ToString(System.Globalization.CultureInfo.InvariantCulture);
