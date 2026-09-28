@@ -5,16 +5,18 @@ namespace Farm_App.Controllers;
 
 public class ConditionsController : Controller
 {
-    // Approximate Koes town coordinates; replace with the farm's exact pin for better local forecasts.
-    private const double Latitude = -25.95;
-    private const double Longitude = 18.05;
+    private const double DefaultLatitude = -25.95;
+    private const double DefaultLongitude = 18.05;
 
     public IActionResult Index() => View();
 
     [HttpGet]
-    public async Task<IActionResult> Forecast()
+    public async Task<IActionResult> Forecast(double? latitude, double? longitude)
     {
-        const string source = "https://api.open-meteo.com/v1/forecast?latitude=-25.95&longitude=18.05&timezone=Africa%2FWindhoek&forecast_days=7&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,wind_speed_10m_max&current=temperature_2m,relative_humidity_2m,wind_speed_10m,precipitation";
+        var hasLocation = latitude is >= -90 and <= 90 && longitude is >= -180 and <= 180;
+        var lat = hasLocation ? latitude!.Value : DefaultLatitude;
+        var lon = hasLocation ? longitude!.Value : DefaultLongitude;
+        var source = $"https://api.open-meteo.com/v1/forecast?latitude={lat.ToString(System.Globalization.CultureInfo.InvariantCulture)}&longitude={lon.ToString(System.Globalization.CultureInfo.InvariantCulture)}&timezone=auto&forecast_days=7&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,wind_speed_10m_max&current=temperature_2m,relative_humidity_2m,wind_speed_10m,precipitation";
         try
         {
             using var client = new HttpClient { Timeout = TimeSpan.FromSeconds(20) };
@@ -25,7 +27,8 @@ public class ConditionsController : Controller
             var days = new List<object>();
             var dates = daily.GetProperty("time");
             for (var i = 0; i < dates.GetArrayLength(); i++)
-                days.Add(new {
+                days.Add(new
+                {
                     date = dates[i].GetString(),
                     maxTemp = daily.GetProperty("temperature_2m_max")[i].GetDouble(),
                     minTemp = daily.GetProperty("temperature_2m_min")[i].GetDouble(),
@@ -34,10 +37,15 @@ public class ConditionsController : Controller
                     windKmh = daily.GetProperty("wind_speed_10m_max")[i].GetDouble()
                 });
             var current = root.GetProperty("current");
-            return Json(new {
+            return Json(new
+            {
                 source = "Open-Meteo forecast",
                 fetchedAt = DateTimeOffset.Now,
-                current = new {
+                location = hasLocation ? "Your current location" : "Koes area (approximate fallback)",
+                latitude = lat,
+                longitude = lon,
+                current = new
+                {
                     temp = current.GetProperty("temperature_2m").GetDouble(),
                     humidity = current.GetProperty("relative_humidity_2m").GetInt32(),
                     windKmh = current.GetProperty("wind_speed_10m").GetDouble(),

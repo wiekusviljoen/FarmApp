@@ -1,0 +1,27 @@
+@page
+@model Farm_App.Areas.Identity.Pages.Account.ConfirmEmailModel
+@{
+    ViewData["Title"] = "Confirm email";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow-sm">
+                <div class="card-body p-4">
+                    <h1 class="h3 mb-3">Confirm your email</h1>
+                    @if (Model.Confirmed)
+                    {
+                        <div class="alert alert-success" role="status">@Model.Message</div>
+                        <a class="btn btn-primary" asp-area="Identity" asp-page="/Account/Login">Sign in</a>
+                    }
+                    else
+                    {
+                        <div class="alert alert-warning" role="alert">@Model.Message</div>
+                        <a class="btn btn-outline-primary" asp-area="Identity" asp-page="/Account/ResendEmailConfirmation">Request a new confirmation email</a>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

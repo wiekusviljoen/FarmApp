@@ -55,6 +55,10 @@
         </main>
     </div>
 
+    <button type="button" id="floatingBackButton" class="floating-back-button" aria-label="Go back" title="Go back" onclick="if (window.history.length > 1) { window.history.back(); } else { window.location.href = '/'; }">
+        <span aria-hidden="true">←</span><span class="floating-back-label">Back</span>
+    </button>
+
     <footer class="border-top footer text-muted">
         <div class="container">
             &copy; 2026 - FarmFlow - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>

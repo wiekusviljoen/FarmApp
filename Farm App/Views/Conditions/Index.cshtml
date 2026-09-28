@@ -1,16 +1,33 @@
 @{ ViewData["Title"] = "Weather & Fire Conditions"; }
 <h1>Farm weather & fire conditions</h1>
-<p class="text-muted">Forecast for the Koes area using approximate town coordinates. Update the location to your farm's exact coordinates for a more precise forecast.</p>
-<div class="d-flex flex-wrap gap-2 mb-3"><button class="btn btn-primary" onclick="loadForecast()">Refresh forecast</button><span id="status" class="small text-muted align-self-center">Loading…</span></div>
+<p class="text-muted">Allow location access to get weather for your current position. If location access is unavailable, the app uses approximate Koes-area weather.</p>
+<div class="d-flex flex-wrap gap-2 mb-3"><button class="btn btn-primary" onclick="requestLocation()">Use my location</button><button class="btn btn-outline-primary" onclick="loadForecast()">Refresh forecast</button><span id="status" class="small text-muted align-self-center" aria-live="polite">Finding your location…</span></div>
+<p id="locationLabel" class="small text-muted"></p>
 <div class="row g-3 mb-4" id="current"></div>
 <section class="card p-4 mb-4"><h2>🌧️ 7-day rainfall & weather</h2><p class="small text-muted">Rain totals, probability, temperatures and wind. Forecast, not measured farm rainfall.</p><div class="table-responsive"><table class="table table-sm" id="forecast"><thead><tr><th>Date</th><th>Min / Max °C</th><th>Rain mm</th><th>Rain chance</th><th>Max wind km/h</th></tr></thead><tbody></tbody></table></div><h3>Rainfall forecast (mm)</h3><canvas id="rainChart" height="130" style="width:100%"></canvas></section>
 <section class="card p-4 mb-4"><h2>🔥 Fire conditions</h2><div id="fireSummary" class="alert alert-secondary">Calculating weather-based fire conditions…</div><p class="small text-muted">This is a simple weather-based caution indicator—not an official fire danger rating and not a satellite-detected fire alert. Confirm fires with local authorities and check official alerts.</p><p><a href="https://firms.modaps.eosdis.nasa.gov/map/" target="_blank" rel="noopener">Open NASA FIRMS active-fire map</a> · <a href="https://www.meteoblue.com/" target="_blank" rel="noopener">Weather maps</a></p></section>
 @section Scripts {
 <script>
+let selectedLocation=null;
+function requestLocation(){
+ const status=document.getElementById('status');
+ if(!navigator.geolocation){status.textContent='Location is not supported here. Showing Koes-area forecast.';loadForecast();return;}
+ status.textContent='Requesting location permission…';
+ navigator.geolocation.getCurrentPosition(position=>{
+  selectedLocation={latitude:position.coords.latitude,longitude:position.coords.longitude};
+  loadForecast();
+ },error=>{
+  selectedLocation=null;
+  status.textContent=error.code===1?'Location permission denied. Showing Koes-area forecast.':'Could not get location. Showing Koes-area forecast.';
+  loadForecast();
+ },{enableHighAccuracy:false,timeout:12000,maximumAge:300000});
+}
 async function loadForecast(){
- const status=document.getElementById('status'); status.textContent='Fetching Koes-area forecast…';
+ const status=document.getElementById('status'); status.textContent=selectedLocation?'Fetching weather for your location…':'Fetching Koes-area forecast…';
  try {
-  const res=await fetch('/Conditions/Forecast'); const data=await res.json(); if(!res.ok) throw new Error(data.error||'Forecast unavailable');
+  const params=selectedLocation?`?latitude=${encodeURIComponent(selectedLocation.latitude)}&longitude=${encodeURIComponent(selectedLocation.longitude)}`:'';
+  const res=await fetch('/Conditions/Forecast'+params); const data=await res.json(); if(!res.ok) throw new Error(data.error||'Forecast unavailable');
+  document.getElementById('locationLabel').textContent=data.location+(selectedLocation?` · ${data.latitude.toFixed(3)}, ${data.longitude.toFixed(3)}`:'');
   const c=data.current;
   document.getElementById('current').innerHTML=[['Temperature',c.temp+' °C'],['Humidity',c.humidity+'%'],['Wind',c.windKmh+' km/h'],['Current rain',c.rainMm+' mm']].map(x=>`<div class="col-6 col-lg-3"><div class="card p-3 h-100"><div class="text-muted small">${x[0]}</div><div class="fs-4 fw-bold">${x[1]}</div></div></div>`).join('');
   document.querySelector('#forecast tbody').innerHTML=data.days.map(d=>`<tr><td>${d.date}</td><td>${d.minTemp.toFixed(1)} / ${d.maxTemp.toFixed(1)}</td><td>${d.rainMm.toFixed(1)}</td><td>${d.rainChance}%</td><td>${d.windKmh.toFixed(1)}</td></tr>`).join('');
@@ -29,6 +46,6 @@ function showFire(c,days){
  if(hot&&windy&&dry){label='High weather-based caution — hot, dry and windy conditions';cls='alert-danger';}
  document.getElementById('fireSummary').className='alert '+cls;document.getElementById('fireSummary').textContent=label+'. Next 3-day forecast rainfall: '+rain.toFixed(1)+' mm.';
 }
-document.addEventListener('DOMContentLoaded',loadForecast);
+document.addEventListener('DOMContentLoaded',requestLocation);
 </script>
 }

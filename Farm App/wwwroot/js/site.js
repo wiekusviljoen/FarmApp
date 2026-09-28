@@ -2,3 +2,17 @@
 // for details on configuring this project to bundle and minify static web assets.
 
 // Write your JavaScript code.
+
+
+// Reveal the floating Back button only after scrolling down.
+(() => {
+  const backButton = document.getElementById('floatingBackButton');
+  if (!backButton) return;
+
+  const updateBackButton = () => {
+    backButton.classList.toggle('is-visible', window.scrollY > 120);
+  };
+
+  window.addEventListener('scroll', updateBackButton, { passive: true });
+  updateBackButton();
+})();
