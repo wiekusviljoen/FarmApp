@@ -1,0 +1,115 @@
+﻿@{
+    ViewData["Title"] = "Agriculture News";
+}
+<div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
+    <div>
+        <h1>Agriculture news</h1>
+        <p class="text-muted mb-0">Latest farming and agribusiness headlines from Namibia and Southern Africa.</p>
+    </div>
+    <button type="button" class="btn btn-outline-primary" id="refreshNews" onclick="loadNews(true)">Refresh news</button>
+</div>
+<div class="d-flex flex-wrap align-items-center gap-3 mb-3">
+    <label class="form-label mb-0" for="newsFilter">Filter news</label>
+    <select class="form-select" id="newsFilter" style="max-width: 260px" onchange="renderNews()">
+        <option value="all">All agriculture news</option>
+        <option value="livestock">Livestock & animal health</option>
+        <option value="crops">Crops, weather & water</option>
+        <option value="markets">Markets & agribusiness</option>
+        <option value="policy">Policy, funding & trade</option>
+    </select>
+    <span class="small text-muted ms-auto" id="newsStatus" role="status">Loading latest headlines...</span>
+</div>
+<div class="alert alert-info d-none" id="newsError" role="alert"></div>
+<div class="row g-3" id="newsList" aria-live="polite"></div>
+<div class="text-muted small mt-4">Headlines and summaries are provided by the original publishers. Open a story to read the full report. Feed availability and publication times depend on each source.</div>
+@section Scripts {
+<script>
+let newsArticles = [];
+const newsTerms = {
+    livestock: ['livestock','cattle','beef','sheep','goat','lamb','wool','meatco','abattoir','auction','foot-and-mouth','foot and mouth','fmd','animal health','veterinary','poultry','pig','dairy','grazing','veld'],
+    crops: ['maize','corn','wheat','grain','crop','harvest','horticultur','irrigat','fertili','seed','drought','rainfall','locust','pest','water','fodder'],
+    markets: ['price','market','export','import','trade','feed','cost','production','sales','auction','agribusiness','income','profit','supply','demand'],
+    policy: ['policy','government','ministry','fund','funding','loan','levy','regulation','restriction','permit','support','bank','trade','export','import']
+};
+function articleMatches(article, filter) {
+    if (filter === 'all') return true;
+    const text = `${article.title} ${article.summary} ${article.category}`.toLowerCase();
+    return newsTerms[filter].some(term => text.includes(term));
+}
+function formatDate(value) {
+    if (!value) return 'Date unavailable';
+    const date = new Date(value);
+    return Number.isNaN(date.getTime()) ? 'Date unavailable' : date.toLocaleDateString(undefined, { year:'numeric', month:'short', day:'numeric' });
+}
+function renderNews() {
+    const filter = document.getElementById('newsFilter').value;
+    const articles = newsArticles.filter(article => articleMatches(article, filter));
+    const list = document.getElementById('newsList');
+    list.replaceChildren();
+    if (!articles.length) {
+        const empty = document.createElement('div');
+        empty.className = 'col-12';
+        empty.innerHTML = '<div class="card p-4 text-muted">No stories match this filter right now. Try another category or refresh.</div>';
+        list.appendChild(empty);
+        return;
+    }
+    for (const article of articles) {
+        const col = document.createElement('div');
+        col.className = 'col-12 col-lg-6';
+        const card = document.createElement('article');
+        card.className = 'card p-4 h-100';
+        const meta = document.createElement('div');
+        meta.className = 'small text-muted mb-2';
+        meta.textContent = `${article.source || 'News source'}  |  ${formatDate(article.publishedAt)}`;
+        const heading = document.createElement('h2');
+        heading.className = 'h5';
+        const link = document.createElement('a');
+        link.href = article.url;
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+        link.textContent = article.title;
+        heading.appendChild(link);
+        const summary = document.createElement('p');
+        summary.className = 'text-muted mb-3';
+        summary.textContent = article.summary || 'Open the publisher’s article for the full report.';
+        const footer = document.createElement('div');
+        footer.className = 'mt-auto';
+        const sourceLink = document.createElement('a');
+        sourceLink.href = article.url;
+        sourceLink.target = '_blank';
+        sourceLink.rel = 'noopener noreferrer';
+        sourceLink.className = 'btn btn-sm btn-outline-secondary';
+        sourceLink.textContent = 'Read full story';
+        footer.appendChild(sourceLink);
+        card.append(meta, heading, summary, footer);
+        col.appendChild(card);
+        list.appendChild(col);
+    }
+}
+async function loadNews(refresh = false) {
+    const button = document.getElementById('refreshNews');
+    const status = document.getElementById('newsStatus');
+    const error = document.getElementById('newsError');
+    button.disabled = true;
+    button.textContent = 'Loading...';
+    error.classList.add('d-none');
+    status.textContent = 'Checking agriculture news sources...';
+    try {
+        const response = await fetch(`/News/Feed${refresh ? '?refresh=true' : ''}`, { cache:'no-store' });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || 'News feed is temporarily unavailable.');
+        newsArticles = data.articles || [];
+        renderNews();
+        status.textContent = `${newsArticles.length} stories · Updated ${new Date(data.fetchedAt).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}`;
+    } catch (err) {
+        error.textContent = err.message || 'Could not load news. Please try again.';
+        error.classList.remove('d-none');
+        status.textContent = 'News update failed';
+    } finally {
+        button.disabled = false;
+        button.textContent = 'Refresh news';
+    }
+}
+document.addEventListener('DOMContentLoaded', () => loadNews());
+</script>
+}
