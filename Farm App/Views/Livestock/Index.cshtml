@@ -10,6 +10,12 @@
 <section class="card p-4 mt-4" id="rainfallRegister">
  <div class="d-flex flex-wrap justify-content-between align-items-start gap-2"><div><h2>🌧️ Rain register & local rainfall</h2><p class="text-muted mb-2">Record measured rain by date and camp, and compare it with local weather data.</p></div><button type="button" class="btn btn-outline-primary" onclick="loadRainfallWeather()">Refresh online rain</button></div>
  <div class="alert alert-light border" id="rainfallWeatherSummary" aria-live="polite">Loading local rainfall data…</div>
+ <div class="border rounded-3 p-3 mb-3" id="rainfallTrendPanel">
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3"><div><h3 class="h5 mb-1">Rainfall trend</h3><small class="text-muted" id="rainTrendDates">Historical daily rainfall</small></div><div class="d-flex align-items-center gap-2"><label class="form-label mb-0" for="rainHistoryPeriod">History</label><select class="form-select form-select-sm" id="rainHistoryPeriod" style="width:auto" onchange="loadRainfallTrend()"><option value="1m">1 month</option><option value="3m">3 months</option><option value="6m">6 months</option><option value="1y" selected>1 year</option><option value="2y">2 years</option><option value="5y">5 years</option></select></div></div>
+  <div id="rainfallTrendStatus" class="small text-muted mb-2" aria-live="polite">Loading historical rainfall…</div>
+  <div class="w-100" style="min-height:220px;overflow:hidden"><svg id="rainfallTrendChart" viewBox="0 0 760 270" role="img" aria-label="Historical rainfall trend chart" style="display:block;width:100%;height:auto;min-height:220px"></svg></div>
+  <div class="small text-muted mt-2" id="rainfallTrendLegend">Online historical rainfall in millimetres</div>
+ </div>
  <form asp-action="LogRainfall" method="post" class="row g-2 mb-3">
   @Html.AntiForgeryToken()
   <div class="col-6 col-md-3"><label class="form-label" for="rainDate">Date</label><input class="form-control" id="rainDate" name="date" type="date" value="@DateTime.Today.ToString("yyyy-MM-dd")" required /></div>
@@ -67,10 +73,45 @@ function renderRationTable() {
  target.innerHTML='<table class="table table-sm align-middle"><thead><tr><th>Species</th><th>Heads</th><th>Supplement kg/head/day</th></tr></thead><tbody>'+livestockCounts.map(x=>`<tr><td>${escapeHtml(x.species)}</td><td>${x.count}</td><td><input type="number" min="0" max="100" step="0.05" class="form-control form-control-sm feed-ration-input" data-species="${escapeHtml(x.species)}" value="${saved[x.species]??0}" aria-label="Daily supplement for ${escapeHtml(x.species)}" /></td></tr>`).join('')+'</tbody></table>';
  target.querySelectorAll('.feed-ration-input').forEach(input=>input.addEventListener('input',()=>{const next={};target.querySelectorAll('.feed-ration-input').forEach(x=>next[x.dataset.species]=Number(x.value)||0);localStorage.setItem(rationStoreKey,JSON.stringify(next));updateFeedingEstimate();}));
 }
+let rainCoords = null;
+function drawRainfallTrend(records, period) {
+ const svg=document.getElementById('rainfallTrendChart');
+ while(svg.firstChild) svg.removeChild(svg.firstChild);
+ const ns='http://www.w3.org/2000/svg';
+ const make=(tag,attrs,text)=>{const el=document.createElementNS(ns,tag);Object.entries(attrs||{}).forEach(([k,v])=>el.setAttribute(k,v));if(text!==undefined)el.textContent=text;return el;};
+ let points=records.map(r=>({date:r.date,value:Number(r.rainMm)||0}));
+ if(['6m','1y','2y','5y'].includes(period)){
+  const buckets={};points.forEach(p=>{const key=p.date.slice(0,7);buckets[key]=(buckets[key]||0)+p.value;});
+  points=Object.entries(buckets).map(([date,value])=>({date,value}));
+ }
+ if(!points.length){svg.appendChild(make('text',{x:380,y:130,'text-anchor':'middle',fill:'currentColor'},'No rainfall data available'));return;}
+ const W=760,H=270,L=52,R=16,T=14,B=42,plotW=W-L-R,plotH=H-T-B;
+ const max=Math.max(10,...points.map(p=>p.value));
+ for(let i=0;i<=4;i++){const y=T+plotH-(i/4)*plotH;svg.appendChild(make('line',{x1:L,y1:y,x2:W-R,y2:y,stroke:'currentColor','stroke-opacity':'.15'}));svg.appendChild(make('text',{x:L-8,y:y+4,'text-anchor':'end','font-size':11,fill:'currentColor'},(max*i/4).toFixed(0)));}
+ const step=plotW/points.length, barW=Math.max(1,Math.min(24,step*.68));
+ points.forEach((p,i)=>{const x=L+i*step+(step-barW)/2;const h=Math.max(1,p.value/max*plotH);const rect=make('rect',{x,y:T+plotH-h,width:barW,height:h,rx:Math.min(3,barW/3),fill:'#269b83'});rect.appendChild(make('title',{},`${p.date}: ${p.value.toFixed(1)} mm`));svg.appendChild(rect);});
+ const labels=[0,Math.floor((points.length-1)/2),points.length-1];[...new Set(labels)].forEach(i=>{const p=points[i],label=period==='1m'?p.date.slice(5):p.date;svg.appendChild(make('text',{x:L+i*step+step/2,y:H-14,'text-anchor':'middle','font-size':11,fill:'currentColor'},label));});
+}
+async function loadRainfallTrend() {
+ const period=document.getElementById('rainHistoryPeriod').value;
+ const status=document.getElementById('rainfallTrendStatus');
+ status.textContent='Loading historical rainfall…';
+ try {
+  const query=new URLSearchParams({period});
+  if(rainCoords){query.set('latitude',rainCoords.latitude);query.set('longitude',rainCoords.longitude);}
+  const response=await fetch('/Livestock/RainfallHistory?'+query.toString());
+  const data=await response.json();if(!response.ok)throw new Error(data.error||'Historical data unavailable');
+  drawRainfallTrend(data.records,period);
+  document.getElementById('rainTrendDates').textContent=`${data.startDate} to ${data.endDate} · ${data.location}`;
+  const total=data.records.reduce((sum,r)=>sum+(Number(r.rainMm)||0),0);
+  status.textContent=`${data.records.length} daily observations · Total: ${total.toFixed(1)} mm · Source: ${data.source}`;
+ } catch(error){status.textContent='Could not load rainfall history: '+error.message;}
+}
 async function loadRainfallWeather() {
  const summary=document.getElementById('rainfallWeatherSummary');
  summary.textContent='Getting local rainfall history and forecast…';
  const fetchAt=async coords=>{
+  if(coords) rainCoords=coords;
   const query=coords?`?latitude=${coords.latitude}&longitude=${coords.longitude}`:'';
   const response=await fetch('/Livestock/RainfallWeather'+query); const data=await response.json();
   if(!response.ok) throw new Error(data.error||'Rainfall data unavailable');
@@ -83,8 +124,8 @@ async function loadRainfallWeather() {
   updateFeedingEstimate();
   summary.innerHTML=`<strong>${signal}</strong><br>Recent 30-day rainfall (online): <strong>${past.toFixed(1)} mm</strong> · Next 7-day forecast: <strong>${next7.toFixed(1)} mm</strong><br>Manual rain register (last 30 days): <strong>${Number(manualRain30).toFixed(1)} mm</strong><br><small>Location: ${escapeHtml(data.location)} · Source: ${escapeHtml(data.source)} · Updated ${new Date(data.fetchedAt).toLocaleString()}</small>`;
  };
- if(navigator.geolocation){navigator.geolocation.getCurrentPosition(pos=>fetchAt({latitude:pos.coords.latitude,longitude:pos.coords.longitude}).catch(e=>summary.textContent='Online rainfall unavailable: '+e.message),()=>fetchAt(null).catch(e=>summary.textContent='Online rainfall unavailable: '+e.message),{timeout:12000,maximumAge:300000});}
- else {fetchAt(null).catch(e=>summary.textContent='Online rainfall unavailable: '+e.message);}
+ if(navigator.geolocation){navigator.geolocation.getCurrentPosition(pos=>fetchAt({latitude:pos.coords.latitude,longitude:pos.coords.longitude}).then(loadRainfallTrend).catch(e=>{summary.textContent='Online rainfall unavailable: '+e.message;loadRainfallTrend();}),()=>fetchAt(null).then(loadRainfallTrend).catch(e=>{summary.textContent='Online rainfall unavailable: '+e.message;loadRainfallTrend();}),{timeout:12000,maximumAge:300000});}
+ else {fetchAt(null).then(loadRainfallTrend).catch(e=>{summary.textContent='Online rainfall unavailable: '+e.message;loadRainfallTrend();});}
 }
 const feedProducts = [
  {name:'Feedlot 80',group:'Beef cattle',bagKg:50},{name:'Bush Improver Lick',group:'Beef cattle / sheep',bagKg:50},
