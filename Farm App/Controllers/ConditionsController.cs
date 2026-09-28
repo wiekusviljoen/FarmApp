@@ -37,11 +37,14 @@ public class ConditionsController : Controller
                     windKmh = daily.GetProperty("wind_speed_10m_max")[i].GetDouble()
                 });
             var current = root.GetProperty("current");
+            var locationName = hasLocation
+                ? await GetLocationNameAsync(lat, lon)
+                : "Koes area (approximate fallback)";
             return Json(new
             {
                 source = "Open-Meteo forecast",
                 fetchedAt = DateTimeOffset.Now,
-                location = hasLocation ? "Your current location" : "Koes area (approximate fallback)",
+                location = locationName,
                 latitude = lat,
                 longitude = lon,
                 current = new
@@ -54,5 +57,24 @@ public class ConditionsController : Controller
             });
         }
         catch (Exception ex) { return StatusCode(502, new { error = "Forecast unavailable: " + ex.Message }); }
+    }
+
+    private static async Task<string> GetLocationNameAsync(double latitude, double longitude)
+    {
+        try
+        {
+            using var client = new HttpClient { Timeout = TimeSpan.FromSeconds(8) };
+            client.DefaultRequestHeaders.UserAgent.ParseAdd("FarmApp/1.0 (weather location lookup)");
+            var url = $"https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat={latitude.ToString(System.Globalization.CultureInfo.InvariantCulture)}&lon={longitude.ToString(System.Globalization.CultureInfo.InvariantCulture)}&zoom=10&addressdetails=1";
+            using var response = await client.GetAsync(url);
+            if (!response.IsSuccessStatusCode) return "Your detected area";
+            using var doc = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
+            if (!doc.RootElement.TryGetProperty("address", out var address)) return "Your detected area";
+            foreach (var key in new[] { "state", "region", "county", "city", "town", "village", "municipality" })
+                if (address.TryGetProperty(key, out var value) && !string.IsNullOrWhiteSpace(value.GetString()))
+                    return value.GetString()!;
+            return "Your detected area";
+        }
+        catch { return "Your detected area"; }
     }
 }

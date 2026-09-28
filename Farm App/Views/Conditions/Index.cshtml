@@ -27,7 +27,7 @@ async function loadForecast(){
  try {
   const params=selectedLocation?`?latitude=${encodeURIComponent(selectedLocation.latitude)}&longitude=${encodeURIComponent(selectedLocation.longitude)}`:'';
   const res=await fetch('/Conditions/Forecast'+params); const data=await res.json(); if(!res.ok) throw new Error(data.error||'Forecast unavailable');
-  document.getElementById('locationLabel').textContent=data.location+(selectedLocation?` · ${data.latitude.toFixed(3)}, ${data.longitude.toFixed(3)}`:'');
+  document.getElementById('locationLabel').textContent=data.location;
   const c=data.current;
   document.getElementById('current').innerHTML=[['Temperature',c.temp+' °C'],['Humidity',c.humidity+'%'],['Wind',c.windKmh+' km/h'],['Current rain',c.rainMm+' mm']].map(x=>`<div class="col-6 col-lg-3"><div class="card p-3 h-100"><div class="text-muted small">${x[0]}</div><div class="fs-4 fw-bold">${x[1]}</div></div></div>`).join('');
   document.querySelector('#forecast tbody').innerHTML=data.days.map(d=>`<tr><td>${d.date}</td><td>${d.minTemp.toFixed(1)} / ${d.maxTemp.toFixed(1)}</td><td>${d.rainMm.toFixed(1)}</td><td>${d.rainChance}%</td><td>${d.windKmh.toFixed(1)}</td></tr>`).join('');
