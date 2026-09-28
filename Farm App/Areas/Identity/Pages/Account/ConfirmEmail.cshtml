@@ -13,7 +13,7 @@
                     @if (Model.Confirmed)
                     {
                         <div class="alert alert-success" role="status">@Model.Message</div>
-                        <a class="btn btn-primary" href="/Identity/Account/Login">Sign in</a>
+                        <button class="btn btn-primary" type="button" onclick="window.location.assign('/Identity/Account/Login')">Sign in</button>
                     }
                     else
                     {
