@@ -345,3 +345,46 @@ body { overflow-wrap: anywhere; }
   .livestock-add-button { align-self: flex-start; white-space: nowrap; }
   .livestock-table { min-width: 700px; }
 }
+
+/* App-wide responsive polish for phones, tablets and desktop screens. */
+html { min-height: 100%; }
+body { overflow-wrap: break-word; word-break: normal; }
+.navbar-brand { white-space: nowrap; word-break: normal; }
+.navbar .navbar-nav { min-width: 0; }
+.navbar-collapse { flex-basis: 100%; }
+.page-shell { min-width: 0; }
+.footer { position: static; width: 100%; white-space: normal; line-height: 1.5; }
+.footer .container { padding-top: .85rem; padding-bottom: .85rem; }
+img, canvas, svg { max-width: 100%; }
+.table-responsive { max-width: 100%; -webkit-overflow-scrolling: touch; }
+.card, .card-body, .row > *, section, article { min-width: 0; }
+.form-control, .form-select { min-width: 0; }
+
+@media (max-width: 991.98px) {
+  .navbar-collapse { padding: .5rem 0 .85rem; }
+  .navbar-collapse .navbar-nav { gap: .1rem; }
+  .navbar-collapse .nav-link { padding: .6rem .75rem; }
+  .navbar-collapse .navbar-nav + .navbar-nav { margin-top: .25rem; }
+}
+@media (max-width: 767.98px) {
+  .page-shell { padding-top: 1rem; }
+  h1 { font-size: clamp(1.7rem, 6.5vw, 2.25rem); line-height: 1.15; }
+  h2 { font-size: clamp(1.25rem, 5vw, 1.65rem); }
+  .card.p-4 { padding: 1rem !important; }
+  .dashboard-hero { overflow-wrap: normal; }
+  .section-heading { align-items: flex-start; flex-wrap: wrap; }
+  .hero-actions .btn { max-width: 100%; white-space: normal; }
+  .btn { max-width: 100%; }
+  .table { font-size: .9rem; }
+  canvas { display: block; }
+}
+@media (max-width: 575.98px) {
+  .container { padding-left: .75rem; padding-right: .75rem; }
+  .navbar > .container-fluid { padding-left: .8rem; padding-right: .8rem; }
+  .brand-icon { margin-right: .35rem; }
+  .page-shell { padding-top: .85rem; }
+  .dashboard-section { margin-top: 1.8rem; }
+  .dashboard-note { align-items: flex-start; }
+  .footer .container { font-size: .9rem; }
+  .auction-calendar-wrap, .table-responsive { max-width: 100%; }
+}
