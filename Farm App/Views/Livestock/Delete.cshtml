@@ -1,0 +1,4 @@
+@model Farm_App.Models.Livestock
+@{ ViewData["Title"] = "Delete animal"; }
+<h1>Delete animal record</h1><div class="alert alert-warning">Are you sure you want to permanently delete <strong>@Model.TagNumber</strong> (@Model.Species)?</div>
+<form asp-action="Delete" method="post"><input type="hidden" asp-for="Id"/><button class="btn btn-danger" type="submit">Delete record</button> <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a></form>

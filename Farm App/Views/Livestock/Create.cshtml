@@ -1,0 +1,15 @@
+@model Farm_App.Models.Livestock
+@{ ViewData["Title"] = "Add animal"; }
+<h1>Add animal</h1><p class="text-muted">Enter the animal details below.</p>
+<form asp-action="Create" method="post" class="row g-3">
+<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+<div class="col-md-6"><label asp-for="TagNumber" class="form-label"></label><input asp-for="TagNumber" class="form-control"/><span asp-validation-for="TagNumber" class="text-danger"></span></div>
+<div class="col-md-6"><label asp-for="Species" class="form-label"></label><select asp-for="Species" class="form-select"><option>Sheep</option><option>Cattle</option><option>Goat</option><option>Other</option></select><span asp-validation-for="Species" class="text-danger"></span></div>
+<div class="col-md-6"><label asp-for="Breed" class="form-label"></label><input asp-for="Breed" class="form-control"/></div>
+<div class="col-md-6"><label asp-for="Sex" class="form-label"></label><select asp-for="Sex" class="form-select"><option value="">Unknown</option><option>Ewe / Female</option><option>Ram / Male</option><option>Wether</option></select></div>
+<div class="col-md-6"><label asp-for="DateOfBirth" class="form-label"></label><input asp-for="DateOfBirth" class="form-control"/></div>
+<div class="col-md-6"><label asp-for="Camp" class="form-label"></label><input asp-for="Camp" class="form-control"/></div>
+<div class="col-md-6"><label asp-for="Status" class="form-label"></label><select asp-for="Status" class="form-select"><option>Active</option><option>Sold</option><option>Deceased</option><option>Transferred</option></select></div>
+<div class="col-md-6"><label asp-for="PurchasePrice" class="form-label"></label><input asp-for="PurchasePrice" class="form-control"/><span asp-validation-for="PurchasePrice" class="text-danger"></span></div>
+<div class="col-12"><label asp-for="Notes" class="form-label"></label><textarea asp-for="Notes" class="form-control" rows="3"></textarea></div>
+<div class="col-12"><button class="btn btn-primary" type="submit">Save animal</button> <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a></div></form>

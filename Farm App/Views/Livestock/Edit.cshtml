@@ -1,0 +1,11 @@
+@model Farm_App.Models.Livestock
+@{ ViewData["Title"] = "Edit animal"; }
+<h1>Edit animal @Model.TagNumber</h1>
+<form asp-action="Edit" method="post" class="row g-3">
+<input type="hidden" asp-for="Id"/><div asp-validation-summary="ModelOnly" class="text-danger"></div>
+<div class="col-md-6"><label asp-for="TagNumber" class="form-label"></label><input asp-for="TagNumber" class="form-control"/><span asp-validation-for="TagNumber" class="text-danger"></span></div>
+<div class="col-md-6"><label asp-for="Species" class="form-label"></label><select asp-for="Species" class="form-select"><option>Sheep</option><option>Cattle</option><option>Goat</option><option>Other</option></select></div>
+<div class="col-md-6"><label asp-for="Breed" class="form-label"></label><input asp-for="Breed" class="form-control"/></div><div class="col-md-6"><label asp-for="Sex" class="form-label"></label><input asp-for="Sex" class="form-control"/></div>
+<div class="col-md-6"><label asp-for="DateOfBirth" class="form-label"></label><input asp-for="DateOfBirth" class="form-control"/></div><div class="col-md-6"><label asp-for="Camp" class="form-label"></label><input asp-for="Camp" class="form-control"/></div>
+<div class="col-md-6"><label asp-for="Status" class="form-label"></label><select asp-for="Status" class="form-select"><option>Active</option><option>Sold</option><option>Deceased</option><option>Transferred</option></select></div><div class="col-md-6"><label asp-for="PurchasePrice" class="form-label"></label><input asp-for="PurchasePrice" class="form-control"/></div>
+<div class="col-12"><label asp-for="Notes" class="form-label"></label><textarea asp-for="Notes" class="form-control" rows="3"></textarea></div><div class="col-12"><button class="btn btn-primary">Save changes</button> <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a></div></form>

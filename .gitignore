@@ -1,0 +1,16 @@
+﻿# Visual Studio
+.vs/
+**/bin/
+**/obj/
+*.user
+*.suo
+
+# Local database and SQLite files
+**/*.db
+**/*.db-shm
+**/*.db-wal
+
+# Local secrets and environment files
+.env
+.env.*
+secrets.json

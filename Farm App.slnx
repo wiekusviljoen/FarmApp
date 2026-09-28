@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="Farm App.AppHost/Farm App.AppHost.csproj" />
+  <Project Path="Farm App.ServiceDefaults/Farm App.ServiceDefaults.csproj" />
+  <Project Path="Farm App/Farm App.csproj" />
+</Solution>
