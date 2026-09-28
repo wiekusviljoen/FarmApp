@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Farm_App.Data;
+using Farm_App.Services;
 
 namespace Farm_App;
 
@@ -20,6 +21,9 @@ public class Program
         builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
             .AddEntityFrameworkStores<ApplicationDbContext>();
         builder.Services.AddControllersWithViews();
+        builder.Services.AddHttpClient("AuctionFeed", client => { client.Timeout = TimeSpan.FromSeconds(25); client.DefaultRequestHeaders.UserAgent.ParseAdd("FarmApp-AuctionCalendar/1.0"); });
+        builder.Services.AddSingleton<AuctionFeedService>();
+        builder.Services.AddHostedService(sp => sp.GetRequiredService<AuctionFeedService>());
 
         var app = builder.Build();
 
