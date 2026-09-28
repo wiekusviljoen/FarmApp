@@ -12,6 +12,11 @@ public class ConfirmEmailModel(UserManager<IdentityUser> userManager) : PageMode
 
     public async Task OnGetAsync(string? userId, string? code)
     {
+        // Some email clients or copied HTML links may leave the HTML entity "&amp;"
+        // in the query string, causing the token to arrive as "amp;code".
+        if (string.IsNullOrWhiteSpace(code))
+            code = Request.Query["amp;code"].FirstOrDefault();
+
         if (string.IsNullOrWhiteSpace(userId) || string.IsNullOrWhiteSpace(code))
         {
             Message = "The confirmation link is incomplete. Please request a new confirmation email.";
