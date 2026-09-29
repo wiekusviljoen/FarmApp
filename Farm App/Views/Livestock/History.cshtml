@@ -1,0 +1,40 @@
+@model IEnumerable<Farm_App.Models.LivestockEvent>
+@{
+    var animal = (Farm_App.Models.Livestock)ViewBag.Animal;
+    ViewData["Title"] = $"History · {animal.TagNumber}";
+}
+<div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
+    <div><a asp-action="Index" class="text-decoration-none">← Livestock register</a><h1 class="mt-2">Animal history</h1><p class="text-muted mb-0"><strong>@animal.TagNumber</strong> · @animal.Species · @(animal.Breed ?? "Breed not set") · @(animal.Camp ?? "No camp")</p></div>
+    <a asp-action="Edit" asp-route-id="@animal.Id" class="btn btn-outline-primary">Edit animal</a>
+</div>
+@if (TempData["Message"] is string message) { <div class="alert alert-success">@message</div> }
+@if (TempData["EventError"] is string error) { <div class="alert alert-danger">@error</div> }
+<section class="card p-3 p-md-4 mb-4">
+    <h2 class="h4">Log an event</h2>
+    <p class="text-muted">Keep a record of births, purchases, sales, deaths, movements, treatments, and vaccinations.</p>
+    <form asp-action="AddEvent" method="post" class="row g-3">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="livestockId" value="@animal.Id" />
+        <div class="col-12 col-md-4"><label class="form-label" for="eventType">Event type</label><select class="form-select" id="eventType" name="eventType" required><option>Birth</option><option>Purchase</option><option>Sale</option><option>Death</option><option>Movement</option><option>Treatment</option><option>Vaccination</option><option>Other</option></select></div>
+        <div class="col-6 col-md-4"><label class="form-label" for="eventDate">Date</label><input class="form-control" id="eventDate" name="eventDate" type="date" value="@DateTime.Today.ToString("yyyy-MM-dd")" required /></div>
+        <div class="col-6 col-md-4"><label class="form-label" for="amount">Amount (NAD, optional)</label><input class="form-control" id="amount" name="amount" type="number" min="0" max="100000000" step="0.01" placeholder="0.00" /></div>
+        <div class="col-12"><label class="form-label" for="notes">Notes</label><textarea class="form-control" id="notes" name="notes" rows="3" maxlength="1000" placeholder="Details, medicine, quantity, buyer, camp movement…"></textarea></div>
+        <div class="col-12"><button type="submit" class="btn btn-primary">Save event</button></div>
+    </form>
+</section>
+<section class="card p-3 p-md-4">
+    <div class="d-flex justify-content-between align-items-center gap-2 mb-3"><h2 class="h4 mb-0">Event timeline</h2><span class="badge text-bg-light">@Model.Count() records</span></div>
+    @if (!Model.Any())
+    {
+        <p class="text-muted mb-0">No history recorded for this animal yet.</p>
+    }
+    else
+    {
+        <div class="table-responsive"><table class="table align-middle"><thead><tr><th>Date</th><th>Event</th><th>Notes</th><th>Amount</th><th></th></tr></thead><tbody>
+        @foreach (var entry in Model)
+        {
+            <tr><td class="text-nowrap">@entry.EventDate.ToString("dd MMM yyyy")</td><td><span class="badge text-bg-success">@entry.EventType</span></td><td>@(string.IsNullOrWhiteSpace(entry.Notes) ? "—" : entry.Notes)</td><td class="text-nowrap">@(entry.Amount.HasValue ? $"NAD {entry.Amount.Value:N2}" : "—")</td><td><form asp-action="DeleteEvent" method="post" onsubmit="return confirm('Delete this history event?');">@Html.AntiForgeryToken()<input type="hidden" name="id" value="@entry.Id" /><button class="btn btn-sm btn-outline-danger" type="submit">Delete</button></form></td></tr>
+        }
+        </tbody></table></div>
+    }
+</section>

@@ -99,6 +99,55 @@ public class LivestockController(ApplicationDbContext db) : Controller
         catch (Exception ex) { return StatusCode(502, new { error = "Could not load rainfall data: " + ex.Message }); }
     }
 
+    public async Task<IActionResult> History(int id)
+    {
+        var animal = await db.Livestock.AsNoTracking().FirstOrDefaultAsync(a => a.Id == id && a.OwnerId == CurrentUserId);
+        if (animal == null) return NotFound();
+        ViewBag.Animal = animal;
+        var events = await db.LivestockEvents.AsNoTracking().Where(e => e.LivestockId == id && e.OwnerId == CurrentUserId).OrderByDescending(e => e.EventDate).ThenByDescending(e => e.Id).ToListAsync();
+        return View(events);
+    }
+
+    [HttpPost, ValidateAntiForgeryToken]
+    public async Task<IActionResult> AddEvent(int livestockId, string eventType, DateTime eventDate, decimal? amount, string? notes)
+    {
+        var allowedTypes = new[] { "Birth", "Purchase", "Sale", "Death", "Movement", "Treatment", "Vaccination", "Other" };
+        var animal = await db.Livestock.FirstOrDefaultAsync(a => a.Id == livestockId && a.OwnerId == CurrentUserId);
+        if (animal == null) return NotFound();
+        if (!allowedTypes.Contains(eventType) || eventDate == default || amount < 0 || amount > 100000000)
+        {
+            TempData["EventError"] = "Please enter a valid event type, date, and amount.";
+            return RedirectToAction(nameof(History), new { id = livestockId });
+        }
+        db.LivestockEvents.Add(new LivestockEvent
+        {
+            OwnerId = CurrentUserId,
+            LivestockId = livestockId,
+            EventType = eventType,
+            EventDate = eventDate.Date,
+            Amount = amount,
+            Notes = string.IsNullOrWhiteSpace(notes) ? null : notes.Trim()
+        });
+        await db.SaveChangesAsync();
+        TempData["Message"] = "Livestock event saved.";
+        return RedirectToAction(nameof(History), new { id = livestockId });
+    }
+
+    [HttpPost, ValidateAntiForgeryToken]
+    public async Task<IActionResult> DeleteEvent(int id)
+    {
+        var entry = await db.LivestockEvents.FirstOrDefaultAsync(e => e.Id == id && e.OwnerId == CurrentUserId);
+        if (entry != null)
+        {
+            var livestockId = entry.LivestockId;
+            db.LivestockEvents.Remove(entry);
+            await db.SaveChangesAsync();
+            TempData["Message"] = "Event deleted.";
+            return RedirectToAction(nameof(History), new { id = livestockId });
+        }
+        return NotFound();
+    }
+
     public IActionResult Create() => View(new Livestock());
 
     [HttpPost, ValidateAntiForgeryToken]

@@ -1,0 +1,31 @@
+@{
+    ViewData["Title"] = "Welcome to FarmFlow";
+}
+
+<section class="welcome-hero">
+    <div class="welcome-copy">
+        <div class="welcome-eyebrow"><span class="welcome-dot"></span> FARM MANAGEMENT, MADE PRACTICAL</div>
+        <h1>More time for the farm.<br /><span>Less time chasing records.</span></h1>
+        <p class="welcome-lead">Meet FarmFlow: one simple place to keep your livestock records, follow farm conditions, and stay on top of the everyday details.</p>
+        <div class="welcome-actions">
+            <a class="welcome-primary" asp-area="Identity" asp-page="/Account/Register">Create your free account <span aria-hidden="true">→</span></a>
+            <a class="welcome-secondary" asp-area="Identity" asp-page="/Account/Login">I already have an account</a>
+        </div>
+        <div class="welcome-trust"><span aria-hidden="true">✓</span> Your farm records stay connected to your account</div>
+    </div>
+    <div class="welcome-art" aria-label="Illustration of rolling farmland at sunrise" role="img">
+        <div class="welcome-sun"></div><div class="welcome-hill welcome-hill-back"></div><div class="welcome-hill welcome-hill-front"></div>
+        <div class="welcome-art-label"><span>🌱</span><div><strong>Your farm, in focus</strong><small>Records · Tools · Insights</small></div></div>
+    </div>
+</section>
+
+<section class="welcome-benefits" aria-label="FarmFlow features">
+    <div class="welcome-section-intro"><span>YOUR FARM TOOLKIT</span><h2>Everything you need, in one place.</h2><p>Simple tools for keeping track of the work that matters.</p></div>
+    <div class="welcome-feature-grid">
+        <article class="welcome-feature"><div class="welcome-feature-icon welcome-icon-green">🐑</div><h3>Livestock records</h3><p>Keep animal details, tags, camps, and history organized in one register.</p><span>Track your herd <b>↗</b></span></article>
+        <article class="welcome-feature"><div class="welcome-feature-icon welcome-icon-gold">🌦️</div><h3>Weather & rainfall</h3><p>Check local conditions and keep a rainfall register for your farm.</p><span>Stay weather-aware <b>↗</b></span></article>
+        <article class="welcome-feature"><div class="welcome-feature-icon welcome-icon-blue">📊</div><h3>Market & farm tools</h3><p>Explore market information, calculators, fuel prices, and auction dates.</p><span>Make informed plans <b>↗</b></span></article>
+    </div>
+</section>
+
+<section class="welcome-bottom-cta"><div><span>READY WHEN YOU ARE</span><h2>Bring your farm records together.</h2><p>Create an account to open your own farm workspace.</p></div><a class="welcome-primary" asp-area="Identity" asp-page="/Account/Register">Get started <span aria-hidden="true">→</span></a></section>

@@ -441,3 +441,118 @@ img, canvas, svg { max-width: 100%; }
   .farm-navbar > .container-fluid { padding: .5rem .8rem; }
   .farm-navbar .navbar-brand { font-size: 1.1rem; }
 }
+
+/* Farm snapshot and livestock history */
+.dashboard-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1rem}
+.dashboard-metric{display:flex;align-items:center;gap:1rem;min-width:0;padding:1.25rem;border:1px solid #e3eae1;border-radius:1rem;background:#fff;box-shadow:0 8px 24px rgba(35,77,63,.045)}
+.metric-icon{display:grid;place-items:center;flex:0 0 3rem;height:3rem;border-radius:.9rem;background:#edf5e9;font-size:1.45rem}
+.metric-label{display:block;color:#718078;font-size:.82rem;font-weight:700}
+.dashboard-metric strong{display:block;margin:.1rem 0;color:#234d3f;font-size:clamp(1.45rem,3vw,2rem);font-weight:850;line-height:1.25}
+.dashboard-metric strong small{display:inline;font-size:.8rem;font-weight:700}
+.dashboard-metric small{display:block;color:#87928c;font-size:.76rem}
+.dashboard-metrics-secondary{grid-template-columns:repeat(2,minmax(0,1fr))}
+.dashboard-metric-compact{padding:1rem 1.25rem}
+.dashboard-metric-compact strong{font-size:1.5rem}
+@media(max-width:991.98px){.dashboard-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:575.98px){.dashboard-metrics{gap:.65rem}.dashboard-metric{gap:.65rem;padding:.9rem .75rem;border-radius:.8rem}.metric-icon{flex-basis:2.35rem;height:2.35rem;font-size:1.15rem;border-radius:.7rem}.metric-label{font-size:.72rem}.dashboard-metric strong{font-size:1.5rem}.dashboard-metric small{font-size:.68rem}.dashboard-metric-compact{padding:.85rem}}
+
+
+/* Public welcome page */
+.welcome-hero{position:relative;display:grid;grid-template-columns:minmax(0,1.1fr) minmax(300px,.9fr);align-items:center;gap:clamp(2rem,5vw,5rem);overflow:hidden;padding:clamp(2rem,6vw,5rem);border:1px solid #e1e9dc;border-radius:1.8rem;background:linear-gradient(135deg,#fffefa 0%,#f1f6e9 100%);box-shadow:0 20px 55px rgba(35,77,63,.08)}
+.welcome-copy{position:relative;z-index:2;max-width:680px}
+.welcome-eyebrow{display:flex;align-items:center;gap:.6rem;color:#58765e;font-size:.72rem;font-weight:850;letter-spacing:.13em}
+.welcome-dot{width:.55rem;height:.55rem;border-radius:50%;background:#d9a441;box-shadow:0 0 0 5px rgba(217,164,65,.15)}
+.welcome-hero h1{margin:1.2rem 0;font-size:clamp(2.5rem,5vw,4.45rem);font-weight:850;line-height:1.04;letter-spacing:-.055em;color:#1e4435}
+.welcome-hero h1 span{color:#75906a}
+.welcome-lead{max-width:590px;margin:0 0 1.7rem;color:#68786d;font-size:1.08rem;line-height:1.8}
+.welcome-actions{display:flex;align-items:center;gap:1.1rem;flex-wrap:wrap}
+.welcome-primary{display:inline-flex;align-items:center;justify-content:center;gap:1rem;padding:.95rem 1.3rem;border:1px solid #234d3f;border-radius:.85rem;background:#234d3f;color:#fff;text-decoration:none;font-weight:800;box-shadow:0 9px 20px rgba(35,77,63,.16);transition:transform .18s ease,background .18s ease}
+.welcome-primary:hover{background:#173a2d;color:#fff;transform:translateY(-2px)}
+.welcome-secondary{color:#315b45;font-weight:750;text-decoration:none;padding:.75rem .25rem}
+.welcome-secondary:hover{text-decoration:underline;color:#173a2d}
+.welcome-trust{display:flex;align-items:center;gap:.55rem;margin-top:1.5rem;color:#718174;font-size:.82rem}
+.welcome-trust span{display:grid;place-items:center;width:1.25rem;height:1.25rem;border-radius:50%;background:#e1efdc;color:#2d7048;font-weight:900}
+.welcome-art{position:relative;min-height:340px;overflow:hidden;border-radius:1.45rem;background:linear-gradient(180deg,#dfeee4 0%,#f4e9c9 68%,#d6dfb9 100%)}
+.welcome-sun{position:absolute;top:12%;right:17%;width:clamp(75px,9vw,120px);aspect-ratio:1;border-radius:50%;background:#f4c96d;box-shadow:0 0 0 18px rgba(244,201,109,.16),0 0 70px rgba(244,201,109,.45)}
+.welcome-hill{position:absolute;left:-15%;width:135%;border-radius:50% 50% 0 0}
+.welcome-hill-back{height:68%;bottom:-22%;background:#9dbb8b;transform:rotate(-9deg)}
+.welcome-hill-front{height:57%;bottom:-28%;left:20%;background:linear-gradient(135deg,#426e4b,#234d3f);transform:rotate(11deg)}
+.welcome-art-label{position:absolute;right:1rem;bottom:1rem;left:1rem;display:flex;align-items:center;gap:.85rem;padding:1rem 1.1rem;border:1px solid rgba(255,255,255,.6);border-radius:1rem;background:rgba(255,255,255,.88);backdrop-filter:blur(10px);box-shadow:0 10px 30px rgba(30,68,53,.12)}
+.welcome-art-label>span{display:grid;place-items:center;width:3rem;height:3rem;border-radius:.85rem;background:#e8f1df;font-size:1.6rem}
+.welcome-art-label strong,.welcome-art-label small{display:block}.welcome-art-label strong{color:#234d3f;font-size:.95rem}.welcome-art-label small{margin-top:.2rem;color:#778579;font-size:.78rem}
+
+.welcome-benefits{padding:clamp(2.3rem,5vw,4rem) 0 1rem}
+.welcome-section-intro{text-align:center;max-width:650px;margin:0 auto 2rem}
+.welcome-section-intro>span,.welcome-bottom-cta>div>span{color:#789071;font-size:.72rem;font-weight:850;letter-spacing:.15em}
+.welcome-section-intro h2{margin:.6rem 0;color:#234d3f;font-size:clamp(1.8rem,3.5vw,2.6rem);font-weight:850;letter-spacing:-.04em}
+.welcome-section-intro p{margin:0;color:#718078;line-height:1.7}
+.welcome-feature-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1.1rem}
+.welcome-feature{padding:1.5rem;border:1px solid #e4eae0;border-radius:1.2rem;background:rgba(255,255,255,.88);box-shadow:0 8px 24px rgba(35,77,63,.045)}
+.welcome-feature-icon{display:grid;place-items:center;width:3.4rem;height:3.4rem;margin-bottom:1.2rem;border-radius:1rem;font-size:1.6rem}
+.welcome-icon-green{background:#eaf4e5}.welcome-icon-gold{background:#fff2d9}.welcome-icon-blue{background:#e8eff8}
+.welcome-feature h3{margin:0 0 .6rem;color:#234d3f;font-size:1.2rem;font-weight:850}
+.welcome-feature p{min-height:4.5rem;margin:0 0 1rem;color:#718078;font-size:.92rem;line-height:1.7}
+.welcome-feature>span{display:flex;align-items:center;justify-content:space-between;padding-top:.9rem;border-top:1px solid #edf0e9;color:#376247;font-size:.86rem;font-weight:800}
+.welcome-bottom-cta{display:flex;align-items:center;justify-content:space-between;gap:1.5rem;margin:2.4rem 0 1.5rem;padding:clamp(1.5rem,4vw,2.6rem);border-radius:1.3rem;background:#e8f0e2}
+.welcome-bottom-cta h2{margin:.45rem 0;color:#234d3f;font-size:clamp(1.45rem,3vw,2rem);font-weight:850;letter-spacing:-.035em}
+.welcome-bottom-cta p{margin:0;color:#718078;line-height:1.6}
+@media(max-width:767.98px){.welcome-hero{grid-template-columns:1fr;gap:1.8rem;padding:1.5rem;border-radius:1.2rem}.welcome-hero h1{font-size:clamp(2.35rem,10vw,3.5rem)}.welcome-art{min-height:240px}.welcome-actions{align-items:stretch;flex-direction:column;gap:.55rem}.welcome-primary{width:100%}.welcome-secondary{text-align:center}.welcome-feature-grid{grid-template-columns:1fr}.welcome-feature p{min-height:0}.welcome-bottom-cta{align-items:stretch;flex-direction:column}.welcome-bottom-cta .welcome-primary{width:100%}}
+@media(prefers-reduced-motion:reduce){.welcome-primary{transition:none}.welcome-primary:hover{transform:none}}
+
+
+/* Guest dashboard access notice */
+.guest-dashboard-banner{display:flex;align-items:center;justify-content:space-between;gap:1.25rem;margin:0 0 1.5rem;padding:1.2rem 1.4rem;border:1px solid #d8e7d1;border-radius:1rem;background:#f0f6eb;color:#234d3f}
+.guest-dashboard-banner strong{display:block;font-size:1.05rem;font-weight:850}
+.guest-dashboard-banner p{margin:.35rem 0 0;color:#63766a;line-height:1.6}
+.guest-dashboard-actions{display:flex;gap:.65rem;flex-shrink:0}
+@media(max-width:650px){.guest-dashboard-banner{align-items:stretch;flex-direction:column}.guest-dashboard-actions{flex-wrap:wrap}.guest-dashboard-actions .btn{flex:1}}
+
+
+/* Polished sign-in and registration screens */
+.auth-page{min-height:100vh;background:radial-gradient(ellipse at 10% 10%,rgba(216,233,207,.75),transparent 35%),linear-gradient(145deg,#f7faf4 0%,#edf4e8 52%,#f8f5eb 100%)}
+.auth-page .farm-navbar{background:rgba(255,255,255,.9);border-bottom:1px solid #e2eade!important;box-shadow:0 5px 24px rgba(35,77,63,.045)!important}
+.auth-page .farm-navbar > .container-fluid{max-width:1240px;padding:1rem clamp(1rem,4vw,2.5rem)}
+.auth-page .farm-navbar .navbar-collapse{display:flex!important;flex-basis:auto;flex-grow:0}
+.auth-page .farm-navbar .navbar-nav.flex-grow-1,
+.auth-page .farm-navbar .farm-location-control,
+.auth-page .farm-navbar .navbar-toggler{display:none!important}
+.auth-page .farm-navbar .navbar-brand{font-size:1.35rem}
+.auth-page .farm-navbar .navbar-collapse .navbar-nav{display:flex;flex-direction:row;gap:.5rem}
+.auth-page .farm-navbar .navbar-collapse .nav-link{padding:.65rem 1rem;border-radius:.7rem;font-weight:750}
+.auth-page .farm-navbar .navbar-collapse .nav-item:last-child .nav-link{background:#234d3f;color:#fff!important}
+.auth-page .farm-navbar .navbar-collapse .nav-item:last-child .nav-link:hover{background:#173a2d}
+.auth-page .page-shell{display:flex;flex-direction:column;justify-content:center;min-height:calc(100vh - 175px);padding:clamp(2rem,5vw,4.5rem) 1rem}
+.auth-page .page-shell>.row{justify-content:center;align-items:stretch;gap:1.25rem;width:100%;margin:0 auto}
+.auth-page .page-shell>.row>[class*="col-"]{flex:0 1 520px;width:100%;max-width:520px;margin:0;padding:clamp(1.5rem,4vw,2.5rem);border:1px solid rgba(35,77,63,.11);border-radius:1.4rem;background:rgba(255,255,255,.94);box-shadow:0 18px 55px rgba(35,77,63,.09)}
+.auth-page .page-shell h1,.auth-page .page-shell h2{color:#234d3f;font-weight:850;letter-spacing:-.035em}
+.auth-page .page-shell h1{margin:0 0 .6rem;font-size:clamp(1.9rem,4vw,2.45rem)}
+.auth-page .page-shell h2{margin:0 0 .8rem;font-size:clamp(1.5rem,3vw,1.9rem)}
+.auth-page .page-shell h3{color:#234d3f;font-size:1.15rem;font-weight:800}
+.auth-page .page-shell hr{border-color:#e6ece2;opacity:1;margin:1.25rem 0}
+.auth-page .page-shell p,.auth-page .page-shell .form-text{color:#718078;line-height:1.65}
+.auth-page .page-shell form label,.auth-page .page-shell .form-label{color:#43584a;font-size:.88rem;font-weight:750;margin-bottom:.45rem}
+.auth-page .page-shell .form-control{min-height:3.15rem;border:1px solid #dce6d9;border-radius:.8rem;background:#fbfdf9;padding:.8rem 1rem;color:#243b30}
+.auth-page .page-shell .form-control:focus{border-color:#6f9a78;box-shadow:0 0 0 .22rem rgba(72,126,82,.13);background:#fff}
+.auth-page .page-shell .form-floating>.form-control{height:3.5rem;min-height:3.5rem}
+.auth-page .page-shell .form-floating>label{padding:1rem;color:#718078;font-weight:600}
+.auth-page .page-shell .form-check{display:flex;align-items:center;gap:.55rem;min-height:1.5rem}
+.auth-page .page-shell .form-check-input{width:1.1rem;height:1.1rem;margin:0;border-color:#b9cbb5}
+.auth-page .page-shell .form-check-label{margin:0;color:#637468;font-weight:600}
+.auth-page .page-shell .btn-primary,.auth-page .page-shell button[type="submit"]{min-height:3rem;border:1px solid #234d3f;border-radius:.8rem;background:#234d3f;color:#fff;font-weight:800;padding:.8rem 1.1rem;box-shadow:0 7px 17px rgba(35,77,63,.13);transition:background .15s ease,transform .15s ease}
+.auth-page .page-shell .btn-primary:hover,.auth-page .page-shell button[type="submit"]:hover{background:#173a2d;border-color:#173a2d;color:#fff;transform:translateY(-1px)}
+.auth-page .page-shell a{color:#2c694a;font-weight:650;text-decoration:none}
+.auth-page .page-shell a:hover{color:#173a2d;text-decoration:underline}
+.auth-page .page-shell .text-danger{font-size:.88rem}
+.auth-page .page-shell .validation-summary-errors{padding:.8rem 1rem;border:1px solid #f1c7c2;border-radius:.7rem;background:#fff5f3;color:#9b352d}
+.auth-page .page-shell .validation-summary-errors ul{margin:0;padding-left:1.2rem}
+.auth-page .page-shell .external-login-buttons{display:grid;gap:.65rem}
+.auth-page .footer{border-top:1px solid #e3eade!important;background:rgba(255,255,255,.7)}
+.auth-page .floating-back-button{display:none!important}
+@media(max-width:575.98px){.auth-page .farm-navbar > .container-fluid{padding:.75rem 1rem}.auth-page .page-shell{min-height:calc(100vh - 130px);padding:1.5rem .35rem}.auth-page .page-shell>.row{gap:.9rem}.auth-page .page-shell>.row>[class*="col-"]{padding:1.35rem 1.1rem;border-radius:1.1rem}.auth-page .farm-navbar .navbar-collapse .nav-link{padding:.55rem .75rem;font-size:.9rem}}
+
+
+/* Hide the unused external-provider panel on Identity screens (no providers are configured). */
+.auth-page .page-shell > .row > .col-lg-4,
+.auth-page .page-shell > .row > .col-lg-4.col-lg-offset-2 {
+    display: none !important;
+}

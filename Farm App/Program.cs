@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Farm_App.Data;
 using Farm_App.Services;
@@ -32,6 +33,14 @@ public class Program
             options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(10);
         })
             .AddEntityFrameworkStores<ApplicationDbContext>();
+        // Require sign-in by default for every endpoint unless it explicitly allows anonymous access.
+        builder.Services.AddAuthorization(options =>
+        {
+            options.FallbackPolicy = new AuthorizationPolicyBuilder()
+                .RequireAuthenticatedUser()
+                .Build();
+        });
+
         builder.Services.AddTransient<Microsoft.AspNetCore.Identity.UI.Services.IEmailSender, SmtpEmailSender>();
         builder.Services.AddTransient<IEmailSender<IdentityUser>, SmtpEmailSender>();
         builder.Services.AddControllersWithViews();
@@ -79,7 +88,8 @@ public class Program
         app.UseAuthentication();
         app.UseAuthorization();
 
-        app.MapStaticAssets();
+        // Static CSS, JavaScript, and images must remain public so the public welcome page can render correctly.
+        app.MapStaticAssets().AllowAnonymous();
         app.MapControllerRoute(
             name: "default",
             pattern: "{controller=Home}/{action=Index}/{id?}")

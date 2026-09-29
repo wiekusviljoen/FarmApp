@@ -1,4 +1,9 @@
-﻿<!DOCTYPE html>
+﻿@{
+    var currentPath = Context.Request.Path.Value ?? string.Empty;
+    var isAuthPage = currentPath.StartsWith("/Identity/Account/Login", StringComparison.OrdinalIgnoreCase)
+        || currentPath.StartsWith("/Identity/Account/Register", StringComparison.OrdinalIgnoreCase);
+}
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -6,9 +11,9 @@
     <title>@ViewData["Title"] - Farm_App</title>
     <script type="importmap"></script>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css?v=20260928" />
-    <link rel="stylesheet" href="~/css/site.css?v=20260929" />
+    <link rel="stylesheet" href="~/css/site.css?v=20260930-auth2" />
 </head>
-<body>
+<body class="@(isAuthPage ? "auth-page" : string.Empty)">
     <header>
         <nav class="navbar navbar-expand-lg navbar-toggleable-sm farm-navbar border-bottom shadow-sm">
             <div class="container-fluid">
