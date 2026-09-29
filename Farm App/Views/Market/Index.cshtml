@@ -17,10 +17,18 @@
   <p>Compare quoted prices per kg and estimate gross value.</p>
   <div class="mb-3"><label class="form-label">Abattoir / buyer</label><input id="buyer" class="form-control" placeholder="Buyer name" /></div>
   <div class="mb-3"><label class="form-label">Price per kg (NAD)</label><input id="abPrice" type="number" min="0" step="0.01" class="form-control" placeholder="e.g. 65.00" /></div>
-  <div class="mb-3"><label class="form-label">Carcass weight (kg)</label><input id="carcass" type="number" min="0" step="0.1" class="form-control" value="20" /></div>
-  <p class="fw-bold" id="payoutPreview">Estimated gross: NAD 0.00</p>
+  <div class="mb-3"><label class="form-label">Carcass weight per animal (kg)</label><input id="carcass" type="number" min="0.1" step="0.1" class="form-control" value="20" /></div>
+  <div class="mb-3"><label class="form-label">Number of animals</label><input id="headCount" type="number" min="1" step="1" class="form-control" value="1" /></div>
+  <h3 class="h5">Costs per animal (NAD)</h3>
+  <div class="row g-2">
+   <div class="col-sm-6"><label class="form-label">Slaughter / abattoir fee</label><input id="slaughterFee" type="number" min="0" step="0.01" class="form-control" value="0" /></div>
+   <div class="col-sm-6"><label class="form-label">Transport</label><input id="transportFee" type="number" min="0" step="0.01" class="form-control" value="0" /></div>
+   <div class="col-sm-6"><label class="form-label">Inspection / levy</label><input id="inspectionFee" type="number" min="0" step="0.01" class="form-control" value="0" /></div>
+   <div class="col-sm-6"><label class="form-label">Other fees</label><input id="otherFee" type="number" min="0" step="0.01" class="form-control" value="0" /></div>
+  </div>
+  <p class="fw-bold mt-3" id="payoutPreview">Gross: NAD 0.00 · Costs: NAD 0.00 · Net: NAD 0.00</p>
   <button class="btn btn-primary" onclick="addQuote()">Add quote to comparison</button>
-  <h3 class="mt-4">Quote comparison</h3><div class="table-responsive"><table class="table" id="quotes"><thead><tr><th>Buyer</th><th>NAD/kg</th><th>Gross value</th></tr></thead><tbody></tbody></table></div>
+  <h3 class="mt-4">Quote comparison</h3><div class="table-responsive"><table class="table" id="quotes"><thead><tr><th>Buyer</th><th>NAD/kg</th><th>Gross total</th><th>Total costs</th><th>Net payout</th></tr></thead><tbody></tbody></table></div>
   <p class="fw-bold" id="bestQuote">Enter a quote to compare.</p>
  </div></div>
  
@@ -123,23 +131,33 @@ function useLivePrice(encodedName, price) {
  document.getElementById('abPrice').focus();
 }
 const quotes = [];
+const readNumber = id => Math.max(0, Number(document.getElementById(id).value) || 0);
+function quoteTotals() {
+ const price = readNumber('abPrice');
+ const weight = readNumber('carcass');
+ const count = Math.floor(readNumber('headCount'));
+ const perAnimalCosts = readNumber('slaughterFee') + readNumber('transportFee') + readNumber('inspectionFee') + readNumber('otherFee');
+ const gross = price * weight * count;
+ const costs = perAnimalCosts * count;
+ return { gross, costs, net: gross - costs, count, perAnimalCosts };
+}
 function addQuote() {
  const buyer = document.getElementById('buyer').value.trim();
- const price = Number(document.getElementById('abPrice').value);
- const kg = Number(document.getElementById('carcass').value);
- if (!buyer || price <= 0 || kg <= 0) { alert('Enter buyer, price, and carcass weight.'); return; }
- quotes.push({buyer, price, value: price * kg});
- quotes.sort((a,b) => b.price-a.price);
- document.querySelector('#quotes tbody').innerHTML = quotes.map(q => `<tr><td>${escapeHtml(q.buyer)}</td><td>${money(q.price)}</td><td>${money(q.value)}</td></tr>`).join('');
- document.getElementById('bestQuote').textContent = `Highest entered price: ${quotes[0].buyer} at ${money(quotes[0].price)}/kg`;
+ const price = readNumber('abPrice');
+ const kg = readNumber('carcass');
+ const count = Math.floor(readNumber('headCount'));
+ const totals = quoteTotals();
+ if (!buyer || price <= 0 || kg <= 0 || count < 1) { alert('Enter buyer, a price above zero, carcass weight, and at least one animal.'); return; }
+ quotes.push({buyer, price, kg, count, ...totals});
+ quotes.sort((a,b) => b.net-a.net);
+ document.querySelector('#quotes tbody').innerHTML = quotes.map(q => `<tr><td>${escapeHtml(q.buyer)}<br><small>${q.count} head · ${q.kg.toFixed(1)} kg/head</small></td><td>${money(q.price)}</td><td>${money(q.gross)}</td><td>${money(q.costs)}</td><td class="fw-bold">${money(q.net)}</td></tr>`).join('');
+ document.getElementById('bestQuote').textContent = `Highest net payout: ${quotes[0].buyer} at ${money(quotes[0].net)} after entered costs.`;
 }
-document.addEventListener('DOMContentLoaded', () => { updatePreviews(); loadLivePrices(); });
 function escapeHtml(s) { return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function updatePreviews() {
- const price = Number(document.getElementById('abPrice').value) || 0;
- const weight = Number(document.getElementById('carcass').value) || 0;
- document.getElementById('payoutPreview').textContent = `Estimated gross: ${money(price * weight)}`;
+ const t = quoteTotals();
+ document.getElementById('payoutPreview').textContent = 'Gross: ' + money(t.gross) + ' · Costs: ' + money(t.costs) + ' · Net: ' + money(t.net) + ' (for ' + t.count + ' head)';
 }
-['abPrice','carcass'].forEach(id => document.getElementById(id).addEventListener('input', updatePreviews));
+['abPrice','carcass','headCount','slaughterFee','transportFee','inspectionFee','otherFee'].forEach(id => document.getElementById(id).addEventListener('input', updatePreviews));
 document.addEventListener('DOMContentLoaded', () => { updatePreviews(); loadLivePrices(); });</script>
 }

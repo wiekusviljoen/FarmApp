@@ -1,0 +1,51 @@
+@{
+    ViewData["Title"] = "Namibia Fuel Prices";
+}
+<div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-4">
+    <div>
+        <p class="text-uppercase small text-muted mb-1">Namibia · Fuel price update</p>
+        <h1>Fuel prices</h1>
+        <p class="text-muted mb-0">Pump prices at Walvis Bay, Namibia's fuel price base point. Prices in other towns can be higher.</p>
+    </div>
+    <span class="badge text-bg-success fs-6">Effective 2 September 2026</span>
+</div>
+<div class="alert alert-info" role="note">
+    <strong>Location note:</strong> These are the published Walvis Bay base-point prices, not a confirmed Koes or Helmeringhausen pump price. Inland prices vary by town. Confirm the local station price before budgeting.
+</div>
+<div class="row g-3 mb-4">
+    <div class="col-md-4"><section class="card p-4 h-100"><div class="small text-muted">Petrol 95 (ULP)</div><div class="display-6 fw-bold">N$25.08</div><div class="small text-muted">per litre</div></section></div>
+    <div class="col-md-4"><section class="card p-4 h-100"><div class="small text-muted">Diesel 50ppm</div><div class="display-6 fw-bold">N$27.96</div><div class="small text-muted">per litre</div></section></div>
+    <div class="col-md-4"><section class="card p-4 h-100"><div class="small text-muted">Diesel 10ppm</div><div class="display-6 fw-bold">N$27.86</div><div class="small text-muted">per litre</div></section></div>
+</div>
+<div class="card p-4 mb-4">
+    <h2 class="h3">Fuel cost calculator</h2>
+    <p class="text-muted">Estimate the cost of filling a tank or buying fuel for a trip. Change the price to match your local station.</p>
+    <div class="row g-3">
+        <div class="col-md-4"><label class="form-label" for="fuelType">Fuel type</label><select id="fuelType" class="form-select"><option value="25.08">Petrol 95 — N$25.08/L</option><option value="27.96" selected>Diesel 50ppm — N$27.96/L</option><option value="27.86">Diesel 10ppm — N$27.86/L</option></select></div>
+        <div class="col-md-4"><label class="form-label" for="fuelPrice">Price per litre (N$)</label><input id="fuelPrice" class="form-control" type="number" min="0" step="0.01" value="27.96" /></div>
+        <div class="col-md-4"><label class="form-label" for="fuelLitres">Litres</label><input id="fuelLitres" class="form-control" type="number" min="0" step="1" value="80" /></div>
+    </div>
+    <div class="mt-4 p-3 rounded bg-light"><span class="text-muted">Estimated total</span><div class="display-6 fw-bold" id="fuelTotal">N$2,236.80</div></div>
+</div>
+<div class="small text-muted">Last checked: 29 September 2026 · Source: Ministry fuel-price announcement reported by Informanté and The Namibian.</div>
+<p class="mt-2"><a href="https://informante.web.na/?p=400112" target="_blank" rel="noopener">Read the September fuel-price announcement</a> · <a href="https://www.namibian.com.na/fuel-prices-to-rise-in-september-as-ministry-increases-road-levies/" target="_blank" rel="noopener">The Namibian report</a></p>
+@section Scripts {
+<script>
+(() => {
+    const type = document.getElementById('fuelType');
+    const price = document.getElementById('fuelPrice');
+    const litres = document.getElementById('fuelLitres');
+    const total = document.getElementById('fuelTotal');
+    const money = value => 'N$' + value.toLocaleString('en-NA', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const update = () => {
+        const p = Math.max(0, Number(price.value) || 0);
+        const l = Math.max(0, Number(litres.value) || 0);
+        total.textContent = money(p * l);
+    };
+    type.addEventListener('change', () => { price.value = type.value; update(); });
+    price.addEventListener('input', update);
+    litres.addEventListener('input', update);
+    update();
+})();
+</script>
+}
