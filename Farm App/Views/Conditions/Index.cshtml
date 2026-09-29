@@ -5,6 +5,7 @@
 <p id="locationLabel" class="small text-muted"></p>
 <div class="row g-3 mb-4" id="current"></div>
 <section class="card p-4 mb-4"><h2>🌧️ 7-day rainfall & weather</h2><p class="small text-muted">Rain totals, probability, temperatures and wind. Forecast, not measured farm rainfall.</p><div class="table-responsive"><table class="table table-sm" id="forecast"><thead><tr><th>Date</th><th>Min / Max °C</th><th>Rain mm</th><th>Rain chance</th><th>Max wind km/h</th></tr></thead><tbody></tbody></table></div><h3>Rainfall forecast (mm)</h3><canvas id="rainChart" height="130" style="width:100%"></canvas></section>
+<section class="card p-4 mb-4" id="rainHistorySection"><h2>📈 Rainfall history</h2><p class="small text-muted">Historical rainfall estimates for the selected location. These are weather-data estimates, not measurements from your farm rain gauge.</p><div class="d-flex flex-wrap align-items-center gap-2 mb-3" id="rainHistoryChoices" role="group" aria-label="Rainfall history period"><button type="button" class="btn btn-sm btn-outline-primary" data-period="1m" onclick="selectRainHistoryPeriod(this)">1 month</button><button type="button" class="btn btn-sm btn-outline-primary" data-period="3m" onclick="selectRainHistoryPeriod(this)">3 months</button><button type="button" class="btn btn-sm btn-outline-primary" data-period="6m" onclick="selectRainHistoryPeriod(this)">6 months</button><button type="button" class="btn btn-sm btn-primary active" data-period="1y" aria-pressed="true" onclick="selectRainHistoryPeriod(this)">1 year</button><button type="button" class="btn btn-sm btn-outline-primary" data-period="2y" onclick="selectRainHistoryPeriod(this)">2 years</button><button type="button" class="btn btn-sm btn-outline-primary" data-period="5y" onclick="selectRainHistoryPeriod(this)">5 years</button></div><div id="rainHistoryStatus" class="small text-muted mb-2" aria-live="polite">Loading rainfall history…</div><div class="w-100" style="min-height:220px;overflow:hidden"><svg id="rainHistoryChart" viewBox="0 0 760 270" role="img" aria-label="Historical rainfall chart" style="display:block;width:100%;height:auto;min-height:220px"></svg></div><div id="rainHistoryDates" class="small text-muted mt-2"></div></section>
 <section class="card p-4 mb-4"><h2>🔥 Fire conditions</h2><div id="fireSummary" class="alert alert-secondary">Calculating weather-based fire conditions…</div><p class="small text-muted">This is a simple weather-based caution indicator—not an official fire danger rating and not a satellite-detected fire alert. Confirm fires with local authorities and check official alerts.</p><p><a href="https://firms.modaps.eosdis.nasa.gov/map/" target="_blank" rel="noopener">Open NASA FIRMS active-fire map</a> · <a href="https://www.meteoblue.com/" target="_blank" rel="noopener">Weather maps</a></p></section>
 @section Scripts {
 <script>
@@ -40,6 +41,45 @@ function requestLocation(){
  },{enableHighAccuracy:false,timeout:12000,maximumAge:300000});
 }
 window.addEventListener('farm-location-changed',applyLocationPreference);
+let rainHistoryPeriod='1y';
+function selectRainHistoryPeriod(button){
+ rainHistoryPeriod=button.dataset.period;
+ document.querySelectorAll('#rainHistoryChoices button').forEach(item=>{
+  const active=item===button;
+  item.classList.toggle('btn-primary',active);item.classList.toggle('active',active);
+  item.classList.toggle('btn-outline-primary',!active);item.setAttribute('aria-pressed',String(active));
+ });
+ loadRainHistory();
+}
+async function loadRainHistory(){
+ const status=document.getElementById('rainHistoryStatus');
+ status.textContent='Loading historical rainfall…';
+ const loc=selectedLocation||{latitude:regionCoordinates.Koes[0],longitude:regionCoordinates.Koes[1]};
+ try{
+  const query=new URLSearchParams({period:rainHistoryPeriod,latitude:loc.latitude,longitude:loc.longitude});
+  const response=await fetch('/Livestock/RainfallHistory?'+query.toString());
+  const data=await response.json();if(!response.ok)throw new Error(data.error||'Historical data unavailable');
+  let points=(data.records||[]).map(r=>({date:r.date,value:Number(r.rainMm)||0}));
+  if(['6m','1y','2y','5y'].includes(rainHistoryPeriod)){
+   const buckets={};points.forEach(p=>{const key=p.date.slice(0,7);buckets[key]=(buckets[key]||0)+p.value;});
+   points=Object.entries(buckets).map(([date,value])=>({date,value}));
+  }
+  const svg=document.getElementById('rainHistoryChart');while(svg.firstChild)svg.removeChild(svg.firstChild);
+  const ns='http://www.w3.org/2000/svg';
+  const make=(tag,attrs,text)=>{const el=document.createElementNS(ns,tag);Object.entries(attrs||{}).forEach(([k,v])=>el.setAttribute(k,v));if(text!==undefined)el.textContent=text;return el;};
+  if(!points.length){svg.appendChild(make('text',{x:380,y:135,'text-anchor':'middle',fill:'currentColor'},'No rainfall data available'));}
+  else{
+   const W=760,H=270,L=52,R=16,T=14,B=42,plotW=W-L-R,plotH=H-T-B,max=Math.max(10,...points.map(p=>p.value));
+   for(let i=0;i<=4;i++){const y=T+plotH-(i/4)*plotH;svg.appendChild(make('line',{x1:L,y1:y,x2:W-R,y2:y,stroke:'currentColor','stroke-opacity':'.15'}));svg.appendChild(make('text',{x:L-8,y:y+4,'text-anchor':'end','font-size':11,fill:'currentColor'},(max*i/4).toFixed(0)));}
+   const step=plotW/points.length,bw=Math.max(1,Math.min(24,step*.68));
+   points.forEach((p,i)=>{const x=L+i*step+(step-bw)/2,h=Math.max(1,p.value/max*plotH),rect=make('rect',{x,y:T+plotH-h,width:bw,height:h,rx:2,fill:'#269b83'});rect.appendChild(make('title',{},p.date+': '+p.value.toFixed(1)+' mm'));svg.appendChild(rect);});
+   [...new Set([0,Math.floor((points.length-1)/2),points.length-1])].forEach(i=>{const p=points[i];svg.appendChild(make('text',{x:L+i*step+step/2,y:H-14,'text-anchor':'middle','font-size':11,fill:'currentColor'},rainHistoryPeriod==='1m'?p.date.slice(5):p.date));});
+  }
+  const total=(data.records||[]).reduce((sum,r)=>sum+(Number(r.rainMm)||0),0);
+  status.textContent=(data.records||[]).length+' daily observations · Total: '+total.toFixed(1)+' mm · Source: '+(data.source||'Historical weather data');
+  document.getElementById('rainHistoryDates').textContent=(data.startDate||'')+' to '+(data.endDate||'');
+ }catch(error){status.textContent='Could not load rainfall history: '+error.message;}
+}
 async function loadForecast(){
  const status=document.getElementById('status'); status.textContent=selectedLocation?'Fetching weather for your location…':'Fetching Koes-area forecast…';
  try {
@@ -49,7 +89,7 @@ async function loadForecast(){
   const c=data.current;
   document.getElementById('current').innerHTML=[['Temperature',c.temp+' °C'],['Humidity',c.humidity+'%'],['Wind',c.windKmh+' km/h'],['Current rain',c.rainMm+' mm']].map(x=>`<div class="col-6 col-lg-3"><div class="card p-3 h-100"><div class="text-muted small">${x[0]}</div><div class="fs-4 fw-bold">${x[1]}</div></div></div>`).join('');
   document.querySelector('#forecast tbody').innerHTML=data.days.map(d=>`<tr><td>${d.date}</td><td>${d.minTemp.toFixed(1)} / ${d.maxTemp.toFixed(1)}</td><td>${d.rainMm.toFixed(1)}</td><td>${d.rainChance}%</td><td>${d.windKmh.toFixed(1)}</td></tr>`).join('');
-  drawRain(data.days); showFire(data.current,data.days); status.textContent='Updated '+new Date(data.fetchedAt).toLocaleString()+' · Source: Open-Meteo';
+  drawRain(data.days); showFire(data.current,data.days); loadRainHistory(); status.textContent='Updated '+new Date(data.fetchedAt).toLocaleString()+' · Source: Open-Meteo';
  }catch(e){status.textContent='Could not load forecast: '+e.message;}
 }
 function drawRain(days){
