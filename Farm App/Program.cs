@@ -40,6 +40,13 @@ public class Program
 
         var app = builder.Build();
 
+        // Ensure the SQLite schema is present on hosted deployments as well as local runs.
+        using (var scope = app.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            db.Database.Migrate();
+        }
+
         app.MapDefaultEndpoints();
 
         // Configure the HTTP request pipeline.
