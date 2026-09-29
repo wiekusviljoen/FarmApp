@@ -85,6 +85,28 @@ function renderRationTable() {
  target.querySelectorAll('.feed-ration-input').forEach(input=>input.addEventListener('input',()=>{const next={};target.querySelectorAll('.feed-ration-input').forEach(x=>next[x.dataset.species]=Number(x.value)||0);localStorage.setItem(rationStoreKey,JSON.stringify(next));updateFeedingEstimate();}));
 }
 let rainCoords = null;
+const rainRegionCoordinates = {
+ 'Koes': { latitude: -25.95, longitude: 18.05 },
+ 'Karas': { latitude: -26.6, longitude: 18.1 },
+ 'Hardap': { latitude: -24.5, longitude: 17.9 },
+ 'Khomas': { latitude: -22.6, longitude: 17.1 },
+ 'Erongo': { latitude: -22.0, longitude: 14.5 },
+ 'Kunene': { latitude: -19.4, longitude: 13.0 },
+ 'Oshana': { latitude: -17.8, longitude: 15.7 },
+ 'Omusati': { latitude: -18.4, longitude: 14.9 },
+ 'Ohangwena': { latitude: -17.6, longitude: 16.0 },
+ 'Oshikoto': { latitude: -18.3, longitude: 17.1 },
+ 'Kavango East': { latitude: -18.0, longitude: 19.7 },
+ 'Kavango West': { latitude: -18.1, longitude: 18.0 },
+ 'Zambezi': { latitude: -17.8, longitude: 24.2 },
+ 'Otjozondjupa': { latitude: -20.5, longitude: 17.5 }
+};
+function currentRainLocation() {
+ const mode = localStorage.getItem('farmLocationMode') || 'auto';
+ const region = localStorage.getItem('farmRegion') || 'Koes';
+ if (mode === 'manual') return { ... (rainRegionCoordinates[region] || rainRegionCoordinates.Koes), label: region + ' (approximate region centre)' };
+ return rainCoords ? { ...rainCoords, label: 'GPS location' } : { ...rainRegionCoordinates.Koes, label: 'Koes area (approximate fallback)' };
+}
 function drawRainfallTrend(records, period) {
  const svg=document.getElementById('rainfallTrendChart');
  while(svg.firstChild) svg.removeChild(svg.firstChild);
@@ -108,12 +130,12 @@ async function loadRainfallTrend() {
  const status=document.getElementById('rainfallTrendStatus');
  status.textContent='Loading historical rainfall…';
  try {
-  const query=new URLSearchParams({period});
-  if(rainCoords){query.set('latitude',rainCoords.latitude);query.set('longitude',rainCoords.longitude);}
+  const location=currentRainLocation();
+  const query=new URLSearchParams({period,latitude:location.latitude,longitude:location.longitude});
   const response=await fetch('/Livestock/RainfallHistory?'+query.toString());
   const data=await response.json();if(!response.ok)throw new Error(data.error||'Historical data unavailable');
   drawRainfallTrend(data.records,period);
-  document.getElementById('rainTrendDates').textContent=`${data.startDate} to ${data.endDate} · ${data.location}`;
+  document.getElementById('rainTrendDates').textContent=`${data.startDate} to ${data.endDate} · ${location.label}`;
   const total=data.records.reduce((sum,r)=>sum+(Number(r.rainMm)||0),0);
   status.textContent=`${data.records.length} daily observations · Total: ${total.toFixed(1)} mm · Source: ${data.source}`;
  } catch(error){status.textContent='Could not load rainfall history: '+error.message;}
@@ -123,7 +145,8 @@ async function loadRainfallWeather() {
  summary.textContent='Getting local rainfall history and forecast…';
  const fetchAt=async coords=>{
   if(coords) rainCoords=coords;
-  const query=coords?`?latitude=${coords.latitude}&longitude=${coords.longitude}`:'';
+  const location=currentRainLocation();
+  const query='?'+new URLSearchParams({latitude:location.latitude,longitude:location.longitude});
   const response=await fetch('/Livestock/RainfallWeather'+query); const data=await response.json();
   if(!response.ok) throw new Error(data.error||'Rainfall data unavailable');
   const next7=data.days.filter(d=>d.isForecast).reduce((sum,d)=>sum+d.rainMm,0);
@@ -133,9 +156,10 @@ async function loadRainfallWeather() {
   document.getElementById('seasonFactor').value=factor;
   document.getElementById('seasonFactorNote').textContent=`${signal}. Suggested planning factor ${factor.toFixed(2)}× based on a simple rainfall threshold, not measured grazing. Adjust for veld condition, animal stage and advice.`;
   updateFeedingEstimate();
-  summary.innerHTML=`<strong>${signal}</strong><br>Recent 30-day rainfall (online): <strong>${past.toFixed(1)} mm</strong> · Next 7-day forecast: <strong>${next7.toFixed(1)} mm</strong><br>Manual rain register (last 30 days): <strong>${Number(manualRain30).toFixed(1)} mm</strong><br><small>Location: ${escapeHtml(data.location)} · Source: ${escapeHtml(data.source)} · Updated ${new Date(data.fetchedAt).toLocaleString()}</small>`;
+  summary.innerHTML=`<strong>${signal}</strong><br>Recent 30-day rainfall (online): <strong>${past.toFixed(1)} mm</strong> · Next 7-day forecast: <strong>${next7.toFixed(1)} mm</strong><br>Manual rain register (last 30 days): <strong>${Number(manualRain30).toFixed(1)} mm</strong><br><small>Location: ${escapeHtml(location.label)} · Source: ${escapeHtml(data.source)} · Updated ${new Date(data.fetchedAt).toLocaleString()}</small>`;
  };
- if(navigator.geolocation){navigator.geolocation.getCurrentPosition(pos=>fetchAt({latitude:pos.coords.latitude,longitude:pos.coords.longitude}).then(loadRainfallTrend).catch(e=>{summary.textContent='Online rainfall unavailable: '+e.message;loadRainfallTrend();}),()=>fetchAt(null).then(loadRainfallTrend).catch(e=>{summary.textContent='Online rainfall unavailable: '+e.message;loadRainfallTrend();}),{timeout:12000,maximumAge:300000});}
+ if((localStorage.getItem('farmLocationMode')||'auto')==='manual'){rainCoords=null;fetchAt(null).then(loadRainfallTrend).catch(e=>{summary.textContent='Online rainfall unavailable: '+e.message;loadRainfallTrend();});}
+ else if(navigator.geolocation){navigator.geolocation.getCurrentPosition(pos=>fetchAt({latitude:pos.coords.latitude,longitude:pos.coords.longitude}).then(loadRainfallTrend).catch(e=>{summary.textContent='Online rainfall unavailable: '+e.message;loadRainfallTrend();}),()=>fetchAt(null).then(loadRainfallTrend).catch(e=>{summary.textContent='Online rainfall unavailable: '+e.message;loadRainfallTrend();}),{timeout:12000,maximumAge:300000});}
  else {fetchAt(null).then(loadRainfallTrend).catch(e=>{summary.textContent='Online rainfall unavailable: '+e.message;loadRainfallTrend();});}
 }
 const feedProducts = [
@@ -258,6 +282,7 @@ function updatePreviews() {
 document.getElementById('bagPrice').addEventListener('change', saveSelectedFeedPrice);
 document.getElementById('bagKg').addEventListener('change', saveSelectedFeedPrice);
 document.getElementById('durationUnit').addEventListener('change', updatePreviews);
+window.addEventListener('farm-location-changed',()=>{rainCoords=null;loadRainfallWeather();});
 document.addEventListener('DOMContentLoaded', () => { renderSpeciesCountSummary(); renderRationTable(); initFeedProducts(); updatePreviews(); refreshFeedProducts(); loadRainfallWeather(); });
 </script>
 }
