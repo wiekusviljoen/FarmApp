@@ -20,7 +20,8 @@ public class Program
 
         builder.Services.AddDefaultIdentity<IdentityUser>(options =>
         {
-            options.SignIn.RequireConfirmedAccount = true;
+            // Allow users to sign in immediately after registration; email delivery is not configured yet.
+            options.SignIn.RequireConfirmedAccount = false;
             options.User.RequireUniqueEmail = true;
             options.Password.RequiredLength = 8;
             options.Password.RequireDigit = true;
