@@ -44,6 +44,17 @@
                             <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
                         </li>
                     </ul>
+                    <div class="d-flex align-items-center gap-2 my-2 my-lg-0 me-lg-3">
+                        <label for="farmLocationMode" class="small mb-0 text-nowrap">Location</label>
+                        <select id="farmLocationMode" class="form-select form-select-sm" aria-label="Location mode" style="min-width:130px">
+                            <option value="auto">Auto (GPS)</option>
+                            <option value="manual">Manual region</option>
+                        </select>
+                        <select id="farmRegion" class="form-select form-select-sm" aria-label="Choose region" style="min-width:145px;display:none">
+                            <option value="Koes">Koes / ǁKaras</option>
+                            <option value="Karas">ǁKaras</option><option value="Hardap">Hardap</option><option value="Khomas">Khomas</option><option value="Erongo">Erongo</option><option value="Kunene">Kunene</option><option value="Oshana">Oshana</option><option value="Omusati">Omusati</option><option value="Ohangwena">Ohangwena</option><option value="Oshikoto">Oshikoto</option><option value="Kavango East">Kavango East</option><option value="Kavango West">Kavango West</option><option value="Zambezi">Zambezi</option><option value="Otjozondjupa">Otjozondjupa</option>
+                        </select>
+                    </div>
                     <partial name="_LoginPartial" />
                 </div>
             </div>
@@ -70,6 +81,24 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    <script>
+    (() => {
+        const mode = document.getElementById('farmLocationMode');
+        const region = document.getElementById('farmRegion');
+        if (!mode || !region) return;
+        const savedMode = localStorage.getItem('farmLocationMode') || 'auto';
+        const savedRegion = localStorage.getItem('farmRegion') || 'Koes';
+        mode.value = savedMode; region.value = savedRegion;
+        region.style.display = savedMode === 'manual' ? '' : 'none';
+        const changed = () => {
+            localStorage.setItem('farmLocationMode', mode.value);
+            localStorage.setItem('farmRegion', region.value);
+            region.style.display = mode.value === 'manual' ? '' : 'none';
+            window.dispatchEvent(new CustomEvent('farm-location-changed', { detail: { mode: mode.value, region: region.value } }));
+        };
+        mode.addEventListener('change', changed); region.addEventListener('change', changed);
+    })();
+    </script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

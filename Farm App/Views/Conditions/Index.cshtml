@@ -1,7 +1,7 @@
 @{ ViewData["Title"] = "Weather & Fire Conditions"; }
 <h1>Farm weather & fire conditions</h1>
-<p class="text-muted">Allow location access to get weather for your current position. If location access is unavailable, the app uses approximate Koes-area weather.</p>
-<div class="d-flex flex-wrap gap-2 mb-3"><button class="btn btn-primary" onclick="requestLocation()">Use my location</button><button class="btn btn-outline-primary" onclick="loadForecast()">Refresh forecast</button><span id="status" class="small text-muted align-self-center" aria-live="polite">Finding your location…</span></div>
+<p class="text-muted">Choose Auto (GPS) or select a region manually using the location controls in the top navigation. The selected location is used for weather and fire conditions.</p>
+<div class="d-flex flex-wrap gap-2 mb-3"><button class="btn btn-primary" onclick="requestLocation()">Use my location</button><button class="btn btn-outline-primary" onclick="loadForecast()">Refresh forecast</button><span id="status" class="small text-muted align-self-center" aria-live="polite">Loading location…</span></div>
 <p id="locationLabel" class="small text-muted"></p>
 <div class="row g-3 mb-4" id="current"></div>
 <section class="card p-4 mb-4"><h2>🌧️ 7-day rainfall & weather</h2><p class="small text-muted">Rain totals, probability, temperatures and wind. Forecast, not measured farm rainfall.</p><div class="table-responsive"><table class="table table-sm" id="forecast"><thead><tr><th>Date</th><th>Min / Max °C</th><th>Rain mm</th><th>Rain chance</th><th>Max wind km/h</th></tr></thead><tbody></tbody></table></div><h3>Rainfall forecast (mm)</h3><canvas id="rainChart" height="130" style="width:100%"></canvas></section>
@@ -9,19 +9,37 @@
 @section Scripts {
 <script>
 let selectedLocation=null;
+const regionCoordinates={
+ 'Koes':[-25.95,18.05],'Karas':[-26.58,18.13],'Hardap':[-24.63,17.97],
+ 'Khomas':[-22.56,17.08],'Erongo':[-22.68,14.53],'Kunene':[-18.06,13.84],
+ 'Oshana':[-17.91,15.98],'Omusati':[-17.5,14.98],'Ohangwena':[-17.47,16.34],
+ 'Oshikoto':[-19.25,17.72],'Kavango East':[-17.91,19.77],'Kavango West':[-17.62,18.61],
+ 'Zambezi':[-17.5,24.27],'Otjozondjupa':[-20.46,16.65]
+};
+function applyLocationPreference(){
+ const mode=localStorage.getItem('farmLocationMode')||'auto';
+ const region=localStorage.getItem('farmRegion')||'Koes';
+ if(mode==='manual'){
+  const coords=regionCoordinates[region]||regionCoordinates.Koes;
+  selectedLocation={latitude:coords[0],longitude:coords[1]};
+  loadForecast();
+ } else requestLocation();
+}
 function requestLocation(){
  const status=document.getElementById('status');
- if(!navigator.geolocation){status.textContent='Location is not supported here. Showing Koes-area forecast.';loadForecast();return;}
+ if((localStorage.getItem('farmLocationMode')||'auto')==='manual'){applyLocationPreference();return;}
+ if(!navigator.geolocation){selectedLocation=null;status.textContent='Location is not supported. Showing approximate Koes-area weather.';loadForecast();return;}
  status.textContent='Requesting location permission…';
  navigator.geolocation.getCurrentPosition(position=>{
   selectedLocation={latitude:position.coords.latitude,longitude:position.coords.longitude};
   loadForecast();
  },error=>{
   selectedLocation=null;
-  status.textContent=error.code===1?'Location permission denied. Showing Koes-area forecast.':'Could not get location. Showing Koes-area forecast.';
+  status.textContent=error.code===1?'Location permission denied. Showing approximate Koes-area weather.':'Could not get location. Showing approximate Koes-area weather.';
   loadForecast();
  },{enableHighAccuracy:false,timeout:12000,maximumAge:300000});
 }
+window.addEventListener('farm-location-changed',applyLocationPreference);
 async function loadForecast(){
  const status=document.getElementById('status'); status.textContent=selectedLocation?'Fetching weather for your location…':'Fetching Koes-area forecast…';
  try {
@@ -46,6 +64,6 @@ function showFire(c,days){
  if(hot&&windy&&dry){label='High weather-based caution — hot, dry and windy conditions';cls='alert-danger';}
  document.getElementById('fireSummary').className='alert '+cls;document.getElementById('fireSummary').textContent=label+'. Next 3-day forecast rainfall: '+rain.toFixed(1)+' mm.';
 }
-document.addEventListener('DOMContentLoaded',requestLocation);
+document.addEventListener('DOMContentLoaded',applyLocationPreference);
 </script>
 }
