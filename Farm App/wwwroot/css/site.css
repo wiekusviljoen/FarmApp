@@ -411,3 +411,33 @@ img, canvas, svg { max-width: 100%; }
 @media (max-width: 991.98px) {
   .farm-location-control { width: min(100%, 260px); flex-basis: auto; margin: .65rem 0; }
 }
+
+
+/* FarmFlow navigation refresh: cleaner spacing and responsive wrapping. */
+.farm-navbar { position: relative; z-index: 1030; }
+.farm-navbar > .container-fluid { display: flex; flex-wrap: wrap; align-items: center; gap: .45rem 1rem; padding: .55rem clamp(.8rem, 2vw, 1.5rem); }
+.farm-navbar .navbar-brand { display: inline-flex; align-items: center; gap: .1rem; margin-right: .5rem; padding: .35rem 0; font-size: 1.18rem; letter-spacing: -.025em; }
+.farm-navbar .navbar-collapse { flex-basis: 100%; align-items: center; }
+.farm-navbar .navbar-nav { display: flex; flex-wrap: wrap; align-items: center; gap: .25rem; }
+.farm-navbar .navbar-nav .nav-link { display: inline-flex; align-items: center; min-height: 2.45rem; padding: .55rem .8rem; border-radius: .7rem; color: #3b4c45; font-size: .9rem; font-weight: 650; line-height: 1.25; white-space: nowrap; transition: background .15s ease, color .15s ease; }
+.farm-navbar .navbar-nav .nav-link:hover,
+.farm-navbar .navbar-nav .nav-link:focus { background: #eaf4e9; color: var(--farm-green); }
+.farm-navbar .navbar-nav .nav-link.active { background: var(--farm-green); color: #fff; }
+.farm-navbar .farm-location-control { margin-left: auto; }
+.farm-navbar .navbar-toggler { border: 1px solid var(--farm-border); border-radius: .7rem; padding: .45rem .65rem; }
+.farm-navbar .navbar-toggler:focus { box-shadow: 0 0 0 .2rem rgba(35,77,63,.15); }
+@media (min-width: 992px) {
+  .farm-navbar .navbar-collapse { flex-basis: 100%; }
+  .farm-navbar .navbar-nav { flex: 1 1 auto; }
+  .farm-navbar .farm-location-control { margin-left: auto; }
+}
+@media (max-width: 991.98px) {
+  .farm-navbar .navbar-collapse { padding: .65rem 0 .25rem; }
+  .farm-navbar .navbar-nav { align-items: stretch; gap: .15rem; }
+  .farm-navbar .navbar-nav .nav-link { width: 100%; padding: .7rem .8rem; }
+  .farm-navbar .farm-location-control { width: min(100%, 320px); margin: .7rem 0; }
+}
+@media (max-width: 575.98px) {
+  .farm-navbar > .container-fluid { padding: .5rem .8rem; }
+  .farm-navbar .navbar-brand { font-size: 1.1rem; }
+}
