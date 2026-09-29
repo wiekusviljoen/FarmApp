@@ -1,10 +1,14 @@
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 
 namespace Farm_App.Models;
 
 public class Livestock
 {
     public int Id { get; set; }
+
+    [ValidateNever]
+    public string OwnerId { get; set; } = string.Empty;
 
     [Required, StringLength(30)]
     [Display(Name = "Tag / ID")]

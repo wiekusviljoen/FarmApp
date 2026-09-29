@@ -1,5 +1,7 @@
-using System.Globalization;
+﻿using System.Globalization;
 using System.Text.Json;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Farm_App.Data;
 using Farm_App.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -7,22 +9,24 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Farm_App.Controllers;
 
+[Authorize]
 public class LivestockController(ApplicationDbContext db) : Controller
 {
+    private string CurrentUserId => User.FindFirstValue(ClaimTypes.NameIdentifier)!;
     private const double DefaultLatitude = -25.95;
     private const double DefaultLongitude = 18.05;
 
     public async Task<IActionResult> Index(string? q)
     {
-        var animals = db.Livestock.AsNoTracking();
+        var animals = db.Livestock.AsNoTracking().Where(a => a.OwnerId == CurrentUserId);
         if (!string.IsNullOrWhiteSpace(q))
             animals = animals.Where(a => a.TagNumber.Contains(q) || a.Species.Contains(q) || (a.Camp != null && a.Camp.Contains(q)));
         ViewBag.Query = q;
-        var allActive = await db.Livestock.AsNoTracking().Where(a => a.Status == "Active").ToListAsync();
+        var allActive = await db.Livestock.AsNoTracking().Where(a => a.OwnerId == CurrentUserId && a.Status == "Active").ToListAsync();
         ViewBag.ActiveCount = allActive.Count;
-        ViewBag.ManualRain30 = await db.RainfallRecords.AsNoTracking().Where(r => r.Date >= DateTime.Today.AddDays(-30)).SumAsync(r => (decimal?)r.Millimeters) ?? 0m;
+        ViewBag.ManualRain30 = await db.RainfallRecords.AsNoTracking().Where(r => r.OwnerId == CurrentUserId && r.Date >= DateTime.Today.AddDays(-30)).SumAsync(r => (decimal?)r.Millimeters) ?? 0m;
         ViewBag.SpeciesCountsJson = JsonSerializer.Serialize(allActive.GroupBy(a => a.Species).OrderBy(g => g.Key).Select(g => new { species = g.Key, count = g.Count() }));
-        ViewBag.RainfallEntries = await db.RainfallRecords.AsNoTracking().OrderByDescending(r => r.Date).ThenBy(r => r.Camp).Take(100).ToListAsync();
+        ViewBag.RainfallEntries = await db.RainfallRecords.AsNoTracking().Where(r => r.OwnerId == CurrentUserId).OrderByDescending(r => r.Date).ThenBy(r => r.Camp).Take(100).ToListAsync();
         return View(await animals.OrderBy(a => a.Species).ThenBy(a => a.TagNumber).ToListAsync());
     }
 
@@ -34,7 +38,7 @@ public class LivestockController(ApplicationDbContext db) : Controller
             TempData["RainError"] = "Enter a valid date and rainfall amount between 0 and 2,000 mm.";
             return RedirectToAction(nameof(Index));
         }
-        db.RainfallRecords.Add(new RainfallRecord { Date = date.Date, Camp = string.IsNullOrWhiteSpace(camp) ? null : camp.Trim(), Millimeters = millimeters, Notes = string.IsNullOrWhiteSpace(notes) ? null : notes.Trim() });
+        db.RainfallRecords.Add(new RainfallRecord { OwnerId = CurrentUserId, Date = date.Date, Camp = string.IsNullOrWhiteSpace(camp) ? null : camp.Trim(), Millimeters = millimeters, Notes = string.IsNullOrWhiteSpace(notes) ? null : notes.Trim() });
         await db.SaveChangesAsync();
         TempData["Message"] = "Rainfall entry saved.";
         return RedirectToAction(nameof(Index));
@@ -43,7 +47,7 @@ public class LivestockController(ApplicationDbContext db) : Controller
     [HttpPost, ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteRainfall(int id)
     {
-        var record = await db.RainfallRecords.FindAsync(id);
+        var record = await db.RainfallRecords.FirstOrDefaultAsync(r => r.Id == id && r.OwnerId == CurrentUserId);
         if (record != null) { db.RainfallRecords.Remove(record); await db.SaveChangesAsync(); }
         TempData["Message"] = "Rainfall entry deleted.";
         return RedirectToAction(nameof(Index));
@@ -101,14 +105,15 @@ public class LivestockController(ApplicationDbContext db) : Controller
     public async Task<IActionResult> Create(Livestock animal)
     {
         if (!ModelState.IsValid) return View(animal);
-        db.Add(animal); await db.SaveChangesAsync();
+        animal.OwnerId = CurrentUserId;
+        db.Livestock.Add(animal); await db.SaveChangesAsync();
         TempData["Message"] = "Animal added.";
         return RedirectToAction(nameof(Index));
     }
 
     public async Task<IActionResult> Edit(int id)
     {
-        var animal = await db.Livestock.FindAsync(id);
+        var animal = await db.Livestock.FirstOrDefaultAsync(a => a.Id == id && a.OwnerId == CurrentUserId);
         return animal == null ? NotFound() : View(animal);
     }
 
@@ -116,22 +121,33 @@ public class LivestockController(ApplicationDbContext db) : Controller
     public async Task<IActionResult> Edit(int id, Livestock animal)
     {
         if (id != animal.Id) return NotFound();
+        var existing = await db.Livestock.FirstOrDefaultAsync(a => a.Id == id && a.OwnerId == CurrentUserId);
+        if (existing == null) return NotFound();
         if (!ModelState.IsValid) return View(animal);
-        db.Update(animal); await db.SaveChangesAsync();
+        existing.TagNumber = animal.TagNumber;
+        existing.Species = animal.Species;
+        existing.Breed = animal.Breed;
+        existing.Sex = animal.Sex;
+        existing.DateOfBirth = animal.DateOfBirth;
+        existing.Camp = animal.Camp;
+        existing.Status = animal.Status;
+        existing.PurchasePrice = animal.PurchasePrice;
+        existing.Notes = animal.Notes;
+        await db.SaveChangesAsync();
         TempData["Message"] = "Animal updated.";
         return RedirectToAction(nameof(Index));
     }
 
     public async Task<IActionResult> Delete(int id)
     {
-        var animal = await db.Livestock.AsNoTracking().FirstOrDefaultAsync(a => a.Id == id);
+        var animal = await db.Livestock.AsNoTracking().FirstOrDefaultAsync(a => a.Id == id && a.OwnerId == CurrentUserId);
         return animal == null ? NotFound() : View(animal);
     }
 
     [HttpPost, ActionName("Delete"), ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteConfirmed(int id)
     {
-        var animal = await db.Livestock.FindAsync(id);
+        var animal = await db.Livestock.FirstOrDefaultAsync(a => a.Id == id && a.OwnerId == CurrentUserId);
         if (animal != null) { db.Livestock.Remove(animal); await db.SaveChangesAsync(); }
         TempData["Message"] = "Animal record deleted.";
         return RedirectToAction(nameof(Index));

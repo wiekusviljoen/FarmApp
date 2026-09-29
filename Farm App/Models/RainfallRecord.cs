@@ -1,10 +1,14 @@
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 
 namespace Farm_App.Models;
 
 public class RainfallRecord
 {
     public int Id { get; set; }
+
+    [ValidateNever]
+    public string OwnerId { get; set; } = string.Empty;
 
     [Required, DataType(DataType.Date)]
     public DateTime Date { get; set; } = DateTime.Today;

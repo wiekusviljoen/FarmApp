@@ -1,13 +1,18 @@
-using System.Text.Json;
+﻿using System.Text.Json;
 using Farm_App.Models;
 using Farm_App.Services;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Farm_App.Controllers;
 
+[Authorize]
 public class AuctionsController : Controller
 {
-    private readonly string _file;
+    private readonly string _folder;
+    private string CurrentUserId => User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+    private string UserFile => Path.Combine(_folder, $"auctions-{CurrentUserId}.json");
     private readonly AuctionFeedService _feed;
     private static readonly SemaphoreSlim Gate = new(1, 1);
     private static readonly JsonSerializerOptions JsonOptions = new() { WriteIndented = true };
@@ -15,9 +20,8 @@ public class AuctionsController : Controller
     public AuctionsController(IWebHostEnvironment env, AuctionFeedService feed)
     {
         _feed = feed;
-        var folder = Path.Combine(env.ContentRootPath, "App_Data");
-        Directory.CreateDirectory(folder);
-        _file = Path.Combine(folder, "auctions.json");
+        _folder = Path.Combine(env.ContentRootPath, "App_Data");
+        Directory.CreateDirectory(_folder);
     }
 
     private async Task<List<AuctionEvent>> LoadAsync()
@@ -25,8 +29,9 @@ public class AuctionsController : Controller
         await Gate.WaitAsync();
         try
         {
-            if (!System.IO.File.Exists(_file)) return new();
-            await using var stream = System.IO.File.OpenRead(_file);
+            var file = UserFile;
+            if (!System.IO.File.Exists(file)) return new();
+            await using var stream = System.IO.File.OpenRead(file);
             return await JsonSerializer.DeserializeAsync<List<AuctionEvent>>(stream) ?? new();
         }
         finally { Gate.Release(); }
@@ -37,7 +42,7 @@ public class AuctionsController : Controller
         await Gate.WaitAsync();
         try
         {
-            await using var stream = System.IO.File.Create(_file);
+            await using var stream = System.IO.File.Create(UserFile);
             await JsonSerializer.SerializeAsync(stream, events, JsonOptions);
         }
         finally { Gate.Release(); }
