@@ -35,6 +35,17 @@ public class Program
         builder.Services.AddTransient<Microsoft.AspNetCore.Identity.UI.Services.IEmailSender, SmtpEmailSender>();
         builder.Services.AddTransient<IEmailSender<IdentityUser>, SmtpEmailSender>();
         builder.Services.AddControllersWithViews();
+        builder.Services.AddMemoryCache();
+        builder.Services.AddHttpClient("WeatherForecast", client =>
+        {
+            client.Timeout = TimeSpan.FromSeconds(8);
+            client.DefaultRequestHeaders.UserAgent.ParseAdd("FarmFlow/1.0");
+        });
+        builder.Services.AddHttpClient("WeatherGeocoding", client =>
+        {
+            client.Timeout = TimeSpan.FromSeconds(4);
+            client.DefaultRequestHeaders.UserAgent.ParseAdd("FarmFlow/1.0 (weather location lookup)");
+        });
         builder.Services.AddHttpClient("AuctionFeed", client => { client.Timeout = TimeSpan.FromSeconds(25); client.DefaultRequestHeaders.UserAgent.ParseAdd("FarmApp-AuctionCalendar/1.0"); });
         builder.Services.AddSingleton<AuctionFeedService>();
         builder.Services.AddHostedService(sp => sp.GetRequiredService<AuctionFeedService>());

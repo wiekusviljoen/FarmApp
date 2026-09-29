@@ -1,17 +1,25 @@
 using System.Globalization;
 using System.Net;
 using System.Text.RegularExpressions;
+using System.Text.Json;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Farm_App.Controllers;
 
 public class MarketController : Controller
 {
+    private readonly IMemoryCache _cache;
+
+    public MarketController(IMemoryCache cache) => _cache = cache;
+
     public IActionResult Index() => View();
 
     [HttpGet]
     public async Task<IActionResult> FeedProducts()
     {
+        const string cacheKey = "market:feed-products";
+        if (_cache.TryGetValue(cacheKey, out string? cachedJson) && !string.IsNullOrEmpty(cachedJson)) return Content(cachedJson, "application/json");
         const string source = "https://www.feedmaster.com.na/products";
         var pages = new[]
         {
@@ -66,7 +74,9 @@ public class MarketController : Controller
                 .Select(g => g.First()).ToList();
             if (unique.Count == 0)
                 return StatusCode(502, new { error = "Feedmaster's product catalog returned no recognizable products.", source });
-            return Json(new { source, fetchedAt = DateTimeOffset.Now, products = unique });
+            var payload = JsonSerializer.Serialize(new { source, fetchedAt = DateTimeOffset.Now, products = unique });
+            _cache.Set(cacheKey, payload, TimeSpan.FromHours(6));
+            return Content(payload, "application/json");
         }
         catch (Exception ex)
         {
@@ -77,6 +87,8 @@ public class MarketController : Controller
     [HttpGet]
     public async Task<IActionResult> LiveMeat()
     {
+        const string cacheKey = "market:live-meat";
+        if (_cache.TryGetValue(cacheKey, out string? cachedJson) && !string.IsNullOrEmpty(cachedJson)) return Content(cachedJson, "application/json");
         const string source = "https://www.feedmaster.com.na/meat-prices";
         try
         {
@@ -151,7 +163,9 @@ public class MarketController : Controller
             if (rows.Count == 0)
                 return StatusCode(502, new { error = "Feedmaster page returned no recognizable beef, mutton, or game price rows.", source });
 
-            return Json(new { source, fetchedAt = DateTimeOffset.Now, prices = rows });
+            var payload = JsonSerializer.Serialize(new { source, fetchedAt = DateTimeOffset.Now, prices = rows });
+            _cache.Set(cacheKey, payload, TimeSpan.FromMinutes(15));
+            return Content(payload, "application/json");
         }
         catch (Exception ex)
         {

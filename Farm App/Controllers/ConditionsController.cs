@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace Farm_App.Controllers;
 
@@ -7,6 +8,14 @@ public class ConditionsController : Controller
 {
     private const double DefaultLatitude = -25.95;
     private const double DefaultLongitude = 18.05;
+    private readonly IHttpClientFactory _clients;
+    private readonly IMemoryCache _cache;
+
+    public ConditionsController(IHttpClientFactory clients, IMemoryCache cache)
+    {
+        _clients = clients;
+        _cache = cache;
+    }
 
     public IActionResult Index() => View();
 
@@ -16,11 +25,19 @@ public class ConditionsController : Controller
         var hasLocation = latitude is >= -90 and <= 90 && longitude is >= -180 and <= 180;
         var lat = hasLocation ? latitude!.Value : DefaultLatitude;
         var lon = hasLocation ? longitude!.Value : DefaultLongitude;
+        var latKey = Math.Round(lat, 3).ToString(System.Globalization.CultureInfo.InvariantCulture);
+        var lonKey = Math.Round(lon, 3).ToString(System.Globalization.CultureInfo.InvariantCulture);
+        var cacheKey = $"weather-forecast:{latKey}:{lonKey}";
         var source = $"https://api.open-meteo.com/v1/forecast?latitude={lat.ToString(System.Globalization.CultureInfo.InvariantCulture)}&longitude={lon.ToString(System.Globalization.CultureInfo.InvariantCulture)}&timezone=auto&forecast_days=7&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,wind_speed_10m_max&current=temperature_2m,relative_humidity_2m,wind_speed_10m,precipitation";
         try
         {
-            using var client = new HttpClient { Timeout = TimeSpan.FromSeconds(20) };
-            var json = await client.GetStringAsync(source);
+            var client = _clients.CreateClient("WeatherForecast");
+            var json = await _cache.GetOrCreateAsync(cacheKey, async entry =>
+            {
+                entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(10);
+                return await client.GetStringAsync(source);
+            });
+            if (json is null) return StatusCode(502, new { error = "Forecast unavailable." });
             using var doc = JsonDocument.Parse(json);
             var root = doc.RootElement;
             var daily = root.GetProperty("daily");
@@ -59,12 +76,13 @@ public class ConditionsController : Controller
         catch (Exception ex) { return StatusCode(502, new { error = "Forecast unavailable: " + ex.Message }); }
     }
 
-    private static async Task<string> GetLocationNameAsync(double latitude, double longitude)
+    private async Task<string> GetLocationNameAsync(double latitude, double longitude)
     {
+        var cacheKey = $"weather-location:{Math.Round(latitude, 2).ToString(System.Globalization.CultureInfo.InvariantCulture)}:{Math.Round(longitude, 2).ToString(System.Globalization.CultureInfo.InvariantCulture)}";
+        if (_cache.TryGetValue(cacheKey, out string? cachedName) && !string.IsNullOrWhiteSpace(cachedName)) return cachedName;
         try
         {
-            using var client = new HttpClient { Timeout = TimeSpan.FromSeconds(8) };
-            client.DefaultRequestHeaders.UserAgent.ParseAdd("FarmApp/1.0 (weather location lookup)");
+            var client = _clients.CreateClient("WeatherGeocoding");
             var url = $"https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat={latitude.ToString(System.Globalization.CultureInfo.InvariantCulture)}&lon={longitude.ToString(System.Globalization.CultureInfo.InvariantCulture)}&zoom=10&addressdetails=1";
             using var response = await client.GetAsync(url);
             if (!response.IsSuccessStatusCode) return "Your detected area";
@@ -72,7 +90,11 @@ public class ConditionsController : Controller
             if (!doc.RootElement.TryGetProperty("address", out var address)) return "Your detected area";
             foreach (var key in new[] { "state", "region", "county", "city", "town", "village", "municipality" })
                 if (address.TryGetProperty(key, out var value) && !string.IsNullOrWhiteSpace(value.GetString()))
-                    return value.GetString()!;
+                {
+                    var name = value.GetString()!;
+                    _cache.Set(cacheKey, name, TimeSpan.FromHours(24));
+                    return name;
+                }
             return "Your detected area";
         }
         catch { return "Your detected area"; }
