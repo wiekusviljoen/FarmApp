@@ -400,3 +400,14 @@ img, canvas, svg { max-width: 100%; }
 .price-category-tabs .price-category-tab { flex: 0 0 auto; white-space: nowrap; border: 1px solid var(--farm-border); background: #fff; color: var(--farm-green); border-radius: 999px; padding: .6rem 1rem; font-weight: 700; }
 .price-category-tabs .price-category-tab.active { background: var(--farm-green); border-color: var(--farm-green); color: #fff; }
 .price-category-panel { min-width: 0; }
+
+/* Compact location selector so it doesn't crowd the main navigation. */
+.farm-location-control { display: grid; grid-template-columns: 1fr; gap: .1rem; width: 145px; flex: 0 0 145px; }
+.farm-location-control label { color: var(--farm-muted); font-size: .72rem; font-weight: 700; line-height: 1.1; }
+.farm-location-control .form-select { width: 100%; max-width: 100%; font-size: .82rem; padding-top: .35rem; padding-bottom: .35rem; }
+@media (min-width: 992px) {
+  .farm-location-control { margin-left: auto; }
+}
+@media (max-width: 991.98px) {
+  .farm-location-control { width: min(100%, 260px); flex-basis: auto; margin: .65rem 0; }
+}

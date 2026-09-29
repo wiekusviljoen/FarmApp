@@ -44,13 +44,13 @@
                             <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
                         </li>
                     </ul>
-                    <div class="d-flex align-items-center gap-2 my-2 my-lg-0 me-lg-3">
-                        <label for="farmLocationMode" class="small mb-0 text-nowrap">Location</label>
-                        <select id="farmLocationMode" class="form-select form-select-sm" aria-label="Location mode" style="min-width:130px">
+                    <div class="farm-location-control my-2 my-lg-0 me-lg-3">
+                        <label for="farmLocationMode" class="small mb-1">Location</label>
+                        <select id="farmLocationMode" class="form-select form-select-sm" aria-label="Location mode">
                             <option value="auto">Auto (GPS)</option>
                             <option value="manual">Manual region</option>
                         </select>
-                        <select id="farmRegion" class="form-select form-select-sm" aria-label="Choose region" style="min-width:145px;display:none">
+                        <select id="farmRegion" class="form-select form-select-sm mt-1" aria-label="Choose region" style="display:none">
                             <option value="Koes">Koes / ǁKaras</option>
                             <option value="Karas">ǁKaras</option><option value="Hardap">Hardap</option><option value="Khomas">Khomas</option><option value="Erongo">Erongo</option><option value="Kunene">Kunene</option><option value="Oshana">Oshana</option><option value="Omusati">Omusati</option><option value="Ohangwena">Ohangwena</option><option value="Oshikoto">Oshikoto</option><option value="Kavango East">Kavango East</option><option value="Kavango West">Kavango West</option><option value="Zambezi">Zambezi</option><option value="Otjozondjupa">Otjozondjupa</option>
                         </select>
