@@ -1,3 +1,5 @@
+[Reading 314 lines from start (total: 314 lines, 0 remaining)]
+
 @model IEnumerable<Farm_App.Models.Livestock>
 @{ ViewData["Title"] = "Livestock"; }
 <div class="livestock-page-header d-flex justify-content-between align-items-center mb-4"><div><h1>Livestock register</h1><p class="text-muted">Track animal IDs, species, breed, camp, and status.</p></div><div class="d-flex gap-2"><a class="btn btn-outline-success" asp-controller="Camps" asp-action="Index">🌿 Manage camps</a><a class="btn btn-primary livestock-add-button" asp-action="Create">+ Add animal</a></div></div>
@@ -16,6 +18,7 @@
  <div class="alert alert-light border" id="rainfallWeatherSummary" aria-live="polite">Loading local rainfall data…</div>
  <div class="border rounded-3 p-3 mb-3" id="rainfallTrendPanel">
   <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3"><div><h3 class="h5 mb-1">Rainfall trend</h3><small class="text-muted" id="rainTrendDates">Historical daily rainfall</small></div><div class="d-flex flex-column gap-2"><span class="form-label mb-0">History period</span><div id="rainHistoryChoices" class="d-flex flex-wrap gap-2" role="group" aria-label="Rainfall history period"><button type="button" class="btn btn-sm btn-outline-primary" data-period="1m" onclick="selectRainHistoryPeriod(this)">1 month</button><button type="button" class="btn btn-sm btn-outline-primary" data-period="3m" onclick="selectRainHistoryPeriod(this)">3 months</button><button type="button" class="btn btn-sm btn-outline-primary" data-period="6m" onclick="selectRainHistoryPeriod(this)">6 months</button><button type="button" class="btn btn-sm btn-primary active" data-period="1y" aria-pressed="true" onclick="selectRainHistoryPeriod(this)">1 year</button><button type="button" class="btn btn-sm btn-outline-primary" data-period="2y" onclick="selectRainHistoryPeriod(this)">2 years</button><button type="button" class="btn btn-sm btn-outline-primary" data-period="5y" onclick="selectRainHistoryPeriod(this)">5 years</button><button type="button" class="btn btn-sm btn-outline-success" data-period="season" onclick="selectRainHistoryPeriod(this)">🌧️ Rain season (Oct–Jul)</button></div></div></div>
+  <div class="row g-2 mb-3 align-items-end"><div class="col-12 col-md-5"><label class="form-label mb-1" for="rainCity">Rain location</label><select id="rainCity" class="form-select" onchange="selectRainCity(this.value)"><option value="Koes">Koes</option><option value="Keetmanshoop">Keetmanshoop</option><option value="Luderitz">Lüderitz</option><option value="Windhoek">Windhoek</option><option value="Mariental">Mariental</option><option value="Rehoboth">Rehoboth</option><option value="Gobabis">Gobabis</option><option value="Otjiwarongo">Otjiwarongo</option><option value="Swakopmund">Swakopmund</option><option value="Walvis Bay">Walvis Bay</option><option value="Oshakati">Oshakati</option><option value="Rundu">Rundu</option><option value="Katima Mulilo">Katima Mulilo</option><option value="Opuwo">Opuwo</option><option value="Outjo">Outjo</option><option value="Tsumeb">Tsumeb</option><option value="Grootfontein">Grootfontein</option><option value="Otavi">Otavi</option></select><small class="text-muted">Choose a town/city to view its historical rainfall.</small></div></div>
   <div id="rainfallTrendStatus" class="small text-muted mb-2" aria-live="polite">Loading historical rainfall…</div>
   <div class="w-100" style="min-height:220px;overflow:hidden"><svg id="rainfallTrendChart" viewBox="0 0 760 270" role="img" aria-label="Historical rainfall trend chart" style="display:block;width:100%;height:auto;min-height:220px"></svg></div>
   <div class="small text-muted mt-2" id="rainfallTrendLegend">Online historical rainfall in millimetres</div>
@@ -101,7 +104,11 @@ const rainRegionCoordinates = {
  'Zambezi': { latitude: -17.8, longitude: 24.2 },
  'Otjozondjupa': { latitude: -20.5, longitude: 17.5 }
 };
+const rainCityCoordinates = { 'Koes':[-25.95,18.05], 'Keetmanshoop':[-26.58,18.13], 'Luderitz':[-26.65,15.16], 'Mariental':[-24.63,17.97], 'Windhoek':[-22.56,17.08], 'Rehoboth':[-23.32,17.08], 'Gobabis':[-22.45,18.97], 'Otjiwarongo':[-20.46,16.65], 'Swakopmund':[-22.68,14.53], 'Walvis Bay':[-22.96,14.51], 'Oshakati':[-17.79,15.70], 'Rundu':[-17.93,19.77], 'Katima Mulilo':[-17.50,24.27], 'Opuwo':[-18.06,13.84], 'Outjo':[-20.11,16.15], 'Tsumeb':[-19.24,17.72], 'Grootfontein':[-19.57,18.12], 'Otavi':[-19.64,17.34] };
+function selectRainCity(city) { localStorage.setItem('farmRainCity',city); rainCoords=null; loadRainfallWeather(); }
 function currentRainLocation() {
+ const city=localStorage.getItem('farmRainCity') || 'Koes';
+ if(rainCityCoordinates[city]) return {latitude:rainCityCoordinates[city][0],longitude:rainCityCoordinates[city][1],label:city};
  const mode = localStorage.getItem('farmLocationMode') || 'auto';
  const region = localStorage.getItem('farmRegion') || 'Koes';
  if (mode === 'manual') return { ... (rainRegionCoordinates[region] || rainRegionCoordinates.Koes), label: region + ' (approximate region centre)' };
@@ -132,7 +139,21 @@ function drawRainfallTrend(records, period) {
   svg.appendChild(make('text',{x:L+i*step+step/2,y:H-14,'text-anchor':'middle','font-size':period==='season'?11:10,fill:'currentColor'},label));
  });
  if(period==='1m'){
-  points.forEach((p,i)=>{if(p.value>0){const x=L+i*step+step/2,h=Math.max(1,p.value/max*plotH);svg.appendChild(make('text',{x,y:T+plotH-h-5,'text-anchor':'middle','font-size':10,'font-weight':'700',fill:'currentColor'},p.value.toFixed(1)+' mm'));}});
+  let lastLabelRight = -Infinity;
+  points.forEach((p,i)=>{
+   if(p.value<=0) return;
+   const x=L+i*step+step/2;
+   const h=Math.max(1,p.value/max*plotH);
+   const label=p.value.toFixed(1)+' mm';
+   const estimatedWidth=label.length*6.2;
+   const left=x-estimatedWidth/2;
+   const right=x+estimatedWidth/2;
+   // Keep rainfall amounts readable: skip a label when it would collide with the previous one.
+   // The bar tooltip still contains the exact date and amount for every day.
+   if(left < lastLabelRight+4) return;
+   svg.appendChild(make('text',{x,y:T+plotH-h-5,'text-anchor':'middle','font-size':10,'font-weight':'700',fill:'currentColor'},label));
+   lastLabelRight=right;
+  });
  }
 }
 let rainHistoryPeriod = '1y';
@@ -309,6 +330,8 @@ document.getElementById('bagPrice').addEventListener('change', saveSelectedFeedP
 document.getElementById('bagKg').addEventListener('change', saveSelectedFeedPrice);
 document.getElementById('durationUnit').addEventListener('change', updatePreviews);
 window.addEventListener('farm-location-changed',()=>{rainCoords=null;loadRainfallWeather();});
-document.addEventListener('DOMContentLoaded', () => { renderSpeciesCountSummary(); renderRationTable(); initFeedProducts(); updatePreviews(); refreshFeedProducts(); loadRainfallWeather(); });
+document.addEventListener('DOMContentLoaded', () => { const city=localStorage.getItem('farmRainCity') || 'Koes'; const select=document.getElementById('rainCity'); if(select) select.value=city; renderSpeciesCountSummary(); renderRationTable(); initFeedProducts(); updatePreviews(); refreshFeedProducts(); loadRainfallWeather(); });
 </script>
 }
+
+[executed on device: DESKTOP-2IPJ9P8 (59869c7c-cbf0-49d3-b774-8bcd0132f317)]
