@@ -1,0 +1,9 @@
+{
+  "name": "FarmFlow",
+  "short_name": "FarmFlow",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f4f1e8",
+  "theme_color": "#2f6b3f",
+  "icons": []
+}

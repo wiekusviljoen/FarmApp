@@ -14,3 +14,10 @@
 .env
 .env.*
 secrets.json
+
+# Local deployment files, backups and inspection scripts
+publish-ready/
+**/*.bak
+inspect_db.py
+**/Properties/PublishProfiles/*.pubxml
+

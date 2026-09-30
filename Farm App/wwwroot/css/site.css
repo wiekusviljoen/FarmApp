@@ -556,3 +556,7 @@ img, canvas, svg { max-width: 100%; }
 .auth-page .page-shell > .row > .col-lg-4.col-lg-offset-2 {
     display: none !important;
 }
+
+/* Offline mode */
+.offline-status{position:fixed;right:12px;bottom:12px;z-index:2000;background:#26352a;color:#fff;border-radius:999px;padding:6px 12px;font-size:.78rem;box-shadow:0 4px 12px #0003}
+

@@ -1,7 +1,9 @@
-﻿@{
+@{
     var currentPath = Context.Request.Path.Value ?? string.Empty;
     var isAuthPage = currentPath.StartsWith("/Identity/Account/Login", StringComparison.OrdinalIgnoreCase)
         || currentPath.StartsWith("/Identity/Account/Register", StringComparison.OrdinalIgnoreCase);
+    var isAuthenticated = User.Identity?.IsAuthenticated == true;
+    var offlineUserId = isAuthenticated ? User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value : null;
 }
 <!DOCTYPE html>
 <html lang="en">
@@ -12,8 +14,10 @@
     <script type="importmap"></script>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css?v=20260928" />
     <link rel="stylesheet" href="~/css/site.css?v=20260930-auth2" />
+    <link rel="manifest" href="~/manifest.webmanifest" />
 </head>
 <body class="@(isAuthPage ? "auth-page" : string.Empty)">
+    <div id="offlineStatus" class="offline-status" aria-live="polite">Checking connection...</div>
     <header>
         <nav class="navbar navbar-expand-lg navbar-toggleable-sm farm-navbar border-bottom shadow-sm">
             <div class="container-fluid">
@@ -27,40 +31,22 @@
                 </button>
                 <div class="navbar-collapse collapse justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">Dashboard</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" asp-controller="Livestock" asp-action="Index">Livestock</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" asp-controller="Market" asp-action="Index">Market & Calculators</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" asp-controller="FuelPrices" asp-action="Index">Fuel Prices</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" asp-controller="Conditions" asp-action="Index">Weather & Fire</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" asp-controller="Auctions" asp-action="Index">Auction Calendar</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" asp-controller="News" asp-action="Index">Agriculture News</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
+                        <li class="nav-item"><a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">Dashboard</a></li>
+                        <li class="nav-item"><a class="nav-link" asp-controller="Livestock" asp-action="Index">Livestock</a></li>
+                        <li class="nav-item"><a class="nav-link" asp-controller="Market" asp-action="Index">Market & Calculators</a></li>
+                        <li class="nav-item"><a class="nav-link" asp-controller="FuelPrices" asp-action="Index">Fuel Prices</a></li>
+                        <li class="nav-item"><a class="nav-link" asp-controller="Conditions" asp-action="Index">Weather & Fire</a></li>
+                        <li class="nav-item"><a class="nav-link" asp-controller="Auctions" asp-action="Index">Auction Calendar</a></li>
+                        <li class="nav-item"><a class="nav-link" asp-controller="News" asp-action="Index">Agriculture News</a></li>
+                        <li class="nav-item"><a class="nav-link" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a></li>
                     </ul>
                     <div class="farm-location-control my-2 my-lg-0 me-lg-3">
                         <label for="farmLocationMode" class="small mb-1">Location</label>
                         <select id="farmLocationMode" class="form-select form-select-sm" aria-label="Location mode">
-                            <option value="auto">Auto (GPS)</option>
-                            <option value="manual">Manual region</option>
+                            <option value="auto">Auto (GPS)</option><option value="manual">Manual region</option>
                         </select>
                         <select id="farmRegion" class="form-select form-select-sm mt-1" aria-label="Choose region" style="display:none">
-                            <option value="Koes">Koes / ǁKaras</option>
-                            <option value="Karas">ǁKaras</option><option value="Hardap">Hardap</option><option value="Khomas">Khomas</option><option value="Erongo">Erongo</option><option value="Kunene">Kunene</option><option value="Oshana">Oshana</option><option value="Omusati">Omusati</option><option value="Ohangwena">Ohangwena</option><option value="Oshikoto">Oshikoto</option><option value="Kavango East">Kavango East</option><option value="Kavango West">Kavango West</option><option value="Zambezi">Zambezi</option><option value="Otjozondjupa">Otjozondjupa</option>
+                            <option value="Koes">Koes / ǁKaras</option><option value="Karas">ǁKaras</option><option value="Hardap">Hardap</option><option value="Khomas">Khomas</option><option value="Erongo">Erongo</option><option value="Kunene">Kunene</option><option value="Oshana">Oshana</option><option value="Omusati">Omusati</option><option value="Ohangwena">Ohangwena</option><option value="Oshikoto">Oshikoto</option><option value="Kavango East">Kavango East</option><option value="Kavango West">Kavango West</option><option value="Zambezi">Zambezi</option><option value="Otjozondjupa">Otjozondjupa</option>
                         </select>
                     </div>
                     <partial name="_LoginPartial" />
@@ -73,22 +59,21 @@
             @RenderBody()
         </main>
     </div>
-
     <button type="button" id="floatingBackButton" class="floating-back-button" aria-label="Go back" title="Go back" onclick="if (window.history.length > 1) { window.history.back(); } else { window.location.href = '/'; }">
         <span aria-hidden="true">←</span><span class="floating-back-label">Back</span>
     </button>
     <button type="button" id="floatingTopButton" class="floating-back-button floating-top-button" aria-label="Scroll to top" title="Scroll to top" onclick="window.scrollTo({ top: 0, behavior: 'smooth' });">
         <span aria-hidden="true">↑</span><span class="floating-back-label">Top</span>
     </button>
-
     <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2026 - FarmFlow - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-        </div>
+        <div class="container">&copy; 2026 - FarmFlow - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a></div>
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    <script>window.farmFlowUserId = @(isAuthenticated && offlineUserId is not null ? System.Text.Json.JsonSerializer.Serialize(offlineUserId) : "null"); if (!window.farmFlowUserId) localStorage.removeItem("farmflow.user"); else localStorage.setItem("farmflow.user", window.farmFlowUserId);</script>
+    <script src="~/js/offline.js" asp-append-version="true"></script>
+    <script>if ("serviceWorker" in navigator) navigator.serviceWorker.register("/service-worker.js", { updateViaCache: "none" }).catch(() => {});</script>
     <script>
     (() => {
         const mode = document.getElementById('farmLocationMode');

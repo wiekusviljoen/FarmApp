@@ -9,6 +9,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<Livestock> Livestock => Set<Livestock>();
     public DbSet<RainfallRecord> RainfallRecords => Set<RainfallRecord>();
     public DbSet<LivestockEvent> LivestockEvents => Set<LivestockEvent>();
+    public DbSet<OfflineSyncRecord> OfflineSyncRecords => Set<OfflineSyncRecord>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -16,6 +17,9 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         builder.Entity<Livestock>()
             .Property(x => x.PurchasePrice)
             .HasPrecision(18, 2);
+        builder.Entity<OfflineSyncRecord>()
+            .HasIndex(x => new { x.OwnerId, x.ClientId })
+            .IsUnique();
         builder.Entity<LivestockEvent>()
             .Property(x => x.Amount)
             .HasPrecision(18, 2);
