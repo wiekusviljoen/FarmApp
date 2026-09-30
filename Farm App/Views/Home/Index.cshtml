@@ -110,13 +110,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         container.replaceChildren();
         for (const article of (data.articles || []).slice(0, 3)) {
             const col = document.createElement('div'); col.className = 'col-12 col-lg-4';
-            const card = document.createElement('article'); card.className = 'card p-4 h-100';
-            const meta = document.createElement('div'); meta.className = 'small text-muted mb-2';
+            const card = document.createElement('article'); card.className = 'news-card';
+            const meta = document.createElement('div'); meta.className = 'news-card-meta';
             meta.textContent = `${article.source || 'Agriculture news'} · ${article.publishedAt ? new Date(article.publishedAt).toLocaleDateString() : 'Date unavailable'}`;
-            const heading = document.createElement('h3'); heading.className = 'h5';
-            const link = document.createElement('a'); link.href = article.url; link.target = '_blank'; link.rel = 'noopener noreferrer'; link.textContent = article.title; heading.appendChild(link);
-            const summary = document.createElement('p'); summary.className = 'text-muted small'; summary.textContent = article.summary || 'Open the story for details.';
-            const impact = document.createElement('div'); impact.className = 'alert alert-light border small mt-auto mb-0';
+            const heading = document.createElement('h3'); heading.className = 'h5 news-card-title';
+            const link = document.createElement('a'); link.className = 'news-card-title-link'; link.href = article.url; link.target = '_blank'; link.rel = 'noopener noreferrer'; link.textContent = article.title; heading.appendChild(link);
+            const summary = document.createElement('p'); summary.className = 'news-card-summary'; summary.textContent = article.summary || 'Open the story for details.';
+            const impact = document.createElement('div'); impact.className = 'news-card-impact';
             const label = document.createElement('strong'); label.textContent = 'Potential industry impact: '; impact.append(label, document.createTextNode(article.impact || 'Impact not assessed.'));
             card.append(meta, heading, summary, impact); col.appendChild(card); container.appendChild(col);
         }
