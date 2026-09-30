@@ -7,6 +7,7 @@ namespace Farm_App.Data;
 public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : IdentityDbContext(options)
 {
     public DbSet<Livestock> Livestock => Set<Livestock>();
+    public DbSet<FarmCamp> FarmCamps => Set<FarmCamp>();
     public DbSet<RainfallRecord> RainfallRecords => Set<RainfallRecord>();
     public DbSet<LivestockEvent> LivestockEvents => Set<LivestockEvent>();
     public DbSet<OfflineSyncRecord> OfflineSyncRecords => Set<OfflineSyncRecord>();

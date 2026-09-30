@@ -1,0 +1,49 @@
+@model IEnumerable<Farm_App.Models.FarmCamp>
+@{
+    ViewData["Title"] = "Camps";
+    var stock = (IEnumerable<Farm_App.Models.Livestock>)ViewBag.Stock;
+}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+    <div><a asp-controller="Livestock" asp-action="Index" class="text-decoration-none">← Livestock</a><h1 class="mt-2 mb-1">Farm camps</h1><p class="text-muted mb-0">Manage camp size, carrying capacity and whole-camp livestock moves.</p></div>
+    <a asp-action="Create" class="btn btn-primary">+ Add camp</a>
+</div>
+@if (TempData["Message"] is string message) { <div class="alert alert-success">@message</div> }
+@if (TempData["CampError"] is string error) { <div class="alert alert-danger">@error</div> }
+<div class="card p-3 p-md-4 mb-4">
+    <h2 class="h4">Camp capacity</h2>
+    <p class="text-muted">Capacity is calculated as hectares ÷ hectares per head, or taken from your manual capacity.</p>
+    <div class="table-responsive"><table class="table align-middle">
+        <thead><tr><th>Camp</th><th>Size</th><th>Rule</th><th>Stock</th><th>Capacity</th><th>Edit</th><th>Move</th></tr></thead><tbody>
+@foreach (var camp in Model)
+{
+    var animals = stock.Where(a => a.Camp == camp.Name && a.Species.Equals(camp.CapacitySpecies, StringComparison.OrdinalIgnoreCase)).ToList();
+    var total = stock.Count(a => a.Camp == camp.Name);
+    var capacity = camp.CapacityMode == "Manual" ? (camp.ManualCapacity ?? 0) : (int)Math.Floor(camp.Hectares / camp.HectaresPerHead);
+    var remaining = capacity - animals.Count;
+    <tr>
+        <td><strong>@camp.Name</strong><br><small class="text-muted">@total total active head</small></td>
+        <td>@camp.Hectares.ToString("N1") ha</td>
+        <td>@camp.CapacitySpecies: 1 head / @camp.HectaresPerHead.ToString("N1") ha<br><small>@camp.CapacityMode</small></td>
+        <td>@animals.Count @camp.CapacitySpecies</td>
+        <td><strong>@capacity</strong> @camp.CapacitySpecies<br><small class="@(remaining < 0 ? "text-danger" : "text-muted")">@(remaining >= 0 ? remaining + " head available" : Math.Abs(remaining) + " head over capacity")</small></td>
+        <td><a asp-action="Edit" asp-route-id="@camp.Id" class="btn btn-sm btn-outline-primary">Edit</a></td>
+        <td class="text-nowrap">
+            <form asp-action="MoveAll" method="post" class="d-flex gap-1 align-items-center" onsubmit="return confirm('Move ALL active animals from @camp.Name to the selected camp? A movement event will be recorded for every animal.');">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" value="@camp.Id" />
+                <select name="destinationCamp" class="form-select form-select-sm" required>
+                    <option value="">Move all to…</option>
+                    @foreach (var destination in Model.Where(x => x.Id != camp.Id)) { <option value="@destination.Name">@destination.Name</option> }
+                </select>
+                <button class="btn btn-sm btn-success" type="submit">Move all</button>
+            </form>
+        </td>
+    </tr>
+}
+@if (!Model.Any()) { <tr><td colspan="7" class="text-center text-muted py-4">No camps yet. Create your first camp to start tracking carrying capacity.</td></tr> }
+</tbody></table></div>
+</div>
+<div class="card p-3 p-md-4">
+    <h2 class="h5">Unassigned active livestock</h2>
+    <p class="mb-0 text-muted">@ViewBag.UnassignedCount animals have no camp assigned. Assign a camp from each animal's profile.</p>
+</div>

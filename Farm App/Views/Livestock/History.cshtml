@@ -5,7 +5,7 @@
 }
 <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
     <div><a asp-action="Index" class="text-decoration-none">← Livestock register</a><h1 class="mt-2 mb-1">Animal profile</h1><p class="text-muted mb-0"><strong>@animal.TagNumber</strong> · @animal.Species · @(animal.Breed ?? "Breed not set") · @(animal.Camp ?? "No camp")</p></div>
-    <a asp-action="Edit" asp-route-id="@animal.Id" class="btn btn-outline-primary">Edit animal</a>
+    <a asp-action="Edit" asp-route-id="@animal.Id" class="btn btn-primary">Update profile</a>
 </div>
 <section class="row g-3 mb-4">
     <div class="col-6 col-lg-3"><div class="card h-100 p-3"><small class="text-muted">Status</small><strong class="fs-5">@animal.Status</strong><span>@(animal.Sex ?? "Sex not set")</span></div></div>

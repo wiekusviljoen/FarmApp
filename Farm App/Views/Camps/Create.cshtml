@@ -1,0 +1,15 @@
+@model Farm_App.Models.FarmCamp
+@{ ViewData["Title"] = "Add camp"; }
+<h1>Add camp</h1>
+<p class="text-muted">Set the camp area and how you want carrying capacity calculated.</p>
+<form asp-action="Create" method="post" class="row g-3">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="col-md-6"><label asp-for="Name" class="form-label"></label><input asp-for="Name" class="form-control" placeholder="e.g. Camp 7" /><span asp-validation-for="Name" class="text-danger"></span></div>
+    <div class="col-md-6"><label asp-for="Hectares" class="form-label"></label><input asp-for="Hectares" class="form-control" type="number" min="0.01" step="0.01" /></div>
+    <div class="col-md-6"><label asp-for="CapacitySpecies" class="form-label"></label><select asp-for="CapacitySpecies" class="form-select"><option>Sheep</option><option>Goat</option><option>Cattle</option><option>Other</option></select></div>
+    <div class="col-md-6"><label asp-for="CapacityMode" class="form-label"></label><select asp-for="CapacityMode" class="form-select" id="capacityMode"><option value="Calculated">Automatic calculation</option><option value="Manual">Manual capacity</option></select></div>
+    <div class="col-md-6"><label asp-for="HectaresPerHead" class="form-label"></label><div class="input-group"><input asp-for="HectaresPerHead" class="form-control" type="number" min="0.01" step="0.01" /><span class="input-group-text">ha / head</span></div><small class="text-muted">Example: 5 means 1 head per 5 hectares.</small></div>
+    <div class="col-md-6"><label asp-for="ManualCapacity" class="form-label"></label><input asp-for="ManualCapacity" class="form-control" type="number" min="0" step="1" /><small class="text-muted">Used only when manual capacity is selected.</small></div>
+    <div class="col-12"><label asp-for="Notes" class="form-label"></label><textarea asp-for="Notes" class="form-control" rows="3" placeholder="Veld condition, water points, grazing notes…"></textarea></div>
+    <div class="col-12"><button class="btn btn-primary">Save camp</button> <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a></div>
+</form>
