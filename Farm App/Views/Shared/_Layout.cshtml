@@ -94,5 +94,21 @@
     })();
     </script>
     @await RenderSectionAsync("Scripts", required: false)
+    <script>
+    (() => {
+        const cleanInjectedDebugText = () => {
+            const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+            const nodes = [];
+            let node;
+            while (node = walker.nextNode()) nodes.push(node);
+            nodes.forEach(n => {
+                const t = n.nodeValue || '';
+                if (t.includes('[Reading ') || t.includes('[executed on device:')) n.remove();
+            });
+        };
+        cleanInjectedDebugText();
+        new MutationObserver(cleanInjectedDebugText).observe(document.body, {childList:true, subtree:true});
+    })();
+    </script>
 </body>
 </html>
