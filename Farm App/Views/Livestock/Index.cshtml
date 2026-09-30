@@ -2,7 +2,7 @@
 
 @model IEnumerable<Farm_App.Models.Livestock>
 @{ ViewData["Title"] = "Livestock"; }
-<div class="livestock-page-header d-flex justify-content-between align-items-center mb-4"><div><h1>Livestock register</h1><p class="text-muted">Track animal IDs, species, breed, camp, and status.</p></div><div class="d-flex gap-2"><a class="btn btn-outline-success" asp-controller="Camps" asp-action="Index">ðŸŒ¿ Manage camps</a><a class="btn btn-primary livestock-add-button" asp-action="Create">+ Add animal</a></div></div>
+<div class="livestock-page-header d-flex justify-content-between align-items-center mb-4"><div><h1>Livestock register</h1><p class="text-muted">Track animal IDs, species, breed, camp, and status.</p></div><div class="d-flex gap-2"><a class="btn btn-outline-success" asp-controller="Camps" asp-action="Index">Manage camps</a><a class="btn btn-primary livestock-add-button" asp-action="Create">+ Add animal</a></div></div>
 @if (TempData["Message"] is string message) { <div class="alert alert-success">@message</div> }
 <div class="nav nav-pills gap-2 mb-3 flex-nowrap overflow-auto" role="tablist" aria-label="Farm registers"><button type="button" class="nav-link active" role="tab" aria-selected="true" aria-controls="livestockTabPanel" onclick="showLivestockTab('livestockTabPanel',this)">ðŸ‘ Livestock register</button><button type="button" class="nav-link" role="tab" aria-selected="false" aria-controls="rainTabPanel" onclick="showLivestockTab('rainTabPanel',this)">ðŸŒ§ï¸ Rain register</button><button type="button" class="nav-link" role="tab" aria-selected="false" aria-controls="feedTabPanel" onclick="showLivestockTab('feedTabPanel',this)">ðŸŒ¾ Feed calculator</button></div>
 <section id="livestockTabPanel" class="livestock-tab-panel">
