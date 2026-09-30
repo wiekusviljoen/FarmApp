@@ -104,7 +104,19 @@ public class LivestockController(ApplicationDbContext db) : Controller
         var animal = await db.Livestock.AsNoTracking().FirstOrDefaultAsync(a => a.Id == id && a.OwnerId == CurrentUserId);
         if (animal == null) return NotFound();
         ViewBag.Animal = animal;
-        var events = await db.LivestockEvents.AsNoTracking().Where(e => e.LivestockId == id && e.OwnerId == CurrentUserId).OrderByDescending(e => e.EventDate).ThenByDescending(e => e.Id).ToListAsync();
+        var events = await db.LivestockEvents.AsNoTracking()
+            .Where(e => e.LivestockId == id && e.OwnerId == CurrentUserId)
+            .OrderByDescending(e => e.EventDate).ThenByDescending(e => e.Id).ToListAsync();
+        ViewBag.HealthCases = await db.AnimalHealthCases.AsNoTracking()
+            .Where(h => h.LivestockId == id && h.OwnerId == CurrentUserId)
+            .OrderByDescending(h => h.CreatedAt).Take(20).ToListAsync();
+        ViewBag.EventCount = events.Count;
+        ViewBag.BirthCount = events.Count(e => e.EventType == "Birth");
+        ViewBag.TreatmentCount = events.Count(e => e.EventType == "Treatment" || e.EventType == "Vaccination");
+        ViewBag.LastEventDate = events.Select(e => (DateTime?)e.EventDate).FirstOrDefault();
+        ViewBag.AgeYears = animal.DateOfBirth.HasValue
+            ? Math.Max(0, (DateTime.Today - animal.DateOfBirth.Value.Date).Days / 365.2425)
+            : (double?)null;
         return View(events);
     }
 

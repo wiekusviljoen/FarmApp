@@ -4,9 +4,16 @@
     ViewData["Title"] = $"History · {animal.TagNumber}";
 }
 <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
-    <div><a asp-action="Index" class="text-decoration-none">← Livestock register</a><h1 class="mt-2">Animal history</h1><p class="text-muted mb-0"><strong>@animal.TagNumber</strong> · @animal.Species · @(animal.Breed ?? "Breed not set") · @(animal.Camp ?? "No camp")</p></div>
+    <div><a asp-action="Index" class="text-decoration-none">← Livestock register</a><h1 class="mt-2 mb-1">Animal profile</h1><p class="text-muted mb-0"><strong>@animal.TagNumber</strong> · @animal.Species · @(animal.Breed ?? "Breed not set") · @(animal.Camp ?? "No camp")</p></div>
     <a asp-action="Edit" asp-route-id="@animal.Id" class="btn btn-outline-primary">Edit animal</a>
 </div>
+<section class="row g-3 mb-4">
+    <div class="col-6 col-lg-3"><div class="card h-100 p-3"><small class="text-muted">Status</small><strong class="fs-5">@animal.Status</strong><span>@(animal.Sex ?? "Sex not set")</span></div></div>
+    <div class="col-6 col-lg-3"><div class="card h-100 p-3"><small class="text-muted">Age</small><strong class="fs-5">@(ViewBag.AgeYears is double age ? $"{age:0.0} years" : "Not set")</strong><span>@(animal.DateOfBirth?.ToString("dd MMM yyyy") ?? "Birth date not set")</span></div></div>
+    <div class="col-6 col-lg-3"><div class="card h-100 p-3"><small class="text-muted">Life events</small><strong class="fs-5">@ViewBag.EventCount</strong><span>@ViewBag.BirthCount births · @ViewBag.TreatmentCount health events</span></div></div>
+    <div class="col-6 col-lg-3"><div class="card h-100 p-3"><small class="text-muted">Last activity</small><strong class="fs-5">@(ViewBag.LastEventDate is DateTime last ? last.ToString("dd MMM") : "—")</strong><span>@(animal.PurchasePrice.HasValue ? $"Purchase: NAD {animal.PurchasePrice.Value:N2}" : "No purchase price")</span></div></div>
+</section>
+@if (!string.IsNullOrWhiteSpace(animal.Notes)) { <section class="alert alert-light border mb-4"><strong>Animal notes:</strong> @animal.Notes</section> }
 @if (TempData["Message"] is string message) { <div class="alert alert-success">@message</div> }
 @if (TempData["EventError"] is string error) { <div class="alert alert-danger">@error</div> }
 <section class="card p-3 p-md-4 mb-4">
@@ -21,6 +28,25 @@
         <div class="col-12"><label class="form-label" for="notes">Notes</label><textarea class="form-control" id="notes" name="notes" rows="3" maxlength="1000" placeholder="Details, medicine, quantity, buyer, camp movement…"></textarea></div>
         <div class="col-12"><button type="submit" class="btn btn-primary">Save event</button></div>
     </form>
+</section>
+@{
+    var healthCases = (IEnumerable<Farm_App.Models.AnimalHealthCase>)ViewBag.HealthCases;
+}
+<section class="card p-3 p-md-4 mb-4">
+    <div class="d-flex justify-content-between align-items-center gap-2 mb-3"><div><h2 class="h4 mb-1">Health history</h2><p class="text-muted mb-0">Cases and recommendations recorded for this animal.</p></div><a asp-controller="AnimalHealth" asp-action="Index" class="btn btn-sm btn-outline-success">Open health assistant</a></div>
+    @if (!healthCases.Any())
+    {
+        <p class="text-muted mb-0">No health cases linked to this animal yet.</p>
+    }
+    else
+    {
+        <div class="table-responsive"><table class="table table-sm align-middle mb-0"><thead><tr><th>Date</th><th>Category</th><th>Problem</th><th>Recommendation</th></tr></thead><tbody>
+        @foreach (var health in healthCases)
+        {
+            <tr><td class="text-nowrap">@health.CreatedAt.ToLocalTime().ToString("dd MMM yyyy")</td><td>@(health.Category ?? "Assessment")</td><td>@health.ProblemDescription</td><td>@health.Recommendation</td></tr>
+        }
+        </tbody></table></div>
+    }
 </section>
 <section class="card p-3 p-md-4">
     <div class="d-flex justify-content-between align-items-center gap-2 mb-3"><h2 class="h4 mb-0">Event timeline</h2><span class="badge text-bg-light">@Model.Count() records</span></div>

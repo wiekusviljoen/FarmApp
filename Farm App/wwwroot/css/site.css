@@ -642,3 +642,14 @@ img, canvas, svg { max-width: 100%; }
 .health-table td{color:#4f6258}
 .empty-state{padding:1rem;border-radius:.8rem;background:#f7faf5;color:#77867d}
 @media(max-width:767.98px){.health-hero{padding:1.25rem;align-items:flex-start}.health-hero-badge{display:none}.health-dose-grid{grid-template-columns:repeat(2,1fr)}.health-result-heading{display:block}.health-vet-badge{margin-top:.7rem}.health-form-card,.health-result,.health-catalog,.health-history{padding:1rem}}
+
+
+/* Compact farm navigation */
+.farm-navbar .nav-privacy{display:none}
+.farm-navbar .navbar-nav{gap:.05rem}
+.farm-navbar .navbar-nav .nav-link{padding:.45rem .52rem;font-size:.88rem;white-space:nowrap}
+.farm-location-control{width:136px;flex:0 0 136px}
+.farm-location-control label{display:block;margin:0 0 .2rem!important;color:#607176;font-size:.68rem!important;font-weight:750;line-height:1}
+.farm-location-control .form-select{min-height:30px;height:30px;padding:.18rem 1.8rem .18rem .5rem;border-color:rgba(35,77,63,.14);border-radius:.5rem;font-size:.72rem;line-height:1.2}
+.farm-location-control .form-select.mt-1{margin-top:.2rem!important}
+@media(max-width:991.98px){.farm-location-control{width:100%;max-width:180px;flex-basis:auto}.farm-navbar .navbar-nav .nav-link{padding:.55rem .7rem;font-size:.9rem}}
