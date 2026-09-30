@@ -1,0 +1,212 @@
+@using Farm_App.Controllers
+@using Farm_App.Models
+@model IReadOnlyList<AnimalHealthCase>
+@{
+    ViewData["Title"] = "Animal Health";
+    var products = ViewBag.Products as List<AnimalHealthController.HealthProduct> ?? [];
+    var animals = ViewBag.Animals as List<Livestock> ?? [];
+    var resultProduct = ViewBag.HealthProduct as AnimalHealthController.HealthProduct;
+}
+<div class="health-page">
+    <div class="health-hero">
+        <div>
+            <span class="eyebrow">FARMFLOW ANIMAL HEALTH</span>
+            <h1>Animal health assistant</h1>
+            <p>Describe what happened and FarmFlow will match it against the verified product information in the local catalogue.</p>
+        </div>
+        <div class="health-hero-badge">🇳🇦 Namibia</div>
+    </div>
+
+    <div class="health-safety">
+        <strong>Important:</strong> This is a farm reference tool, not a diagnosis. Dose and directions are shown only where the product information has been verified. Serious, rapidly worsening or uncertain cases should be assessed by a veterinarian or state vet.
+    </div>
+
+    @if (ViewBag.HealthCategory != null)
+    {
+        <section class="health-result">
+            <div class="health-result-heading">
+                <div>
+                    <span class="eyebrow">RECOMMENDATION</span>
+                    <h2>@ViewBag.HealthCategory</h2>
+                </div>
+                <span class="health-vet-badge @(ViewBag.HealthVet?.ToString()?.StartsWith("Veterinary") == true ? "danger" : "")">@ViewBag.HealthVet</span>
+            </div>
+            <p>@ViewBag.HealthRecommendation</p>
+            @if (resultProduct != null)
+            {
+                <div class="health-product-result">
+                    <div>
+                        <h3>@resultProduct.Name</h3>
+                        <p class="health-product-purpose">@resultProduct.Indication</p>
+                    </div>
+                    <div class="health-dose-grid">
+                        <div><span>Dose</span><strong>@resultProduct.Dose</strong></div>
+                        <div><span>Route</span><strong>@resultProduct.Route</strong></div>
+                        <div><span>Pack</span><strong>@resultProduct.PackSize</strong></div>
+                        <div><span>Price</span><strong>@(resultProduct.PriceNad.HasValue ? $"N$ {resultProduct.PriceNad.Value:N2}" : "Check local price")</strong></div>
+                    </div>
+                    <div class="health-directions"><strong>Directions</strong><br />@resultProduct.Directions</div>
+                    <div class="health-source">Source: @resultProduct.Source · @resultProduct.PriceOrLabelDate@(resultProduct.PriceNad.HasValue ? " — published price reference, verify current branch price" : " — label/catalogue reference")</div>
+                </div>
+            }
+        </section>
+    }
+
+    @if (TempData["HealthError"] != null)
+    {
+        <div class="alert alert-warning">@TempData["HealthError"]</div>
+    }
+
+    <div class="row g-4 align-items-start">
+        <div class="col-lg-7">
+            <section class="health-form-card">
+                <div class="section-heading">
+                    <div>
+                        <span class="eyebrow">STEP 1</span>
+                        <h2>What happened?</h2>
+                    </div>
+                </div>
+                <form asp-action="Recommend" method="post">
+                    @Html.AntiForgeryToken()
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Animal</label>
+                            <select name="livestockId" id="healthAnimal" class="form-select">
+                                <option value="">Enter species manually</option>
+                                @foreach (var animal in animals)
+                                {
+                                    <option value="@animal.Id" data-species="@animal.Species">@animal.TagNumber — @animal.Species@(string.IsNullOrWhiteSpace(animal.Breed) ? "" : $" / {animal.Breed}")</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Species</label>
+                            <select name="species" id="healthSpecies" class="form-select">
+                                <option>Sheep</option>
+                                <option>Goat</option>
+                                <option>Cattle</option>
+                                <option>Horse</option>
+                                <option>Dog</option>
+                                <option>Pig</option>
+                                <option>Poultry</option>
+                                <option>Other</option>
+                            </select>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label" for="problemDescription">What is wrong / what happened?</label>
+                            <textarea name="problemDescription" id="problemDescription" class="form-control" rows="5" placeholder="Example: goat is weak after giving birth; animal has a deep wound; saw ticks; sudden death; coughing; snake bite..." required></textarea>
+                            <div class="form-text">Describe the signs, timing and anything you saw. The more detail you provide, the safer the match.</div>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label" for="suspectedCause">Known or suspected cause <span class="text-muted">(optional)</span></label>
+                            <input name="suspectedCause" id="suspectedCause" class="form-control" placeholder="Example: snake, wound from fence, suspected worms, unknown..." />
+                        </div>
+                        <div class="col-12 d-flex gap-2 flex-wrap">
+                            <button type="submit" class="btn btn-farm-primary">Find recommendation</button>
+                            <a class="btn btn-outline-secondary" href="@Url.Action("Index")">Clear</a>
+                        </div>
+                    </div>
+                </form>
+            </section>
+        </div>        <div class="col-lg-5">
+            <section class="health-form-card health-quick-card">
+                <span class="eyebrow">QUICK GUIDE</span>
+                <h2>What can I enter?</h2>
+                <div class="health-quick-list">
+                    <div><span>🩹</span><strong>Wounds</strong><small>Describe where and how deep it is.</small></div>
+                    <div><span>🐍</span><strong>Snake bite</strong><small>FarmFlow will flag urgent veterinary attention.</small></div>
+                    <div><span>💉</span><strong>Vaccination</strong><small>See verified product dose and directions where available.</small></div>
+                    <div><span>🪰</span><strong>Ticks / parasites</strong><small>Product references are shown without guessing a dose.</small></div>
+                    <div><span>🤒</span><strong>Other illness</strong><small>Describe the signs and FarmFlow will explain when no safe match is available.</small></div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <section class="health-catalog">
+        <div class="section-heading">
+            <div>
+                <span class="eyebrow">LOCAL CATALOGUE</span>
+                <h2>Vaccines & treatments</h2>
+            </div>
+            <span class="catalog-note">Agra / Namibia references</span>
+        </div>
+        <div class="row g-3">
+            @foreach (var product in products)
+            {
+                <div class="col-md-6 col-xl-4">
+                    <article class="health-product-card">
+                        <div class="health-product-top">
+                            <span class="health-type">@product.Type</span>
+                            @if (product.PriceNad.HasValue)
+                            {
+                                <strong class="health-price">N$ @product.PriceNad.Value.ToString("N2")</strong>
+                            }
+                        </div>
+                        <h3>@product.Name</h3>
+                        <p class="health-product-purpose">@product.Indication</p>
+                        <div class="health-meta"><span>Species</span><strong>@product.Species</strong></div>
+                        <div class="health-meta"><span>Pack</span><strong>@product.PackSize</strong></div>
+                        <div class="health-dose-box">
+                            <span>Dose / directions</span>
+                            <strong>@product.Dose</strong>
+                            <small>@product.Route</small>
+                        </div>
+                        <p class="health-directions-small">@product.Directions</p>
+                        <div class="health-source">@(product.PriceNad.HasValue ? $"Agra price reference: {product.PriceOrLabelDate}" : $"Label/catalogue: {product.PriceOrLabelDate}")</div>
+                    </article>
+                </div>
+            }
+        </div>
+    </section>
+
+    <section class="health-history">
+        <div class="section-heading">
+            <div>
+                <span class="eyebrow">HEALTH HISTORY</span>
+                <h2>Recent health entries</h2>
+            </div>
+        </div>
+        @if (Model.Count == 0)
+        {
+            <div class="empty-state">No health cases recorded yet. Your first recommendation will appear here.</div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table health-table align-middle">
+                    <thead><tr><th>Date</th><th>Animal</th><th>Problem</th><th>Recommendation</th><th></th></tr></thead>
+                    <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>@item.CreatedAt.ToLocalTime().ToString("dd MMM yyyy HH:mm")</td>
+                            <td><strong>@(item.AnimalTag ?? "Unassigned")</strong><br /><small>@item.Species</small></td>
+                            <td>@item.ProblemDescription</td>
+                            <td>@(item.Recommendation ?? "No product matched")</td>
+                            <td>@if (item.VetAttentionRecommended) { <span class="health-vet-badge danger">Vet</span> }</td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </section>
+</div>
+
+@section Scripts {
+<script>
+(() => {
+    const animal = document.getElementById('healthAnimal');
+    const species = document.getElementById('healthSpecies');
+    if (!animal || !species) return;
+    animal.addEventListener('change', () => {
+        const selected = animal.options[animal.selectedIndex];
+        if (selected?.dataset.species) {
+            const match = [...species.options].find(o => o.text.toLowerCase() === selected.dataset.species.toLowerCase());
+            if (match) species.value = match.value;
+        }
+    });
+})();
+</script>
+}

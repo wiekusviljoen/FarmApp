@@ -589,3 +589,56 @@ img, canvas, svg { max-width: 100%; }
 @media(max-width:991.98px){.farm-header-status{margin-left:auto;margin-right:.4rem}}
 @media(max-width:575.98px){.farm-header-status{padding:.34rem .55rem;font-size:.7rem;gap:.35rem}.farm-header-status-dot{width:.42rem;height:.42rem}}
 
+
+/* Animal health */
+.health-page{padding:1.25rem 0 3rem}
+.health-hero{display:flex;justify-content:space-between;gap:1.5rem;align-items:center;padding:2rem;border-radius:1.5rem;background:linear-gradient(135deg,#edf5ea,#f8fbf6);border:1px solid #dce8d8;margin-bottom:1rem}
+.health-hero h1{margin:.2rem 0 .55rem;color:#234d3f;font-size:clamp(1.8rem,4vw,2.6rem);font-weight:850}
+.health-hero p{max-width:720px;margin:0;color:#68786f;line-height:1.65}
+.health-hero-badge{padding:.55rem .8rem;border-radius:999px;background:#fff;border:1px solid #dbe6d7;color:#315f49;font-weight:800;white-space:nowrap}
+.health-safety{padding:.85rem 1rem;margin-bottom:1.25rem;border:1px solid #eadfbe;border-radius:.85rem;background:#fffaf0;color:#695d42;font-size:.84rem;line-height:1.55}
+.health-form-card,.health-result,.health-catalog,.health-history{border:1px solid #e1e9de;border-radius:1.2rem;background:rgba(255,255,255,.96);box-shadow:0 8px 24px rgba(35,77,63,.055);padding:1.35rem}
+.health-form-card{height:100%}
+.section-heading{display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-bottom:1rem}
+.section-heading h2,.health-result h2{margin:.2rem 0 0;color:#234d3f;font-size:1.35rem;font-weight:820}
+.eyebrow{font-size:.72rem;letter-spacing:.08em;font-weight:850;color:#789078}
+.btn-farm-primary{background:#315f49;border-color:#315f49;color:#fff;font-weight:800;border-radius:.7rem;padding:.65rem 1rem}
+.btn-farm-primary:hover{background:#234d3f;border-color:#234d3f;color:#fff}
+.health-quick-card{background:#f8faf6}
+.health-quick-list{display:grid;gap:.8rem;margin-top:1rem}
+.health-quick-list div{display:grid;grid-template-columns:2rem 1fr;column-gap:.65rem;align-items:center}
+.health-quick-list span{grid-row:span 2;font-size:1.35rem}
+.health-quick-list strong{color:#315f49;font-size:.9rem}
+.health-quick-list small{color:#718078;line-height:1.45}
+.health-result{margin-bottom:1.25rem;border-color:#cddfc9;background:#f7fbf5}
+.health-result-heading{display:flex;justify-content:space-between;gap:1rem;align-items:flex-start}
+.health-vet-badge{display:inline-flex;align-items:center;padding:.35rem .6rem;border-radius:999px;background:#e8f3e6;color:#376247;font-size:.72rem;font-weight:850;white-space:nowrap}
+.health-vet-badge.danger{background:#fff0ed;color:#a13e2f}
+.health-product-result{margin-top:1rem;padding:1rem;border:1px solid #dce8d8;border-radius:.95rem;background:#fff}
+.health-product-result h3,.health-product-card h3{margin:0;color:#234d3f;font-size:1.05rem;font-weight:820}
+.health-product-purpose{margin:.35rem 0;color:#68786f;font-size:.84rem;line-height:1.55}
+.health-dose-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.6rem;margin:1rem 0}
+.health-dose-grid div{padding:.65rem;border-radius:.7rem;background:#f5f8f2}
+.health-dose-grid span,.health-dose-box span,.health-meta span{display:block;color:#819087;font-size:.68rem;text-transform:uppercase;letter-spacing:.04em;font-weight:800}
+.health-dose-grid strong{display:block;margin-top:.15rem;color:#315f49;font-size:.86rem}
+.health-directions{padding:.75rem .85rem;border-radius:.75rem;background:#f5f8f2;color:#5e7065;font-size:.8rem;line-height:1.6}
+.health-source{margin-top:.7rem;color:#87948c;font-size:.68rem;line-height:1.45}
+.health-catalog{margin-top:1.25rem}
+.catalog-note{font-size:.75rem;color:#789078;font-weight:750}
+.health-product-card{height:100%;padding:1rem;border:1px solid #e1e9de;border-radius:1rem;background:#fff;transition:transform .18s ease,box-shadow .18s ease}
+.health-product-card:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(35,77,63,.08)}
+.health-product-top{display:flex;justify-content:space-between;gap:.5rem;align-items:center;margin-bottom:.7rem}
+.health-type{padding:.25rem .5rem;border-radius:999px;background:#edf5ea;color:#376247;font-size:.66rem;font-weight:850;text-transform:uppercase}
+.health-price{color:#315f49;font-size:.85rem}
+.health-meta{display:flex;justify-content:space-between;gap:1rem;padding:.4rem 0;border-top:1px solid #eef2ec;font-size:.76rem}
+.health-meta strong{color:#4f6258;text-align:right}
+.health-dose-box{margin-top:.7rem;padding:.7rem;border-radius:.75rem;background:#f5f8f2}
+.health-dose-box strong{display:block;margin-top:.2rem;color:#315f49;font-size:.82rem}
+.health-dose-box small{color:#77867d}
+.health-directions-small{margin:.7rem 0 0;color:#68786f;font-size:.76rem;line-height:1.55}
+.health-history{margin-top:1.25rem}
+.health-table{font-size:.8rem}
+.health-table th{color:#718078;font-size:.7rem;text-transform:uppercase;letter-spacing:.04em}
+.health-table td{color:#4f6258}
+.empty-state{padding:1rem;border-radius:.8rem;background:#f7faf5;color:#77867d}
+@media(max-width:767.98px){.health-hero{padding:1.25rem;align-items:flex-start}.health-hero-badge{display:none}.health-dose-grid{grid-template-columns:repeat(2,1fr)}.health-result-heading{display:block}.health-vet-badge{margin-top:.7rem}.health-form-card,.health-result,.health-catalog,.health-history{padding:1rem}}

@@ -13,7 +13,7 @@
     <title>@ViewData["Title"] - Farm_App</title>
     <script type="importmap"></script>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css?v=20260928" />
-    <link rel="stylesheet" href="~/css/site.css?v=20260930-auth2" />
+    <link rel="stylesheet" href="~/css/site.css?v=20260930-health1" />
     <link rel="manifest" href="~/manifest.webmanifest" />
 </head>
 <body class="@(isAuthPage ? "auth-page" : string.Empty)">
@@ -33,6 +33,7 @@
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item"><a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">Dashboard</a></li>
                         <li class="nav-item"><a class="nav-link" asp-controller="Livestock" asp-action="Index">Livestock</a></li>
+                        <li class="nav-item"><a class="nav-link" asp-controller="AnimalHealth" asp-action="Index">Animal Health</a></li>
                         <li class="nav-item"><a class="nav-link" asp-controller="Market" asp-action="Index">Market & Calculators</a></li>
                         <li class="nav-item"><a class="nav-link" asp-controller="FuelPrices" asp-action="Index">Fuel Prices</a></li>
                         <li class="nav-item"><a class="nav-link" asp-controller="Conditions" asp-action="Index">Weather & Fire</a></li>
