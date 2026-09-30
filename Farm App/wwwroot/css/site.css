@@ -568,7 +568,9 @@ img, canvas, svg { max-width: 100%; }
 .offline-mode-promo-inner>.btn{flex:0 0 auto;white-space:nowrap}
 @media(max-width:767.98px){.offline-mode-promo-inner{align-items:flex-start;flex-wrap:wrap}.offline-mode-copy{flex-basis:calc(100% - 5.05rem)}.offline-mode-promo-inner>.btn{width:100%;margin-top:.25rem}.offline-mode-points{gap:.45rem .8rem;font-size:.76rem}}
 
-/* Offline mode status indicator */
-.offline-status{position:fixed;top:.85rem;right:1rem;z-index:1040;background:#eef6ed;color:var(--farm-green);border:1px solid rgba(35,77,63,.16);border-radius:999px;padding:.38rem .7rem;font-size:.78rem;font-weight:750;line-height:1;box-shadow:0 3px 12px rgba(35,77,63,.08);pointer-events:none}
-@media(max-width:575.98px){.offline-status{top:.7rem;right:.7rem;font-size:.72rem;padding:.35rem .6rem}}
+/* FarmFlow connection status */
+.farm-header-status{display:inline-flex;align-items:center;gap:.45rem;margin-left:auto;margin-right:.35rem;padding:.38rem .7rem;border:1px solid rgba(35,77,63,.13);border-radius:999px;background:rgba(238,246,237,.92);color:var(--farm-green);font-size:.76rem;font-weight:750;line-height:1;white-space:nowrap;box-shadow:0 3px 12px rgba(35,77,63,.07);pointer-events:none}
+.farm-header-status-dot{width:.48rem;height:.48rem;border-radius:50%;background:#3d9a61;box-shadow:0 0 0 3px rgba(61,154,97,.12)}
+@media(max-width:991.98px){.farm-header-status{margin-left:auto;margin-right:.4rem}}
+@media(max-width:575.98px){.farm-header-status{padding:.34rem .55rem;font-size:.7rem;gap:.35rem}.farm-header-status-dot{width:.42rem;height:.42rem}}
 
