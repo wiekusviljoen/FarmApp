@@ -175,7 +175,15 @@ public class LivestockController(ApplicationDbContext db) : Controller
     public async Task<IActionResult> Edit(int id)
     {
         var animal = await db.Livestock.FirstOrDefaultAsync(a => a.Id == id && a.OwnerId == CurrentUserId);
-        return animal == null ? NotFound() : View(animal);
+        if (animal == null) return NotFound();
+
+        ViewBag.Camps = await db.FarmCamps.AsNoTracking()
+            .Where(c => c.OwnerId == CurrentUserId)
+            .OrderBy(c => c.Name)
+            .Select(c => c.Name)
+            .ToListAsync();
+
+        return View(animal);
     }
 
     [HttpPost, ValidateAntiForgeryToken]
@@ -184,13 +192,32 @@ public class LivestockController(ApplicationDbContext db) : Controller
         if (id != animal.Id) return NotFound();
         var existing = await db.Livestock.FirstOrDefaultAsync(a => a.Id == id && a.OwnerId == CurrentUserId);
         if (existing == null) return NotFound();
-        if (!ModelState.IsValid) return View(animal);
+
+        var selectedCamp = string.IsNullOrWhiteSpace(animal.Camp) ? null : animal.Camp.Trim();
+        if (selectedCamp != null)
+        {
+            var campExists = await db.FarmCamps.AnyAsync(c =>
+                c.OwnerId == CurrentUserId && c.Name == selectedCamp);
+            if (!campExists)
+                ModelState.AddModelError(nameof(animal.Camp), "Please choose a camp from your camps list.");
+        }
+
+        if (!ModelState.IsValid)
+        {
+            ViewBag.Camps = await db.FarmCamps.AsNoTracking()
+                .Where(c => c.OwnerId == CurrentUserId)
+                .OrderBy(c => c.Name)
+                .Select(c => c.Name)
+                .ToListAsync();
+            return View(animal);
+        }
+
         existing.TagNumber = animal.TagNumber;
         existing.Species = animal.Species;
         existing.Breed = animal.Breed;
         existing.Sex = animal.Sex;
         existing.DateOfBirth = animal.DateOfBirth;
-        existing.Camp = animal.Camp;
+        existing.Camp = selectedCamp;
         existing.Status = animal.Status;
         existing.PurchasePrice = animal.PurchasePrice;
         existing.Notes = animal.Notes;
