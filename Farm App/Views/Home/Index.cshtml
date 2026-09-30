@@ -15,18 +15,18 @@
     <div class="hero-copy">
         <span class="dashboard-kicker">FARM MANAGEMENT</span>
         <h1>Your farm.<br /><span>One clear view.</span></h1>
-        <p>Keep livestock records, check market prices, and plan around the weatherall in one place.</p>
+        <p>Keep livestock records, check market prices, and plan around the weather — all in one place.</p>
         <div class="hero-actions">
-            <a class="btn btn-light btn-lg" asp-controller="Livestock" asp-action="Index">Open livestock register <span aria-hidden="true"></span></a>
-            <a class="hero-text-link" asp-controller="Conditions" asp-action="Index">Check weather <span aria-hidden="true"></span></a>
+            <a class="btn btn-light btn-lg" asp-controller="Livestock" asp-action="Index">Open livestock register <span aria-hidden="true">&#8594;</span></a>
+            <a class="hero-text-link" asp-controller="Conditions" asp-action="Index">Check weather <span aria-hidden="true">&#8599;</span></a>
         </div>
     </div>
-    <div class="hero-emblem" aria-hidden="true"><span></span><small>BUILT FOR<br />THE FARM</small></div>
+    <div class="hero-emblem" aria-hidden="true"><span>&#127807;</span><small>BUILT FOR<br />THE FARM</small></div>
 </section>
 
 <section class="dashboard-section offline-mode-promo" aria-labelledby="offline-mode-heading">
     <div class="offline-mode-promo-inner">
-        <div class="offline-mode-icon" aria-hidden="true"></div>
+        <div class="offline-mode-icon" aria-hidden="true">&#128246;</div>
         <div class="offline-mode-copy">
             <span class="dashboard-kicker">FARMFLOW OFFLINE MODE</span>
             <h2 id="offline-mode-heading">Keep working when the signal disappears.</h2>
@@ -42,10 +42,10 @@
 <section class="dashboard-section" aria-labelledby="farm-snapshot-heading">
     <div class="section-heading"><div><span class="dashboard-kicker">YOUR FARM AT A GLANCE</span><h2 id="farm-snapshot-heading">Farm snapshot</h2></div><span class="section-note">Your records only</span></div>
     <div class="dashboard-metrics">
-        <article class="dashboard-metric"><span class="metric-icon"></span><div><span class="metric-label">Active animals</span><strong>@Model.ActiveAnimals</strong><small>@Model.TotalAnimals total records</small></div></article>
-        <article class="dashboard-metric"><span class="metric-icon"></span><div><span class="metric-label">Rain this month</span><strong>@Model.RainfallThisMonth.ToString("0.0") <small>mm</small></strong><small>From your rain register</small></div></article>
-        <article class="dashboard-metric"><span class="metric-icon"></span><div><span class="metric-label">Births this month</span><strong>@Model.BirthsThisMonth</strong><small>Logged livestock events</small></div></article>
-        <article class="dashboard-metric"><span class="metric-icon"></span><div><span class="metric-label">Camps in use</span><strong>@Model.CampCount</strong><small>With active animals</small></div></article>
+        <article class="dashboard-metric"><span class="metric-icon">&#128017;</span><div><span class="metric-label">Active animals</span><strong>@Model.ActiveAnimals</strong><small>@Model.TotalAnimals total records</small></div></article>
+        <article class="dashboard-metric"><span class="metric-icon">&#127783;</span><div><span class="metric-label">Rain this month</span><strong>@Model.RainfallThisMonth.ToString("0.0") <small>mm</small></strong><small>From your rain register</small></div></article>
+        <article class="dashboard-metric"><span class="metric-icon">&#128118;</span><div><span class="metric-label">Births this month</span><strong>@Model.BirthsThisMonth</strong><small>Logged livestock events</small></div></article>
+        <article class="dashboard-metric"><span class="metric-icon">&#128205;</span><div><span class="metric-label">Camps in use</span><strong>@Model.CampCount</strong><small>With active animals</small></div></article>
     </div>
     <div class="dashboard-metrics dashboard-metrics-secondary mt-3">
         <article class="dashboard-metric dashboard-metric-compact"><div><span class="metric-label">Deaths this month</span><strong>@Model.DeathsThisMonth</strong></div></article>
@@ -76,16 +76,16 @@
     <div class="section-heading"><div><span class="dashboard-kicker">YOUR WORKSPACE</span><h2 id="tools-heading">Farm tools</h2></div><span class="section-note">Choose where to go</span></div>
     <div class="dashboard-tools">
         <a class="dashboard-tool livestock-tool" asp-controller="Livestock" asp-action="Index">
-            <div class="tool-top"><span class="tool-icon"></span><span class="tool-arrow"></span></div>
-            <h3>Livestock register</h3><p>Record animals, update details, and keep your herd information organized.</p><span class="tool-link">Manage livestock <span></span></span>
+            <div class="tool-top"><span class="tool-icon">&#128017;</span><span class="tool-arrow">&#8599;</span></div>
+            <h3>Livestock register</h3><p>Record animals, update details, and keep your herd information organized.</p><span class="tool-link">Manage livestock <span>&#8594;</span></span>
         </a>
         <a class="dashboard-tool market-tool" asp-controller="Market" asp-action="Index">
-            <div class="tool-top"><span class="tool-icon"></span><span class="tool-arrow"></span></div>
-            <h3>Market & calculators</h3><p>Explore published meat prices and calculate feed mixes and costs.</p><span class="tool-link">Open market tools <span></span></span>
+            <div class="tool-top"><span class="tool-icon">&#128200;</span><span class="tool-arrow">&#8599;</span></div>
+            <h3>Market & calculators</h3><p>Explore published meat prices and calculate feed mixes and costs.</p><span class="tool-link">Open market tools <span>&#8594;</span></span>
         </a>
         <a class="dashboard-tool weather-tool" asp-controller="Conditions" asp-action="Index">
-            <div class="tool-top"><span class="tool-icon"></span><span class="tool-arrow"></span></div>
-            <h3>Weather & fire</h3><p>See the 7-day forecast, rainfall outlook, and weather-based fire caution.</p><span class="tool-link">View conditions <span></span></span>
+            <div class="tool-top"><span class="tool-icon">&#9728;&#65039;</span><span class="tool-arrow">&#8599;</span></div>
+            <h3>Weather & fire</h3><p>See the 7-day forecast, rainfall outlook, and weather-based fire caution.</p><span class="tool-link">View conditions <span>&#8594;</span></span>
         </a>
     </div>
 </section>
@@ -96,7 +96,7 @@
 </section>
 
 <section class="dashboard-note">
-    <div class="note-icon"></div><div><h2>Practical information, all together</h2><p>Use the tools above to keep records current and make day-to-day farm decisions with the information available.</p></div>
+    <div class="note-icon">&#10024;</div><div><h2>Practical information, all together</h2><p>Use the tools above to keep records current and make day-to-day farm decisions with the information available.</p></div>
 </section>
 
 @section Scripts {
