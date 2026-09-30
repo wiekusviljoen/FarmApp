@@ -557,6 +557,18 @@ img, canvas, svg { max-width: 100%; }
     display: none !important;
 }
 
-/* Offline mode */
-.offline-status{position:fixed;right:12px;bottom:12px;z-index:2000;background:#26352a;color:#fff;border-radius:999px;padding:6px 12px;font-size:.78rem;box-shadow:0 4px 12px #0003}
+/* Dashboard offline mode promotion */
+.offline-mode-promo{padding:0;border:1px solid #d8e7d1;border-radius:1.35rem;background:linear-gradient(135deg,#f1f7eb 0%,#e8f1e2 100%);overflow:hidden;box-shadow:0 12px 34px rgba(35,77,63,.055)}
+.offline-mode-promo-inner{display:flex;align-items:center;gap:1.25rem;padding:1.5rem clamp(1.1rem,3vw,2rem)}
+.offline-mode-icon{display:grid;place-items:center;flex:0 0 3.8rem;width:3.8rem;height:3.8rem;border-radius:1.05rem;background:#dcebd5;font-size:1.7rem}
+.offline-mode-copy{flex:1;min-width:0}
+.offline-mode-copy h2{margin:.35rem 0 .45rem;color:#234d3f;font-size:clamp(1.25rem,2.4vw,1.7rem);font-weight:850;letter-spacing:-.025em}
+.offline-mode-copy p{margin:0;color:#63766a;line-height:1.6}
+.offline-mode-points{display:flex;flex-wrap:wrap;gap:.55rem 1rem;margin-top:.75rem;color:#376247;font-size:.82rem;font-weight:750}
+.offline-mode-promo-inner>.btn{flex:0 0 auto;white-space:nowrap}
+@media(max-width:767.98px){.offline-mode-promo-inner{align-items:flex-start;flex-wrap:wrap}.offline-mode-copy{flex-basis:calc(100% - 5.05rem)}.offline-mode-promo-inner>.btn{width:100%;margin-top:.25rem}.offline-mode-points{gap:.45rem .8rem;font-size:.76rem}}
+
+/* Offline mode status indicator */
+.offline-status{position:fixed;top:5.25rem;right:12px;z-index:1025;background:#eef6ed;color:var(--farm-green);border:1px solid rgba(35,77,63,.16);border-radius:999px;padding:.38rem .7rem;font-size:.78rem;font-weight:750;line-height:1;box-shadow:0 3px 12px rgba(35,77,63,.08);pointer-events:none}
+@media(max-width:575.98px){.offline-status{top:4.25rem;right:.75rem;font-size:.72rem;padding:.35rem .6rem}}
 
