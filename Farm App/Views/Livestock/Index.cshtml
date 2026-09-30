@@ -2,9 +2,16 @@
 
 @model IEnumerable<Farm_App.Models.Livestock>
 @{ ViewData["Title"] = "Livestock"; }
+<style>
+.livestock-register-tabs .farm-tab-button{appearance:none;border:1px solid #d7dee7;background:#fff;color:#344054;border-radius:10px;padding:.55rem 1rem;font-weight:600;line-height:1.2;cursor:pointer;transition:all .15s ease}
+.livestock-register-tabs .farm-tab-button:hover{background:#f3f6f9;border-color:#98a2b3}
+.livestock-register-tabs .farm-tab-button.active{background:#198754;border-color:#198754;color:#fff;box-shadow:0 2px 6px rgba(25,135,84,.2)}
+@@media(max-width:576px){.livestock-register-tabs{display:grid!important;grid-template-columns:1fr}.livestock-register-tabs .farm-tab-button{width:100%;text-align:center}}
+</style>
+
 <div class="livestock-page-header d-flex justify-content-between align-items-center mb-4"><div><h1>Livestock register</h1><p class="text-muted">Track animal IDs, species, breed, camp, and status.</p></div><div class="d-flex gap-2"><a class="btn btn-outline-success" asp-controller="Camps" asp-action="Index">Manage camps</a><a class="btn btn-primary livestock-add-button" asp-action="Create">+ Add animal</a></div></div>
 @if (TempData["Message"] is string message) { <div class="alert alert-success">@message</div> }
-<div class=nav nav-pills gap-2 mb-3 flex-nowrap overflow-auto role=tablist aria-label=Farm registers><button type=button class=nav-link active role=tab aria-selected=true aria-controls=livestockTabPanel onclick=showLivestockTab('livestockTabPanel',this)>Livestock register</button><button type=button class=nav-link role=tab aria-selected=false aria-controls=rainTabPanel onclick=showLivestockTab('rainTabPanel',this)>Rain register</button><button type=button class=nav-link role=tab aria-selected=false aria-controls=feedTabPanel onclick=showLivestockTab('feedTabPanel',this)>Feed calculator</button></div>
+<div class="livestock-register-tabs d-flex flex-wrap gap-2 mb-3" role="tablist" aria-label="Farm registers"><button type="button" class="farm-tab-button active" role="tab" aria-selected="true" aria-controls="livestockTabPanel" onclick="showLivestockTab('livestockTabPanel',this)">Livestock register</button><button type="button" class="farm-tab-button" role="tab" aria-selected="false" aria-controls="rainTabPanel" onclick="showLivestockTab('rainTabPanel',this)">Rain register</button><button type="button" class="farm-tab-button" role="tab" aria-selected="false" aria-controls="feedTabPanel" onclick="showLivestockTab('feedTabPanel',this)">Feed calculator</button></div>
 <section id="livestockTabPanel" class="livestock-tab-panel">
 <form method="get" class="row g-2 mb-3"><div class="col-sm-8"><input name="q" value="@ViewBag.Query" class="form-control" placeholder="Search tag, species, or camp" /></div><div class="col-auto"><button class="btn btn-outline-primary">Search</button> <a class="btn btn-outline-secondary" asp-action="Index">Clear</a></div></form>
 <div class="table-responsive livestock-table-wrap"><table class="table table-striped align-middle livestock-table"><thead><tr><th>Tag / ID</th><th>Species</th><th>Breed</th><th>Sex</th><th>Camp</th><th>Status</th><th>History</th><th></th></tr></thead><tbody>
@@ -14,12 +21,12 @@
 </section>
 <section id="rainTabPanel" class="livestock-tab-panel d-none">
 <section class="card p-4 mt-4" id="rainfallRegister">
- <div class="d-flex flex-wrap justify-content-between align-items-start gap-2"><div><h2>ðŸŒ§ï¸ Rain register & local rainfall</h2><p class="text-muted mb-2">Record measured rain by date and camp, and compare it with local weather data.</p></div><button type="button" class="btn btn-outline-primary" onclick="loadRainfallWeather()">Refresh online rain</button></div>
- <div class="alert alert-light border" id="rainfallWeatherSummary" aria-live="polite">Loading local rainfall dataâ€¦</div>
+ <div class="d-flex flex-wrap justify-content-between align-items-start gap-2"><div><h2>Rain register & local rainfall</h2><p class="text-muted mb-2">Record measured rain by date and camp, and compare it with local weather data.</p></div><button type="button" class="btn btn-outline-primary" onclick="loadRainfallWeather()">Refresh online rain</button></div>
+ <div class="alert alert-light border" id="rainfallWeatherSummary" aria-live="polite">Loading local rainfall data...</div>
  <div class="border rounded-3 p-3 mb-3" id="rainfallTrendPanel">
-  <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3"><div><h3 class="h5 mb-1">Rainfall trend</h3><small class="text-muted" id="rainTrendDates">Historical daily rainfall</small></div><div class="d-flex flex-column gap-2"><span class="form-label mb-0">History period</span><div id="rainHistoryChoices" class="d-flex flex-wrap gap-2" role="group" aria-label="Farm Rain Register period"><button type="button" class="btn btn-sm btn-outline-primary" data-period="1m" onclick="selectRainHistoryPeriod(this)">1 month</button><button type="button" class="btn btn-sm btn-outline-primary" data-period="3m" onclick="selectRainHistoryPeriod(this)">3 months</button><button type="button" class="btn btn-sm btn-outline-primary" data-period="6m" onclick="selectRainHistoryPeriod(this)">6 months</button><button type="button" class="btn btn-sm btn-primary active" data-period="1y" aria-pressed="true" onclick="selectRainHistoryPeriod(this)">1 year</button><button type="button" class="btn btn-sm btn-outline-primary" data-period="2y" onclick="selectRainHistoryPeriod(this)">2 years</button><button type="button" class="btn btn-sm btn-outline-primary" data-period="5y" onclick="selectRainHistoryPeriod(this)">5 years</button><button type="button" class="btn btn-sm btn-outline-success" data-period="season" onclick="selectRainHistoryPeriod(this)">ðŸŒ§ï¸ Rain season (Octâ€“Jul)</button></div></div></div>
-  <div class="row g-2 mb-3 align-items-end"><div class="col-12 col-md-5"><label class="form-label mb-1" for="rainCity">Rain location</label><select id="rainCity" class="form-select" onchange="selectRainCity(this.value)"><option value="Koes">Koes</option><option value="Bethanie">Bethanie</option><option value="Helmeringhausen">Helmeringhausen</option><option value="Keetmanshoop">Keetmanshoop</option><option value="Luderitz">LÃ¼deritz</option><option value="Windhoek">Windhoek</option><option value="Mariental">Mariental</option><option value="Rehoboth">Rehoboth</option><option value="Gobabis">Gobabis</option><option value="Otjiwarongo">Otjiwarongo</option><option value="Swakopmund">Swakopmund</option><option value="Walvis Bay">Walvis Bay</option><option value="Oshakati">Oshakati</option><option value="Rundu">Rundu</option><option value="Katima Mulilo">Katima Mulilo</option><option value="Opuwo">Opuwo</option><option value="Outjo">Outjo</option><option value="Tsumeb">Tsumeb</option><option value="Grootfontein">Grootfontein</option><option value="Otavi">Otavi</option></select><small class="text-muted">Choose a town/city to view its historical rainfall.</small></div></div>
-  <div id="rainfallTrendStatus" class="small text-muted mb-2" aria-live="polite">Loading historical rainfallâ€¦</div>
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3"><div><h3 class="h5 mb-1">Rainfall trend</h3><small class="text-muted" id="rainTrendDates">Historical daily rainfall</small></div><div class="d-flex flex-column gap-2"><span class="form-label mb-0">History period</span><div id="rainHistoryChoices" class="d-flex flex-wrap gap-2" role="group" aria-label="Farm Rain Register period"><button type="button" class="btn btn-sm btn-outline-primary" data-period="1m" onclick="selectRainHistoryPeriod(this)">1 month</button><button type="button" class="btn btn-sm btn-outline-primary" data-period="3m" onclick="selectRainHistoryPeriod(this)">3 months</button><button type="button" class="btn btn-sm btn-outline-primary" data-period="6m" onclick="selectRainHistoryPeriod(this)">6 months</button><button type="button" class="btn btn-sm btn-primary active" data-period="1y" aria-pressed="true" onclick="selectRainHistoryPeriod(this)">1 year</button><button type="button" class="btn btn-sm btn-outline-primary" data-period="2y" onclick="selectRainHistoryPeriod(this)">2 years</button><button type="button" class="btn btn-sm btn-outline-primary" data-period="5y" onclick="selectRainHistoryPeriod(this)">5 years</button><button type="button" class="btn btn-sm btn-outline-success" data-period="season" onclick="selectRainHistoryPeriod(this)">Rain season (Oct-Jul)</button></div></div></div>
+  <div class="row g-2 mb-3 align-items-end"><div class="col-12 col-md-5"><label class="form-label mb-1" for="rainCity">Rain location</label><select id="rainCity" class="form-select" onchange="selectRainCity(this.value)"><option value="Koes">Koes</option><option value="Bethanie">Bethanie</option><option value="Helmeringhausen">Helmeringhausen</option><option value="Keetmanshoop">Keetmanshoop</option><option value="Luderitz">Luderitz</option><option value="Windhoek">Windhoek</option><option value="Mariental">Mariental</option><option value="Rehoboth">Rehoboth</option><option value="Gobabis">Gobabis</option><option value="Otjiwarongo">Otjiwarongo</option><option value="Swakopmund">Swakopmund</option><option value="Walvis Bay">Walvis Bay</option><option value="Oshakati">Oshakati</option><option value="Rundu">Rundu</option><option value="Katima Mulilo">Katima Mulilo</option><option value="Opuwo">Opuwo</option><option value="Outjo">Outjo</option><option value="Tsumeb">Tsumeb</option><option value="Grootfontein">Grootfontein</option><option value="Otavi">Otavi</option></select><small class="text-muted">Choose a town/city to view its historical rainfall.</small></div></div>
+  <div id="rainfallTrendStatus" class="small text-muted mb-2" aria-live="polite">Loading historical rainfall...</div>
   <div class="w-100" style="min-height:220px;overflow:hidden"><svg id="rainfallTrendChart" viewBox="0 0 760 270" role="img" aria-label="Historical rainfall trend chart" style="display:block;width:100%;height:auto;min-height:220px"></svg></div>
   <div class="small text-muted mt-2" id="rainfallTrendLegend">Online historical rainfall in millimetres</div>
  </div>
@@ -57,8 +64,8 @@
   <div class="row g-3">
    <div class="col-6"><label class="form-label" for="animalCount">Number of active animals</label><input id="animalCount" type="number" min="0" step="1" value="@ViewBag.ActiveCount" class="form-control" readonly /><small class="text-muted">Automatically counted from active livestock records.</small></div>
    <div class="col-12"><div id="speciesCountSummary" class="small text-muted"></div></div>
-   <div class="col-12"><h4 class="h6">Daily supplement by species</h4><div id="feedRationsBySpecies" class="table-responsive"><p class="text-muted small">Loading species rationsâ€¦</p></div><small class="text-muted">Set the supplement amount in kg per head per day for each species. These are your ration settings, not total grazing intake.</small></div>
-   <div class="col-12"><label class="form-label" for="seasonFactor">Rainfall-based supplement factor</label><div class="input-group"><input id="seasonFactor" type="number" min="0" max="2" step="0.05" value="1" class="form-control" /><span class="input-group-text">Ã—</span></div><small class="text-muted" id="seasonFactorNote">Adjust after checking actual grazing and animal condition. Rainfall alone cannot determine feed needs.</small></div>
+   <div class="col-12"><h4 class="h6">Daily supplement by species</h4><div id="feedRationsBySpecies" class="table-responsive"><p class="text-muted small">Loading species rations...</p></div><small class="text-muted">Set the supplement amount in kg per head per day for each species. These are your ration settings, not total grazing intake.</small></div>
+   <div class="col-12"><label class="form-label" for="seasonFactor">Rainfall-based supplement factor</label><div class="input-group"><input id="seasonFactor" type="number" min="0" max="2" step="0.05" value="1" class="form-control" /><span class="input-group-text">x</span></div><small class="text-muted" id="seasonFactorNote">Adjust after checking actual grazing and animal condition. Rainfall alone cannot determine feed needs.</small></div>
    <div class="col-8"><label class="form-label" for="durationValue">Feeding duration</label><input id="durationValue" type="number" min="1" step="1" value="30" class="form-control" /></div>
    <div class="col-4"><label class="form-label" for="durationUnit">Unit</label><select id="durationUnit" class="form-select"><option value="1">Days</option><option value="7">Weeks</option><option value="30">Months (30 days)</option></select></div>
   </div>
@@ -77,7 +84,7 @@ const manualRain30 = @ViewBag.ManualRain30.ToString(System.Globalization.Culture
 const livestockCounts = @Html.Raw(ViewBag.SpeciesCountsJson);
 function renderSpeciesCountSummary() {
  const el=document.getElementById('speciesCountSummary');
- el.textContent=livestockCounts.length ? 'Registered active stock: '+livestockCounts.map(x=>`${x.species}: ${x.count}`).join(' Â· ') : 'No active livestock is registered.';
+ el.textContent=livestockCounts.length ? 'Registered active stock: '+livestockCounts.map(x=>`${x.species}: ${x.count}`).join(' &middot; ') : 'No active livestock is registered.';
 }
 const rationStoreKey='farmflow.dailyRations.v1';
 function renderRationTable() {
@@ -179,12 +186,12 @@ async function loadRainfallTrend() {
   const data=await response.json();if(!response.ok)throw new Error(data.error||'Historical data unavailable');
   drawRainfallTrend(data.records,period);
   document.getElementById('rainTrendDates').textContent=data.season
-    ? `Rain season ${data.season} Â· October to July Â· ${location.label}`
-    : `${data.startDate} to ${data.endDate} Â· ${location.label}`;
+    ? `Rain season ${data.season} &middot; October to July &middot; ${location.label}`
+    : `${data.startDate} to ${data.endDate} &middot; ${location.label}`;
   const total=data.records.reduce((sum,r)=>sum+(Number(r.rainMm)||0),0);
   status.textContent=period==='season'
-    ? `${data.records.length} daily observations grouped into monthly season totals Â· Total: ${total.toFixed(1)} mm Â· Source: ${data.source}`
-    : `${data.records.length} daily observations Â· Total: ${total.toFixed(1)} mm Â· Source: ${data.source}`;
+    ? `${data.records.length} daily observations grouped into monthly season totals &middot; Total: ${total.toFixed(1)} mm &middot; Source: ${data.source}`
+    : `${data.records.length} daily observations &middot; Total: ${total.toFixed(1)} mm &middot; Source: ${data.source}`;
  } catch(error){status.textContent='Could not load farm rain register: '+error.message;}
 }
 async function loadRainfallWeather() {
@@ -203,7 +210,7 @@ async function loadRainfallWeather() {
   document.getElementById('seasonFactor').value=factor;
   document.getElementById('seasonFactorNote').textContent=`${signal}. Suggested planning factor ${factor.toFixed(2)}Ã— based on a simple rainfall threshold, not measured grazing. Adjust for veld condition, animal stage and advice.`;
   updateFeedingEstimate();
-  summary.innerHTML=`<strong>${signal}</strong><br>Recent 30-day rainfall (online): <strong>${past.toFixed(1)} mm</strong> Â· Next 7-day forecast: <strong>${next7.toFixed(1)} mm</strong><br>Manual rain register (last 30 days): <strong>${Number(manualRain30).toFixed(1)} mm</strong><br><small>Location: ${escapeHtml(location.label)} Â· Source: ${escapeHtml(data.source)} Â· Updated ${new Date(data.fetchedAt).toLocaleString()}</small>`;
+  summary.innerHTML=`<strong>${signal}</strong><br>Recent 30-day rainfall (online): <strong>${past.toFixed(1)} mm</strong> &middot; Next 7-day forecast: <strong>${next7.toFixed(1)} mm</strong><br>Manual rain register (last 30 days): <strong>${Number(manualRain30).toFixed(1)} mm</strong><br><small>Location: ${escapeHtml(location.label)} &middot; Source: ${escapeHtml(data.source)} &middot; Updated ${new Date(data.fetchedAt).toLocaleString()}</small>`;
  };
  if((localStorage.getItem('farmLocationMode')||'auto')==='manual'){rainCoords=null;fetchAt(null).then(loadRainfallTrend).catch(e=>{summary.textContent='Online rainfall unavailable: '+e.message;loadRainfallTrend();});}
  else if(navigator.geolocation){navigator.geolocation.getCurrentPosition(pos=>fetchAt({latitude:pos.coords.latitude,longitude:pos.coords.longitude}).then(loadRainfallTrend).catch(e=>{summary.textContent='Online rainfall unavailable: '+e.message;loadRainfallTrend();}),()=>fetchAt(null).then(loadRainfallTrend).catch(e=>{summary.textContent='Online rainfall unavailable: '+e.message;loadRainfallTrend();}),{timeout:12000,maximumAge:300000});}
@@ -316,7 +323,7 @@ function updateFeedingEstimate() {
  const target=document.getElementById('feedingEstimate');
  if(!product || price<=0 || count<=0 || !Number.isFinite(factor) || factor<0 || days<=0){target.textContent='Choose a product, enter its current bag price, and complete the feeding details.';return;}
  const dailyKg=dailyBaseKg*factor, totalKg=dailyKg*days, bags=Math.ceil(totalKg/bagKg), totalCost=totalKg/bagKg*price, bagCost=bags*price;
- target.textContent=`${count} active animals Â· ${days.toLocaleString()} days Â· ${dailyKg.toLocaleString(undefined,{maximumFractionDigits:1})} kg/day Â· ${totalKg.toLocaleString(undefined,{maximumFractionDigits:1})} kg total Â· ${bags.toLocaleString()} bags of ${bagKg} kg Â· Estimated cost: ${money(totalCost)} (full bags: ${money(bagCost)})`;
+ target.textContent=`${count} active animals &middot; ${days.toLocaleString()} days &middot; ${dailyKg.toLocaleString(undefined,{maximumFractionDigits:1})} kg/day &middot; ${totalKg.toLocaleString(undefined,{maximumFractionDigits:1})} kg total &middot; ${bags.toLocaleString()} bags of ${bagKg} kg &middot; Estimated cost: ${money(totalCost)} (full bags: ${money(bagCost)})`;
 }
 function updatePreviews() {
  const bag = Number(document.getElementById('bagPrice').value) || 0;
