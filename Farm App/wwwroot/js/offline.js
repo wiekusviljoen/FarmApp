@@ -10,7 +10,8 @@
   const all = async () => { const db = await dbOpen(); return new Promise((resolve,reject) => { const r=db.transaction(STORE).objectStore(STORE).getAll(); r.onsuccess=()=>resolve(r.result); r.onerror=()=>reject(r.error); }); };
   const put = async item => { const db=await dbOpen(); return new Promise((resolve,reject)=>{const r=db.transaction(STORE,"readwrite").objectStore(STORE).put(item);r.onsuccess=()=>resolve();r.onerror=()=>reject(r.error);}); };
   const remove = async id => { const db=await dbOpen(); return new Promise((resolve,reject)=>{const r=db.transaction(STORE,"readwrite").objectStore(STORE).delete(id);r.onsuccess=()=>resolve();r.onerror=()=>reject(r.error);}); };
-  const makeId = () => crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + "-" + String(Math.random());`r`n  const currentUser = () => window.farmFlowUserId || localStorage.getItem("farmflow.user");
+  const makeId = () => crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + "-" + String(Math.random());
+  const currentUser = () => window.farmFlowUserId || localStorage.getItem("farmflow.user");
   const status = message => { const el=document.getElementById("offlineQueueStatus"); if(el) el.textContent=message; const badge=document.getElementById("offlineStatus"); if(badge) badge.textContent=navigator.onLine ? "Online" : "Offline"; };
   async function sync() {
     if (!navigator.onLine) { status("Offline — entries are stored on this phone."); return; }
@@ -26,7 +27,9 @@
     } catch { status(String(items.length) + " item(s) waiting — will sync when signal returns."); }
   }
   async function queue(type, data) {
-    const ownerKey = currentUser();`r`n    if (!ownerKey) { status("Sign in while online before recording offline entries."); return; }`r`n    await put({ clientId:makeId(), ownerKey, type, data, queuedAt:new Date().toISOString() });
+    const ownerKey = currentUser();
+    if (!ownerKey) { status("Sign in while online before recording offline entries."); return; }
+    await put({ clientId:makeId(), ownerKey, type, data, queuedAt:new Date().toISOString() });
     status("Saved on this phone. It will sync automatically when online.");
     if (navigator.onLine) sync();
   }

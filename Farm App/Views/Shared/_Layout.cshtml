@@ -17,7 +17,6 @@
     <link rel="manifest" href="~/manifest.webmanifest" />
 </head>
 <body class="@(isAuthPage ? "auth-page" : string.Empty)">
-    <div id="offlineStatus" class="offline-status" aria-live="polite">Checking connection...</div>
     <header>
         <nav class="navbar navbar-expand-lg navbar-toggleable-sm farm-navbar border-bottom shadow-sm">
             <div class="container-fluid">
@@ -25,6 +24,7 @@
                     <span class="brand-icon">🌿</span>
                     FarmFlow
                 </a>
+                <div id="offlineStatus" class="offline-status" aria-live="polite">Online</div>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
