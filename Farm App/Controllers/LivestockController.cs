@@ -56,12 +56,20 @@ public class LivestockController(ApplicationDbContext db) : Controller
     [HttpGet]
     public async Task<IActionResult> RainfallHistory(string period = "1y", double? latitude = null, double? longitude = null)
     {
+        var isSeason = period.Equals("season", StringComparison.OrdinalIgnoreCase);
+        var seasonStart = DateTime.Today.Month >= 10
+            ? new DateTime(DateTime.Today.Year, 10, 1)
+            : new DateTime(DateTime.Today.Year - 1, 10, 1);
+        var seasonEnd = DateTime.Today.Month >= 10
+            ? new DateTime(DateTime.Today.Year + 1, 7, 31)
+            : new DateTime(DateTime.Today.Year, 7, 31);
         var months = period switch { "1m" => 1, "3m" => 3, "6m" => 6, "1y" => 12, "2y" => 24, "5y" => 60, _ => 12 };
         var hasLocation = latitude is >= -90 and <= 90 && longitude is >= -180 and <= 180;
         var lat = hasLocation ? latitude!.Value : DefaultLatitude;
         var lon = hasLocation ? longitude!.Value : DefaultLongitude;
-        var end = DateTime.UtcNow.Date.AddDays(-1);
-        var start = end.AddMonths(-months).AddDays(1);
+        var end = isSeason ? seasonEnd : DateTime.UtcNow.Date.AddDays(-1);
+        if (end >= DateTime.UtcNow.Date) end = DateTime.UtcNow.Date.AddDays(-1);
+        var start = isSeason ? seasonStart : end.AddMonths(-months).AddDays(1);
         var url = $"https://archive-api.open-meteo.com/v1/archive?latitude={lat.ToString(CultureInfo.InvariantCulture)}&longitude={lon.ToString(CultureInfo.InvariantCulture)}&start_date={start:yyyy-MM-dd}&end_date={end:yyyy-MM-dd}&daily=precipitation_sum&timezone=auto";
         try
         {
@@ -72,7 +80,7 @@ public class LivestockController(ApplicationDbContext db) : Controller
             var dates = daily.GetProperty("time");
             var rain = daily.GetProperty("precipitation_sum");
             var records = Enumerable.Range(0, dates.GetArrayLength()).Select(i => new { date = dates[i].GetString(), rainMm = rain[i].ValueKind == JsonValueKind.Number ? rain[i].GetDouble() : 0d }).ToList();
-            return Json(new { period, startDate = start.ToString("yyyy-MM-dd"), endDate = end.ToString("yyyy-MM-dd"), location = hasLocation ? "Detected location" : "Koes area (approximate fallback)", source = "Open-Meteo Historical Archive", records });
+            return Json(new { period, season = isSeason ? $"{seasonStart:yyyy}/{seasonEnd:yy}" : null, startDate = start.ToString("yyyy-MM-dd"), endDate = end.ToString("yyyy-MM-dd"), location = hasLocation ? "Detected location" : "Koes area (approximate fallback)", source = "Open-Meteo Historical Archive", records });
         }
         catch (Exception ex) { return StatusCode(502, new { error = "Could not load historical rainfall: " + ex.Message }); }
     }

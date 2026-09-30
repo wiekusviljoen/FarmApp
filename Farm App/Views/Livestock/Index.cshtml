@@ -15,7 +15,7 @@
  <div class="d-flex flex-wrap justify-content-between align-items-start gap-2"><div><h2>🌧️ Rain register & local rainfall</h2><p class="text-muted mb-2">Record measured rain by date and camp, and compare it with local weather data.</p></div><button type="button" class="btn btn-outline-primary" onclick="loadRainfallWeather()">Refresh online rain</button></div>
  <div class="alert alert-light border" id="rainfallWeatherSummary" aria-live="polite">Loading local rainfall data…</div>
  <div class="border rounded-3 p-3 mb-3" id="rainfallTrendPanel">
-  <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3"><div><h3 class="h5 mb-1">Rainfall trend</h3><small class="text-muted" id="rainTrendDates">Historical daily rainfall</small></div><div class="d-flex flex-column gap-2"><span class="form-label mb-0">History period</span><div id="rainHistoryChoices" class="d-flex flex-wrap gap-2" role="group" aria-label="Rainfall history period"><button type="button" class="btn btn-sm btn-outline-primary" data-period="1m" onclick="selectRainHistoryPeriod(this)">1 month</button><button type="button" class="btn btn-sm btn-outline-primary" data-period="3m" onclick="selectRainHistoryPeriod(this)">3 months</button><button type="button" class="btn btn-sm btn-outline-primary" data-period="6m" onclick="selectRainHistoryPeriod(this)">6 months</button><button type="button" class="btn btn-sm btn-primary active" data-period="1y" aria-pressed="true" onclick="selectRainHistoryPeriod(this)">1 year</button><button type="button" class="btn btn-sm btn-outline-primary" data-period="2y" onclick="selectRainHistoryPeriod(this)">2 years</button><button type="button" class="btn btn-sm btn-outline-primary" data-period="5y" onclick="selectRainHistoryPeriod(this)">5 years</button></div></div></div>
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3"><div><h3 class="h5 mb-1">Rainfall trend</h3><small class="text-muted" id="rainTrendDates">Historical daily rainfall</small></div><div class="d-flex flex-column gap-2"><span class="form-label mb-0">History period</span><div id="rainHistoryChoices" class="d-flex flex-wrap gap-2" role="group" aria-label="Rainfall history period"><button type="button" class="btn btn-sm btn-outline-primary" data-period="1m" onclick="selectRainHistoryPeriod(this)">1 month</button><button type="button" class="btn btn-sm btn-outline-primary" data-period="3m" onclick="selectRainHistoryPeriod(this)">3 months</button><button type="button" class="btn btn-sm btn-outline-primary" data-period="6m" onclick="selectRainHistoryPeriod(this)">6 months</button><button type="button" class="btn btn-sm btn-primary active" data-period="1y" aria-pressed="true" onclick="selectRainHistoryPeriod(this)">1 year</button><button type="button" class="btn btn-sm btn-outline-primary" data-period="2y" onclick="selectRainHistoryPeriod(this)">2 years</button><button type="button" class="btn btn-sm btn-outline-primary" data-period="5y" onclick="selectRainHistoryPeriod(this)">5 years</button><button type="button" class="btn btn-sm btn-outline-success" data-period="season" onclick="selectRainHistoryPeriod(this)">🌧️ Rain season (Oct–Jul)</button></div></div></div>
   <div id="rainfallTrendStatus" class="small text-muted mb-2" aria-live="polite">Loading historical rainfall…</div>
   <div class="w-100" style="min-height:220px;overflow:hidden"><svg id="rainfallTrendChart" viewBox="0 0 760 270" role="img" aria-label="Historical rainfall trend chart" style="display:block;width:100%;height:auto;min-height:220px"></svg></div>
   <div class="small text-muted mt-2" id="rainfallTrendLegend">Online historical rainfall in millimetres</div>
@@ -113,7 +113,7 @@ function drawRainfallTrend(records, period) {
  const ns='http://www.w3.org/2000/svg';
  const make=(tag,attrs,text)=>{const el=document.createElementNS(ns,tag);Object.entries(attrs||{}).forEach(([k,v])=>el.setAttribute(k,v));if(text!==undefined)el.textContent=text;return el;};
  let points=records.map(r=>({date:r.date,value:Number(r.rainMm)||0}));
- if(['6m','1y','2y','5y'].includes(period)){
+ if(['6m','1y','2y','5y','season'].includes(period)){
   const buckets={};points.forEach(p=>{const key=p.date.slice(0,7);buckets[key]=(buckets[key]||0)+p.value;});
   points=Object.entries(buckets).map(([date,value])=>({date,value}));
  }
@@ -123,7 +123,17 @@ function drawRainfallTrend(records, period) {
  for(let i=0;i<=4;i++){const y=T+plotH-(i/4)*plotH;svg.appendChild(make('line',{x1:L,y1:y,x2:W-R,y2:y,stroke:'currentColor','stroke-opacity':'.15'}));svg.appendChild(make('text',{x:L-8,y:y+4,'text-anchor':'end','font-size':11,fill:'currentColor'},(max*i/4).toFixed(0)));}
  const step=plotW/points.length, barW=Math.max(1,Math.min(24,step*.68));
  points.forEach((p,i)=>{const x=L+i*step+(step-barW)/2;const h=Math.max(1,p.value/max*plotH);const rect=make('rect',{x,y:T+plotH-h,width:barW,height:h,rx:Math.min(3,barW/3),fill:'#269b83'});rect.appendChild(make('title',{},`${p.date}: ${p.value.toFixed(1)} mm`));svg.appendChild(rect);});
- const labels=[0,Math.floor((points.length-1)/2),points.length-1];[...new Set(labels)].forEach(i=>{const p=points[i],label=period==='1m'?p.date.slice(5):p.date;svg.appendChild(make('text',{x:L+i*step+step/2,y:H-14,'text-anchor':'middle','font-size':11,fill:'currentColor'},label));});
+ const labels=period==='season'
+  ? points.map((_,i)=>i)
+  : [0,Math.floor((points.length-1)/2),points.length-1];
+ [...new Set(labels)].forEach(i=>{const p=points[i],label=period==='season'
+   ? new Date(p.date+'-02').toLocaleDateString(undefined,{month:'short'})
+   : period==='1m' ? new Date(p.date+'T00:00:00').toLocaleDateString(undefined,{day:'numeric',month:'short'}) : p.date;
+  svg.appendChild(make('text',{x:L+i*step+step/2,y:H-14,'text-anchor':'middle','font-size':period==='season'?11:10,fill:'currentColor'},label));
+ });
+ if(period==='1m'){
+  points.forEach((p,i)=>{if(p.value>0){const x=L+i*step+step/2,h=Math.max(1,p.value/max*plotH);svg.appendChild(make('text',{x,y:T+plotH-h-5,'text-anchor':'middle','font-size':10,'font-weight':'700',fill:'currentColor'},p.value.toFixed(1)+' mm'));}});
+ }
 }
 let rainHistoryPeriod = '1y';
 function selectRainHistoryPeriod(button) {
@@ -147,9 +157,13 @@ async function loadRainfallTrend() {
   const response=await fetch('/Livestock/RainfallHistory?'+query.toString());
   const data=await response.json();if(!response.ok)throw new Error(data.error||'Historical data unavailable');
   drawRainfallTrend(data.records,period);
-  document.getElementById('rainTrendDates').textContent=`${data.startDate} to ${data.endDate} · ${location.label}`;
+  document.getElementById('rainTrendDates').textContent=data.season
+    ? `Rain season ${data.season} · October to July · ${location.label}`
+    : `${data.startDate} to ${data.endDate} · ${location.label}`;
   const total=data.records.reduce((sum,r)=>sum+(Number(r.rainMm)||0),0);
-  status.textContent=`${data.records.length} daily observations · Total: ${total.toFixed(1)} mm · Source: ${data.source}`;
+  status.textContent=period==='season'
+    ? `${data.records.length} daily observations grouped into monthly season totals · Total: ${total.toFixed(1)} mm · Source: ${data.source}`
+    : `${data.records.length} daily observations · Total: ${total.toFixed(1)} mm · Source: ${data.source}`;
  } catch(error){status.textContent='Could not load rainfall history: '+error.message;}
 }
 async function loadRainfallWeather() {
