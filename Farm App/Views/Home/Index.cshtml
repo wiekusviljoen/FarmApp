@@ -1,4 +1,4 @@
-@model Farm_App.Models.DashboardViewModel
+﻿@model Farm_App.Models.DashboardViewModel
 @{
     ViewData["Title"] = "Farm Dashboard";
 }
@@ -13,39 +13,39 @@
 
 <section class="dashboard-hero">
     <div class="hero-copy">
-        <span class="dashboard-kicker">FARM MANAGEMENT · KOES</span>
+        <span class="dashboard-kicker">FARM MANAGEMENT Â· KOES</span>
         <h1>Your farm.<br /><span>One clear view.</span></h1>
-        <p>Keep livestock records, check market prices, and plan around the weather—all in one place.</p>
+        <p>Keep livestock records, check market prices, and plan around the weatherâ€”all in one place.</p>
         <div class="hero-actions">
-            <a class="btn btn-light btn-lg" asp-controller="Livestock" asp-action="Index">Open livestock register <span aria-hidden="true">→</span></a>
-            <a class="hero-text-link" asp-controller="Conditions" asp-action="Index">Check weather <span aria-hidden="true">↗</span></a>
+            <a class="btn btn-light btn-lg" asp-controller="Livestock" asp-action="Index">Open livestock register <span aria-hidden="true">â†’</span></a>
+            <a class="hero-text-link" asp-controller="Conditions" asp-action="Index">Check weather <span aria-hidden="true">â†—</span></a>
         </div>
     </div>
-    <div class="hero-emblem" aria-hidden="true"><span>🌾</span><small>BUILT FOR<br />THE FARM</small></div>
+    <div class="hero-emblem" aria-hidden="true"><span>ðŸŒ¾</span><small>BUILT FOR<br />THE FARM</small></div>
 </section>
 
 <section class="dashboard-section offline-mode-promo" aria-labelledby="offline-mode-heading">
     <div class="offline-mode-promo-inner">
-        <div class="offline-mode-icon" aria-hidden="true">📶</div>
+        <div class="offline-mode-icon" aria-hidden="true">ðŸ“¶</div>
         <div class="offline-mode-copy">
             <span class="dashboard-kicker">FARMFLOW OFFLINE MODE</span>
             <h2 id="offline-mode-heading">Keep working when the signal disappears.</h2>
             <p>Record important farm events even without internet. Births, deaths, treatments, movements, sales, purchases, new animals, rainfall and notes can be saved on your phone and synced automatically when you reconnect.</p>
             <div class="offline-mode-points">
-                <span>✓ Works without signal</span><span>✓ Saves on your device</span><span>✓ Syncs when online</span>
+                <span>âœ“ Works without signal</span><span>âœ“ Saves on your device</span><span>âœ“ Syncs when online</span>
             </div>
         </div>
-        <a class="btn btn-success btn-lg" href="/offline.html">Open Offline Mode →</a>
+        <a class="btn btn-success btn-lg" href="/offline.html">Open Offline Mode â†’</a>
     </div>
 </section>
 
 <section class="dashboard-section" aria-labelledby="farm-snapshot-heading">
     <div class="section-heading"><div><span class="dashboard-kicker">YOUR FARM AT A GLANCE</span><h2 id="farm-snapshot-heading">Farm snapshot</h2></div><span class="section-note">Your records only</span></div>
     <div class="dashboard-metrics">
-        <article class="dashboard-metric"><span class="metric-icon">🐑</span><div><span class="metric-label">Active animals</span><strong>@Model.ActiveAnimals</strong><small>@Model.TotalAnimals total records</small></div></article>
-        <article class="dashboard-metric"><span class="metric-icon">🌧️</span><div><span class="metric-label">Rain this month</span><strong>@Model.RainfallThisMonth.ToString("0.0") <small>mm</small></strong><small>From your rain register</small></div></article>
-        <article class="dashboard-metric"><span class="metric-icon">🍼</span><div><span class="metric-label">Births this month</span><strong>@Model.BirthsThisMonth</strong><small>Logged livestock events</small></div></article>
-        <article class="dashboard-metric"><span class="metric-icon">📍</span><div><span class="metric-label">Camps in use</span><strong>@Model.CampCount</strong><small>With active animals</small></div></article>
+        <article class="dashboard-metric"><span class="metric-icon">ðŸ‘</span><div><span class="metric-label">Active animals</span><strong>@Model.ActiveAnimals</strong><small>@Model.TotalAnimals total records</small></div></article>
+        <article class="dashboard-metric"><span class="metric-icon">ðŸŒ§ï¸</span><div><span class="metric-label">Rain this month</span><strong>@Model.RainfallThisMonth.ToString("0.0") <small>mm</small></strong><small>From your rain register</small></div></article>
+        <article class="dashboard-metric"><span class="metric-icon">ðŸ¼</span><div><span class="metric-label">Births this month</span><strong>@Model.BirthsThisMonth</strong><small>Logged livestock events</small></div></article>
+        <article class="dashboard-metric"><span class="metric-icon">ðŸ“</span><div><span class="metric-label">Camps in use</span><strong>@Model.CampCount</strong><small>With active animals</small></div></article>
     </div>
     <div class="dashboard-metrics dashboard-metrics-secondary mt-3">
         <article class="dashboard-metric dashboard-metric-compact"><div><span class="metric-label">Deaths this month</span><strong>@Model.DeathsThisMonth</strong></div></article>
@@ -54,18 +54,18 @@
 </section>
 
 <section class="dashboard-section" aria-labelledby="recent-activity-heading">
-    <div class="section-heading"><div><span class="dashboard-kicker">LIVESTOCK RECORDS</span><h2 id="recent-activity-heading">Recent activity</h2></div><a class="btn btn-outline-primary" asp-controller="Livestock" asp-action="Index">Open register →</a></div>
+    <div class="section-heading"><div><span class="dashboard-kicker">LIVESTOCK RECORDS</span><h2 id="recent-activity-heading">Recent activity</h2></div><a class="btn btn-outline-primary" asp-controller="Livestock" asp-action="Index">Open register â†’</a></div>
     <div class="card p-3 p-md-4">
         @if (Model.RecentEvents.Count == 0)
         {
-            <p class="text-muted mb-0">No livestock events recorded yet. Open an animal’s history to log births, purchases, sales, deaths, movements, treatments, or vaccinations.</p>
+            <p class="text-muted mb-0">No livestock events recorded yet. Open an animalâ€™s history to log births, purchases, sales, deaths, movements, treatments, or vaccinations.</p>
         }
         else
         {
             <div class="table-responsive"><table class="table align-middle mb-0"><thead><tr><th>Date</th><th>Animal</th><th>Event</th><th>Details</th><th></th></tr></thead><tbody>
             @foreach (var item in Model.RecentEvents)
             {
-                <tr><td class="text-nowrap">@item.EventDate.ToString("dd MMM yyyy")</td><td><strong>@(item.Livestock?.TagNumber ?? "Animal")</strong><div class="small text-muted">@item.Livestock?.Species</div></td><td>@item.EventType</td><td>@(string.IsNullOrWhiteSpace(item.Notes) ? "—" : item.Notes) @if (item.Amount.HasValue) { <span class="text-muted">· NAD @item.Amount.Value.ToString("N2")</span> }</td><td><a class="btn btn-sm btn-outline-primary" asp-controller="Livestock" asp-action="History" asp-route-id="@item.LivestockId">History</a></td></tr>
+                <tr><td class="text-nowrap">@item.EventDate.ToString("dd MMM yyyy")</td><td><strong>@(item.Livestock?.TagNumber ?? "Animal")</strong><div class="small text-muted">@item.Livestock?.Species</div></td><td>@item.EventType</td><td>@(string.IsNullOrWhiteSpace(item.Notes) ? "â€”" : item.Notes) @if (item.Amount.HasValue) { <span class="text-muted">Â· NAD @item.Amount.Value.ToString("N2")</span> }</td><td><a class="btn btn-sm btn-outline-primary" asp-controller="Livestock" asp-action="History" asp-route-id="@item.LivestockId">History</a></td></tr>
             }
             </tbody></table></div>
         }
@@ -76,27 +76,27 @@
     <div class="section-heading"><div><span class="dashboard-kicker">YOUR WORKSPACE</span><h2 id="tools-heading">Farm tools</h2></div><span class="section-note">Choose where to go</span></div>
     <div class="dashboard-tools">
         <a class="dashboard-tool livestock-tool" asp-controller="Livestock" asp-action="Index">
-            <div class="tool-top"><span class="tool-icon">🐑</span><span class="tool-arrow">↗</span></div>
-            <h3>Livestock register</h3><p>Record animals, update details, and keep your herd information organized.</p><span class="tool-link">Manage livestock <span>→</span></span>
+            <div class="tool-top"><span class="tool-icon">ðŸ‘</span><span class="tool-arrow">â†—</span></div>
+            <h3>Livestock register</h3><p>Record animals, update details, and keep your herd information organized.</p><span class="tool-link">Manage livestock <span>â†’</span></span>
         </a>
         <a class="dashboard-tool market-tool" asp-controller="Market" asp-action="Index">
-            <div class="tool-top"><span class="tool-icon">📈</span><span class="tool-arrow">↗</span></div>
-            <h3>Market & calculators</h3><p>Explore published meat prices and calculate feed mixes and costs.</p><span class="tool-link">Open market tools <span>→</span></span>
+            <div class="tool-top"><span class="tool-icon">ðŸ“ˆ</span><span class="tool-arrow">â†—</span></div>
+            <h3>Market & calculators</h3><p>Explore published meat prices and calculate feed mixes and costs.</p><span class="tool-link">Open market tools <span>â†’</span></span>
         </a>
         <a class="dashboard-tool weather-tool" asp-controller="Conditions" asp-action="Index">
-            <div class="tool-top"><span class="tool-icon">☀️</span><span class="tool-arrow">↗</span></div>
-            <h3>Weather & fire</h3><p>See the 7-day forecast, rainfall outlook, and weather-based fire caution.</p><span class="tool-link">View conditions <span>→</span></span>
+            <div class="tool-top"><span class="tool-icon">â˜€ï¸</span><span class="tool-arrow">â†—</span></div>
+            <h3>Weather & fire</h3><p>See the 7-day forecast, rainfall outlook, and weather-based fire caution.</p><span class="tool-link">View conditions <span>â†’</span></span>
         </a>
     </div>
 </section>
 
 <section class="dashboard-section" aria-labelledby="agri-news-heading">
-    <div class="section-heading"><div><span class="dashboard-kicker">WHAT IS HAPPENING</span><h2 id="agri-news-heading">Agriculture news</h2><p class="text-muted mb-0">Latest headlines and what they could mean for the industry.</p></div><a class="btn btn-outline-primary" asp-controller="News" asp-action="Index">View all news →</a></div>
-    <div class="row g-3" id="dashboardNews" aria-live="polite"><div class="col-12"><p class="text-muted">Loading latest agriculture news…</p></div></div>
+    <div class="section-heading"><div><span class="dashboard-kicker">WHAT IS HAPPENING</span><h2 id="agri-news-heading">Agriculture news</h2><p class="text-muted mb-0">Latest headlines and what they could mean for the industry.</p></div><a class="btn btn-outline-primary" asp-controller="News" asp-action="Index">View all news â†’</a></div>
+    <div class="row g-3" id="dashboardNews" aria-live="polite"><div class="col-12"><p class="text-muted">Loading latest agriculture newsâ€¦</p></div></div>
 </section>
 
 <section class="dashboard-note">
-    <div class="note-icon">✦</div><div><h2>Practical information, all together</h2><p>Use the tools above to keep records current and make day-to-day farm decisions with the information available.</p></div>
+    <div class="note-icon">âœ¦</div><div><h2>Practical information, all together</h2><p>Use the tools above to keep records current and make day-to-day farm decisions with the information available.</p></div>
 </section>
 
 @section Scripts {
@@ -112,7 +112,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const col = document.createElement('div'); col.className = 'col-12 col-lg-4';
             const card = document.createElement('article'); card.className = 'news-card';
             const meta = document.createElement('div'); meta.className = 'news-card-meta';
-            meta.textContent = `${article.source || 'Agriculture news'} · ${article.publishedAt ? new Date(article.publishedAt).toLocaleDateString() : 'Date unavailable'}`;
+            meta.textContent = `${article.source || 'Agriculture news'} Â· ${article.publishedAt ? new Date(article.publishedAt).toLocaleDateString() : 'Date unavailable'}`;
             const heading = document.createElement('h3'); heading.className = 'h5 news-card-title';
             const link = document.createElement('a'); link.className = 'news-card-title-link'; link.href = article.url; link.target = '_blank'; link.rel = 'noopener noreferrer'; link.textContent = article.title; heading.appendChild(link);
             const summary = document.createElement('p'); summary.className = 'news-card-summary'; summary.textContent = article.summary || 'Open the story for details.';
@@ -125,3 +125,4 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 </script>
 }
+
