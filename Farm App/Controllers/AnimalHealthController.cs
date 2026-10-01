@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using Farm_App.Data;
 using Farm_App.Models;
+using Farm_App.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -8,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Farm_App.Controllers;
 
 [Authorize]
-public class AnimalHealthController(ApplicationDbContext db) : Controller
+public class AnimalHealthController(ApplicationDbContext db, WebPushService push) : Controller
 {
     private string CurrentUserId => User.FindFirstValue(ClaimTypes.NameIdentifier)!;
 
@@ -124,6 +125,22 @@ public class AnimalHealthController(ApplicationDbContext db) : Controller
 
         db.AnimalHealthCases.Add(healthCase);
         await db.SaveChangesAsync();
+
+        if (healthCase.VetAttentionRecommended)
+        {
+            var animalLabel = string.IsNullOrWhiteSpace(healthCase.AnimalTag) ? healthCase.Species : $"{healthCase.Species} {healthCase.AnimalTag}";
+            try
+            {
+                await push.SendToUserAsync(CurrentUserId,
+                    "FARM ALERT: Veterinary attention",
+                    $"{animalLabel}: {healthCase.Category}. Check the Animal Health entry.",
+                    "/AnimalHealth");
+            }
+            catch
+            {
+                // A push failure must not prevent the health record from being saved.
+            }
+        }
 
         TempData["HealthCategory"] = result.Category;
         TempData["HealthProduct"] = result.Product?.Name ?? string.Empty;

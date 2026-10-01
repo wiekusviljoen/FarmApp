@@ -4,13 +4,14 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Farm_App.Data;
 using Farm_App.Models;
+using Farm_App.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace Farm_App.Controllers;
 
 [Authorize]
-public class LivestockController(ApplicationDbContext db) : Controller
+public class LivestockController(ApplicationDbContext db, WebPushService push) : Controller
 {
     private string CurrentUserId => User.FindFirstValue(ClaimTypes.NameIdentifier)!;
     private const double DefaultLatitude = -25.95;
@@ -149,6 +150,21 @@ public class LivestockController(ApplicationDbContext db) : Controller
             Notes = string.IsNullOrWhiteSpace(notes) ? null : notes.Trim()
         });
         await db.SaveChangesAsync();
+
+        if (eventType is "Birth" or "Death")
+        {
+            try
+            {
+                var title = eventType == "Birth" ? "FARM ALERT: Birth recorded" : "FARM ALERT: Death recorded";
+                var body = $"{animal.Species} {animal.TagNumber} — {eventType.ToLowerInvariant()} recorded on {eventDate:dd MMM yyyy}.";
+                await push.SendToUserAsync(CurrentUserId, title, body, $"/Livestock/History/{livestockId}");
+            }
+            catch
+            {
+                // A push failure must not prevent the livestock event from being saved.
+            }
+        }
+
         TempData["Message"] = "Livestock event saved.";
         return RedirectToAction(nameof(History), new { id = livestockId });
     }
