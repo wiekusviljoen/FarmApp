@@ -62,6 +62,7 @@ public class Program
         });
         builder.Services.AddSingleton<AuctionFeedService>();
         builder.Services.AddHostedService(sp => sp.GetRequiredService<AuctionFeedService>());
+        builder.Services.AddHostedService<FarmAlertMonitorService>();
 
         var app = builder.Build();
 

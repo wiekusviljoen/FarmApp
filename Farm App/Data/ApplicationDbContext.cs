@@ -32,5 +32,6 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         builder.Entity<FarmPushSubscription>()
             .HasIndex(x => new { x.OwnerId, x.Endpoint })
             .IsUnique();
+        builder.Entity<PushServerSettings>().Property(x => x.AlertStateJson).HasColumnType("TEXT");
     }
 }

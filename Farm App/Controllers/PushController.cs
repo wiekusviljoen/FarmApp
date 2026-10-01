@@ -39,13 +39,17 @@ public class PushController(ApplicationDbContext db, WebPushService webPush) : C
                 OwnerId = CurrentUserId,
                 Endpoint = request.Endpoint.Trim(),
                 P256dh = request.P256dh.Trim(),
-                Auth = request.Auth.Trim()
+                Auth = request.Auth.Trim(),
+                Latitude = request.Latitude,
+                Longitude = request.Longitude
             });
         }
         else
         {
             existing.P256dh = request.P256dh.Trim();
             existing.Auth = request.Auth.Trim();
+            existing.Latitude = request.Latitude;
+            existing.Longitude = request.Longitude;
             existing.UpdatedAtUtc = DateTime.UtcNow;
         }
 
@@ -75,5 +79,5 @@ public class PushController(ApplicationDbContext db, WebPushService webPush) : C
     }
 }
 
-public sealed record PushSubscriptionRequest(string Endpoint, string P256dh, string Auth);
+public sealed record PushSubscriptionRequest(string Endpoint, string P256dh, string Auth, double? Latitude, double? Longitude);
 public sealed record PushUnsubscribeRequest(string Endpoint);

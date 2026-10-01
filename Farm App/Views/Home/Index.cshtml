@@ -178,10 +178,21 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             const json = subscription.toJSON();
+            let latitude = null, longitude = null;
+            if ('geolocation' in navigator) {
+                try {
+                    const position = await new Promise((resolve, reject) =>
+                        navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: false, timeout: 8000, maximumAge: 3600000 }));
+                    latitude = position.coords.latitude;
+                    longitude = position.coords.longitude;
+                } catch { /* Location is optional; notifications still work without fire alerts. */ }
+            }
             await postJson('/Push/Subscribe', {
                 endpoint: json.endpoint,
                 p256dh: json.keys?.p256dh,
-                auth: json.keys?.auth
+                auth: json.keys?.auth,
+                latitude,
+                longitude
             });
             setReady();
         } catch (error) {
