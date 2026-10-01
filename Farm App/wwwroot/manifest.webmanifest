@@ -1,8 +1,7 @@
-[Reading 23 lines from start (total: 23 lines, 0 remaining)]
-
 {
   "name": "FarmFlow",
   "short_name": "FarmFlow",
+  "id": "/",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
@@ -10,18 +9,16 @@
   "theme_color": "#2f6b3f",
   "icons": [
     {
-      "src": "/farmflow-leaf-192.png",
+      "src": "/farmflow-icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/farmflow-leaf-512.png",
+      "src": "/farmflow-icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
     }
   ]
 }
-
-[executed on device: DESKTOP-2IPJ9P8 (59869c7c-cbf0-49d3-b774-8bcd0132f317)]
