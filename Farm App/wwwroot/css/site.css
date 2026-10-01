@@ -42,14 +42,12 @@ body {
 }
 
 .brand-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 2rem;
-  height: 2rem;
+  display: block;
+  width: 2.35rem;
+  height: 2.35rem;
   margin-right: 0.5rem;
-  border-radius: 0.6rem;
-  background: var(--farm-green-soft);
+  border-radius: 0.55rem;
+  object-fit: cover;
 }
 
 .navbar-nav .nav-link {
@@ -236,8 +234,8 @@ body {
 .hero-actions{display:flex;align-items:center;gap:1.35rem;flex-wrap:wrap}
 .hero-actions .btn{border:0;border-radius:.8rem;font-weight:750;color:#234d3f;padding:.85rem 1.2rem}
 .hero-text-link{color:#f4f7ed;text-decoration:none;font-weight:700}.hero-text-link:hover{color:#d9e9c9}
-.hero-emblem{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:0 0 190px;width:190px;height:190px;border:1px solid rgba(255,255,255,.18);border-radius:50%;background:rgba(255,255,255,.06);color:#dcebd3}
-.hero-emblem span{font-size:4.8rem;line-height:1.2}.hero-emblem small{margin-top:.4rem;text-align:center;letter-spacing:.2em;font-size:.65rem;font-weight:800;line-height:1.6}
+.hero-emblem{display:flex;align-items:center;justify-content:center;flex:0 0 190px;width:190px;height:190px;border-radius:1.4rem;background:rgba(255,255,255,.08);overflow:hidden;box-shadow:0 14px 30px rgba(0,0,0,.12)}
+.hero-emblem img{display:block;width:100%;height:100%;object-fit:cover}
 .dashboard-section{margin:2.8rem 0 2rem}
 .section-heading{display:flex;align-items:end;justify-content:space-between;gap:1rem;margin-bottom:1.2rem}
 .section-heading .dashboard-kicker{color:#688374;margin-bottom:.3rem}

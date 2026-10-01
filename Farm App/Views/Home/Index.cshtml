@@ -6,7 +6,7 @@
 @if (User.Identity?.IsAuthenticated != true)
 {
     <section class="guest-dashboard-banner" aria-label="Guest dashboard notice">
-        <div><strong>Welcome to your FarmFlow dashboard</strong><p>You're viewing the public dashboard preview. Sign in to see your own livestock, rainfall, and farm records.</p></div>
+        <div><strong>Welcome to your Farm dashboard</strong><p>You're viewing the public dashboard preview. Sign in to see your own livestock, rainfall, and farm records.</p></div>
         <div class="guest-dashboard-actions"><a class="btn btn-success" asp-area="Identity" asp-page="/Account/Login">Log in</a><a class="btn btn-outline-success" asp-area="Identity" asp-page="/Account/Register">Create account</a></div>
     </section>
 }
@@ -21,7 +21,7 @@
             <a class="hero-text-link" asp-controller="Conditions" asp-action="Index">Check weather <span aria-hidden="true">&#8599;</span></a>
         </div>
     </div>
-    <div class="hero-emblem" aria-hidden="true"><span>&#127807;</span><small>BUILT FOR<br />THE FARM</small></div>
+    <div class="hero-emblem"><img src="/farm-logo.svg?v=20261001-farm-logo" alt="Farm wind-pump logo" /></div>
 </section>
 
 <section class="dashboard-section offline-mode-promo" aria-labelledby="offline-mode-heading">
