@@ -12,6 +12,8 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<LivestockEvent> LivestockEvents => Set<LivestockEvent>();
     public DbSet<OfflineSyncRecord> OfflineSyncRecords => Set<OfflineSyncRecord>();
     public DbSet<AnimalHealthCase> AnimalHealthCases => Set<AnimalHealthCase>();
+    public DbSet<FarmPushSubscription> FarmPushSubscriptions => Set<FarmPushSubscription>();
+    public DbSet<PushServerSettings> PushServerSettings => Set<PushServerSettings>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -27,5 +29,8 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .HasPrecision(18, 2);
         builder.Entity<AnimalHealthCase>()
             .HasIndex(x => new { x.OwnerId, x.CreatedAt });
+        builder.Entity<FarmPushSubscription>()
+            .HasIndex(x => new { x.OwnerId, x.Endpoint })
+            .IsUnique();
     }
 }
