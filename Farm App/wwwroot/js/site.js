@@ -82,12 +82,23 @@
     hide();
   };
 
-  show();
-  const pageReady = window.farmConditionsReady;
-  if (pageReady && typeof pageReady.then === 'function') {
-    pageReady.catch(() => {}).finally(waitForPageReady);
+  const startReadinessGate = () => {
+    show();
+    const pageReady = window.farmConditionsReady;
+    if (pageReady && typeof pageReady.then === 'function') {
+      pageReady.catch(() => {}).finally(waitForPageReady);
+    } else {
+      waitForPageReady();
+    }
+  };
+
+  // Page-specific readiness promises are declared by the page's Scripts section,
+  // which is rendered after this shared script. Wait until DOMContentLoaded so
+  // those promises exist before deciding the page is ready.
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', startReadinessGate, { once: true });
   } else {
-    waitForPageReady();
+    startReadinessGate();
   }
 
   document.addEventListener('submit', event => {
