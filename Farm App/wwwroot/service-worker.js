@@ -1,8 +1,13 @@
-const CACHE = "farm-shell-v2";
+const CACHE = "farm-shell-v3";
 const OFFLINE_URL = "/offline.html";
+const OFFLINE_ASSETS = [
+  OFFLINE_URL,
+  "/js/offline.js",
+  "/FarmIcon-192.png?v=20261001-exact"
+];
 
 self.addEventListener("install", event => {
-  event.waitUntil(caches.open(CACHE).then(cache => cache.add(OFFLINE_URL)));
+  event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(OFFLINE_ASSETS)));
   self.skipWaiting();
 });
 

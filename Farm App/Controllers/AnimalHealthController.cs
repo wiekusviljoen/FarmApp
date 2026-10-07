@@ -49,7 +49,7 @@ public class AnimalHealthController(ApplicationDbContext db, WebPushService push
             "Check current product label", "Subcutaneous (SC)", "Use the current registered label and veterinary/state-vet programme. Agra lists Riftvax in its animal-health resources.",
             1189.95m, "100 ml", "Agra", "2026-03 promo", false),
         new("Agramycin 23% LA", "Treatment", "Livestock", "Antibiotic treatment",
-            "Product-specific dose required", "Injection", "Antibiotics require a confirmed indication, species/body mass, correct product label and withdrawal period. FarmFlow will not guess an antibiotic dose.",
+            "Product-specific dose required", "Injection", "Antibiotics require a confirmed indication, species/body mass, correct product label and withdrawal period. Farm will not guess an antibiotic dose.",
             529.95m, "500 ml", "Agra", "2026-03 promo", false),
         new("Dectomax", "Treatment", "Livestock", "Parasite control",
             "Product-specific dose required", "Injection", "Dose depends on species and body mass. Follow the registered product label and withdrawal period.",
@@ -58,7 +58,7 @@ public class AnimalHealthController(ApplicationDbContext db, WebPushService push
             "Use only according to the product label", "Topical", "Clean and assess the wound first. Follow the product label. Deep, punctured, infected or heavily bleeding wounds should be assessed by a veterinarian.",
             169.95m, "350 ml", "Agra", "2026-01", false),
         new("Ecomectin 1% Injectable", "Treatment", "Cattle, Sheep, Pig", "Parasite control",
-            "Product-specific dose required", "Injection", "Dose depends on species, body mass and the registered product label. FarmFlow will not calculate this dose without verified label instructions.",
+            "Product-specific dose required", "Injection", "Dose depends on species, body mass and the registered product label. Farm will not calculate this dose without verified label instructions.",
             79.95m, "20 ml", "Agra", "2026-01", false),
         new("Ivomec Injectable", "Treatment", "Cattle, Sheep, Pig", "Parasite control",
             "Product-specific dose required", "Injection", "Dose depends on species and body mass. Follow the current product label or veterinary direction.",
@@ -164,10 +164,10 @@ public class AnimalHealthController(ApplicationDbContext db, WebPushService push
             return new("Anthrax", Products.Single(x => x.Name == "Supavax"), "Supavax is a preventive vaccine for cattle and sheep. Suspected anthrax in a live or recently dead animal needs veterinary/state-vet guidance and strict biosecurity; do not open or perform a home post-mortem.", true);
 
         if (ContainsAny(text, "fmd", "foot and mouth", "foot-and-mouth", "bek-en-klouseer", "blister", "vesicle", "drooling", "salivating", "mouth sore"))
-            return new("Possible FMD", null, "Possible foot-and-mouth disease is a notifiable disease concern. Isolate the animal/herd, stop movements and contact the State Veterinary Service immediately. FarmFlow will not recommend a treatment vaccine for a suspected outbreak.", true);
+            return new("Possible FMD", null, "Possible foot-and-mouth disease is a notifiable disease concern. Isolate the animal/herd, stop movements and contact the State Veterinary Service immediately. Farm will not recommend a treatment vaccine for a suspected outbreak.", true);
 
         if (ContainsAny(text, "lumpy skin", "lumpy", "nodular skin"))
-            return new("Possible lumpy skin disease", null, "Lumpy skin disease should be assessed and reported according to current veterinary rules. FarmFlow can show Lumpyvax in the catalogue, but a suspected clinical case is not treated by simply vaccinating the sick animal.", true);
+            return new("Possible lumpy skin disease", null, "Lumpy skin disease should be assessed and reported according to current veterinary rules. Farm can show Lumpyvax in the catalogue, but a suspected clinical case is not treated by simply vaccinating the sick animal.", true);
 
         if (ContainsAny(text, "pulpy", "enterotox", "enterotoxaemia", "enterotoxemia", "overeating disease"))
             return new("Pulpy kidney / enterotoxaemia", Products.Single(x => x.Name == "Pulpyvax"), "Pulpyvax is for prevention in sheep and goats. It is not a treatment for an animal already showing severe disease; urgent cases need veterinary assessment.", true);
@@ -194,7 +194,7 @@ public class AnimalHealthController(ApplicationDbContext db, WebPushService push
             return new("Respiratory disease prevention", Products.Single(x => x.Name == "Ovivax"), "Ovivax is a preventive vaccine for healthy sheep and goats. It is not a treatment for active pneumonia.", true);
 
         if (ContainsAny(text, "mastitis", "udder hot", "udder swollen", "udder hard", "milk abnormal", "milk fever", "hypocalcemia"))
-            return new("Possible mastitis", null, "Mastitis can require rapid veterinary treatment. Check the udder and milk, separate milk where appropriate and contact a veterinarian; FarmFlow will not guess an antibiotic or withdrawal period.", true);
+            return new("Possible mastitis", null, "Mastitis can require rapid veterinary treatment. Check the udder and milk, separate milk where appropriate and contact a veterinarian; Farm will not guess an antibiotic or withdrawal period.", true);
 
         if (ContainsAny(text, "birth problem", "difficult birth", "dystocia", "stuck", "lamb stuck", "kid stuck", "calf stuck", "giving birth", "labour", "labor"))
             return new("Birth / dystocia problem", null, "A difficult birth is time-sensitive. If the animal is straining without progress or a fetus is stuck, seek veterinary or experienced livestock assistance promptly rather than injecting a vaccine.", true);
@@ -203,7 +203,7 @@ public class AnimalHealthController(ApplicationDbContext db, WebPushService push
             return new("Post-birth problem", null, "Weakness after birth, retained placenta, fever or foul discharge can have several causes. Keep the dam and newborn warm and seek veterinary assessment if she is weak, unable to stand, feverish or deteriorating.", true);
 
         if (ContainsAny(text, "diarrhea", "diarrhoea", "scours", "scour", "loose stool", "watery stool"))
-            return new("Diarrhoea / scours", null, "Diarrhoea can result from parasites, infection, diet or toxins. Prevent dehydration, assess the animal and contact a veterinarian promptly for young, weak, bloody or rapidly worsening cases. FarmFlow will not guess an antibiotic or dewormer.", true);
+            return new("Diarrhoea / scours", null, "Diarrhoea can result from parasites, infection, diet or toxins. Prevent dehydration, assess the animal and contact a veterinarian promptly for young, weak, bloody or rapidly worsening cases. Farm will not guess an antibiotic or dewormer.", true);
 
         if (ContainsAny(text, "footrot", "foot rot", "rotten foot", "lameness", "limping", "sore foot", "hoof", "flystrike", "maggots"))
             return new("Foot / hoof problem", null, "Check the hoof and between the claws, isolate badly affected animals where practical and seek veterinary guidance for suspected footrot or severe lameness. Treatment depends on the cause.", true);
@@ -212,10 +212,10 @@ public class AnimalHealthController(ApplicationDbContext db, WebPushService push
             return new("Eye problem / possible pinkeye", null, "Isolate an affected animal where practical and protect the eye from dust and flies. Severe pain, a cloudy/ulcerated cornea or rapid spread needs veterinary assessment.", true);
 
         if (ContainsAny(text, "tick", "ticks", "teek", "teke"))
-            return new("Ticks / external parasites", Products.Single(x => x.Name == "Ecomectin 1% Injectable"), "Parasite control depends on the parasite, species and body mass. Follow the registered product label; FarmFlow will not guess an injectable dose.", false);
+            return new("Ticks / external parasites", Products.Single(x => x.Name == "Ecomectin 1% Injectable"), "Parasite control depends on the parasite, species and body mass. Follow the registered product label; Farm will not guess an injectable dose.", false);
 
         if (ContainsAny(text, "worm", "worms", "drench", "internal parasite", "parasite", "parasiete"))
-            return new("Internal parasites", Products.Single(x => x.Name == "Ivomec Injectable"), "Confirm the parasite and product label before dosing. FarmFlow will not calculate an injectable dose without verified label information.", false);
+            return new("Internal parasites", Products.Single(x => x.Name == "Ivomec Injectable"), "Confirm the parasite and product label before dosing. Farm will not calculate an injectable dose without verified label information.", false);
 
         if (ContainsAny(text, "sudden death", "died suddenly", "found dead", "dead suddenly"))
             return new("Sudden death", null, "Do not assume the cause from the description alone. Restrict access to the carcass, avoid opening it, record what you observed and contact a veterinarian or state vet—especially if more than one animal is affected.", true);

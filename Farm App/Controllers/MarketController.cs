@@ -37,7 +37,7 @@ public class MarketController : Controller
         try
         {
             using var client = new HttpClient { Timeout = TimeSpan.FromSeconds(30) };
-            client.DefaultRequestHeaders.UserAgent.ParseAdd("FarmFlow/1.0");
+            client.DefaultRequestHeaders.UserAgent.ParseAdd("Farm/1.0");
             var pageResults = await Task.WhenAll(pages.Select(async page =>
             {
                 try
@@ -93,7 +93,7 @@ public class MarketController : Controller
         try
         {
             using var client = new HttpClient { Timeout = TimeSpan.FromSeconds(20) };
-            client.DefaultRequestHeaders.UserAgent.ParseAdd("FarmFlow/1.0");
+            client.DefaultRequestHeaders.UserAgent.ParseAdd("Farm/1.0");
             var html = await client.GetStringAsync(source);
             var rows = new List<object>();
 

@@ -59,7 +59,7 @@ public class NewsController : Controller
         try
         {
             using var request = new HttpRequestMessage(HttpMethod.Get, feed.Url);
-            request.Headers.UserAgent.ParseAdd("FarmFlow/1.0 (agriculture news reader)");
+            request.Headers.UserAgent.ParseAdd("Farm/1.0 (agriculture news reader)");
             using var response = await Client.SendAsync(request);
             response.EnsureSuccessStatusCode();
             await using var stream = await response.Content.ReadAsStreamAsync();

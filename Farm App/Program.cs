@@ -53,7 +53,7 @@ public class Program
         builder.Services.AddHttpClient("WeatherGeocoding", client =>
         {
             client.Timeout = TimeSpan.FromSeconds(4);
-            client.DefaultRequestHeaders.UserAgent.ParseAdd("FarmFlow/1.0 (weather location lookup)");
+            client.DefaultRequestHeaders.UserAgent.ParseAdd("Farm/1.0 (weather location lookup)");
         });
         builder.Services.AddHttpClient("AuctionFeed", client =>
         {
