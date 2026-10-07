@@ -48,7 +48,7 @@ public class Program
         builder.Services.AddHttpClient("WeatherForecast", client =>
         {
             client.Timeout = TimeSpan.FromSeconds(8);
-            client.DefaultRequestHeaders.UserAgent.ParseAdd("FarmFlow/1.0");
+            client.DefaultRequestHeaders.UserAgent.ParseAdd("Farm/1.0");
         });
         builder.Services.AddHttpClient("WeatherGeocoding", client =>
         {
