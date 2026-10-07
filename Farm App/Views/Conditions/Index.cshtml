@@ -106,7 +106,7 @@ async function loadForecast(){
   const c=data.current;
   document.getElementById('current').innerHTML=[['Temperature',c.temp+' °C'],['Humidity',c.humidity+'%'],['Wind',c.windKmh+' km/h'],['Current rain',c.rainMm+' mm']].map(x=>`<div class="col-6 col-lg-3"><div class="card p-3 h-100"><div class="text-muted small">${x[0]}</div><div class="fs-4 fw-bold">${x[1]}</div></div></div>`).join('');
   document.querySelector('#forecast tbody').innerHTML=data.days.map(d=>`<tr><td>${d.date}</td><td>${d.minTemp.toFixed(1)} / ${d.maxTemp.toFixed(1)}</td><td>${d.rainMm.toFixed(1)}</td><td>${d.rainChance}%</td><td>${d.windKmh.toFixed(1)}</td></tr>`).join('');
-  drawRain(data.days); showFire(data.current,data.days); loadRainHistory(); status.textContent='Updated '+new Date(data.fetchedAt).toLocaleString()+' · Source: Open-Meteo';
+  drawRain(data.days); showFire(data.current,data.days); await loadRainHistory(); status.textContent='Updated '+new Date(data.fetchedAt).toLocaleString()+' · Source: Open-Meteo';
  }catch(e){status.textContent='Could not load forecast: '+e.message;}
 }
 function drawRain(days){
@@ -121,6 +121,6 @@ function showFire(c,days){
  if(hot&&windy&&dry){label='High weather-based caution — hot, dry and windy conditions';cls='alert-danger';}
  document.getElementById('fireSummary').className='alert '+cls;document.getElementById('fireSummary').textContent=label+'. Next 3-day forecast rainfall: '+rain.toFixed(1)+' mm.';
 }
-document.addEventListener('DOMContentLoaded',applyLocationPreference);
+window.farmConditionsReady = (async () => { await new Promise(resolve => { const start = () => resolve(applyLocationPreference()); if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start, { once: true }); else start(); }); })();
 </script>
 }

@@ -83,7 +83,12 @@
   };
 
   show();
-  waitForPageReady();
+  const pageReady = window.farmConditionsReady;
+  if (pageReady && typeof pageReady.then === 'function') {
+    pageReady.catch(() => {}).finally(waitForPageReady);
+  } else {
+    waitForPageReady();
+  }
 
   document.addEventListener('submit', event => {
     if (event.target instanceof HTMLFormElement && event.target.method.toLowerCase() !== 'dialog') show();
