@@ -31,6 +31,62 @@ body {
   box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem rgba(35, 77, 63, 0.25);
 }
 
+/* Farm action controls: replace the stock Bootstrap blue-button look. */
+.btn {
+  border-radius: .72rem;
+  min-height: 2.65rem;
+  padding: .58rem .95rem;
+  font-weight: 750;
+  letter-spacing: .005em;
+  transition: transform .14s ease, box-shadow .14s ease, background-color .14s ease, border-color .14s ease;
+}
+.btn:hover { transform: translateY(-1px); }
+.btn:active { transform: translateY(0); }
+.btn-primary, .btn-info {
+  color: #fff;
+  background: linear-gradient(135deg, #315f49, #234d3f);
+  border-color: #234d3f;
+  box-shadow: 0 5px 14px rgba(35,77,63,.16);
+}
+.btn-primary:hover, .btn-primary:focus, .btn-info:hover, .btn-info:focus {
+  color: #fff;
+  background: linear-gradient(135deg, #234d3f, #193b30);
+  border-color: #193b30;
+  box-shadow: 0 7px 18px rgba(35,77,63,.22);
+}
+.btn-outline-primary, .btn-outline-info {
+  color: #315f49;
+  background: #fff;
+  border: 1px solid rgba(35,77,63,.24);
+}
+.btn-outline-primary:hover, .btn-outline-primary:focus, .btn-outline-info:hover, .btn-outline-info:focus {
+  color: #fff;
+  background: #315f49;
+  border-color: #315f49;
+  box-shadow: 0 5px 14px rgba(35,77,63,.14);
+}
+.btn-link {
+  color: #315f49;
+  font-weight: 700;
+  text-decoration: none;
+  border-radius: .55rem;
+}
+.btn-link:hover, .btn-link:focus {
+  color: #193b30;
+  background: #edf5ea;
+  text-decoration: none;
+}
+.btn-secondary {
+  color: #31423b;
+  background: #eef3ef;
+  border-color: #d5dfd8;
+}
+.btn-secondary:hover, .btn-secondary:focus {
+  color: #234d3f;
+  background: #e2ebe4;
+  border-color: #c5d3c9;
+}
+
 .farm-navbar {
   background: rgba(255, 255, 255, 0.86);
   backdrop-filter: blur(12px);
