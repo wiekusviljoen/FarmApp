@@ -75,10 +75,10 @@
       await new Promise(resolve => setTimeout(resolve, 50));
     }
 
-    // Give charts, cards and fetched article content two paint cycles to finish rendering.
+    // Give charts, cards and fetched article content time to finish painting.
     await new Promise(requestAnimationFrame);
     await new Promise(requestAnimationFrame);
-    await new Promise(resolve => setTimeout(resolve, 80));
+    await new Promise(resolve => setTimeout(resolve, 2000));
     hide();
   };
 
