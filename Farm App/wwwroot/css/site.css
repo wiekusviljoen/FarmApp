@@ -654,8 +654,8 @@ img, canvas, svg { max-width: 100%; }
 
 
 /* FarmFlow loading overlay */
-.farm-loading-overlay{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:rgba(245,251,246,.72);backdrop-filter:blur(3px);opacity:0;visibility:hidden;pointer-events:none;transition:opacity .16s ease,visibility .16s ease}
-.farm-loading-overlay.is-visible{opacity:1;visibility:visible;pointer-events:auto}
+.farm-loading-overlay{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:rgba(245,251,246,.96);backdrop-filter:blur(3px);opacity:1;visibility:visible;pointer-events:auto;transition:opacity .16s ease,visibility .16s ease}
+.farm-loading-overlay.is-hidden{opacity:0;visibility:hidden;pointer-events:none}
 .farm-loading-card{display:flex;align-items:center;gap:.8rem;padding:.9rem 1.1rem;border:1px solid rgba(35,77,63,.12);border-radius:999px;background:rgba(255,255,255,.96);box-shadow:0 12px 35px rgba(35,77,63,.14);color:var(--farm-green);font-weight:750}
 .farm-loading-spinner{width:1.45rem;height:1.45rem;border:.2rem solid #dce9df;border-top-color:var(--farm-green);border-radius:50%;animation:farmflow-spin .7s linear infinite}
 @keyframes farmflow-spin{to{transform:rotate(360deg)}}

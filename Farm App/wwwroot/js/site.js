@@ -1,4 +1,4 @@
-﻿// Please see documentation at https://learn.microsoft.com/aspnet/core/client-side/bundling-and-minification
+// Please see documentation at https://learn.microsoft.com/aspnet/core/client-side/bundling-and-minification
 // for details on configuring this project to bundle and minify static web assets.
 
 // Write your JavaScript code.
@@ -27,27 +27,68 @@
 })();
 
 
-// FarmFlow loading indicator for navigation and form submissions.
+// Full-page readiness gate: keep Farm hidden until the page and its async data have settled.
 (() => {
   const overlay = document.getElementById('farmLoadingOverlay');
   if (!overlay) return;
-  let timer;
-  const show = () => {
-    clearTimeout(timer);
-    timer = setTimeout(() => {
-      overlay.classList.add('is-visible');
-      overlay.setAttribute('aria-hidden', 'false');
-    }, 120);
+
+  let pendingFetches = 0;
+  let navigationTimer;
+  const originalFetch = window.fetch;
+
+  window.fetch = function (...args) {
+    pendingFetches++;
+    return originalFetch.apply(this, args).finally(() => {
+      pendingFetches = Math.max(0, pendingFetches - 1);
+    });
   };
+
+  const show = () => {
+    clearTimeout(navigationTimer);
+    overlay.classList.remove('is-hidden');
+    overlay.setAttribute('aria-hidden', 'false');
+  };
+
   const hide = () => {
-    clearTimeout(timer);
-    overlay.classList.remove('is-visible');
+    overlay.classList.add('is-hidden');
     overlay.setAttribute('aria-hidden', 'true');
   };
-  window.addEventListener('pageshow', hide);
+
+  const imagesReady = () => Promise.all(
+    Array.from(document.images).map(img => img.complete
+      ? Promise.resolve()
+      : new Promise(resolve => {
+          img.addEventListener('load', resolve, { once: true });
+          img.addEventListener('error', resolve, { once: true });
+        }))
+  );
+
+  const waitForPageReady = async () => {
+    if (document.readyState !== 'complete') {
+      await new Promise(resolve => window.addEventListener('load', resolve, { once: true }));
+    }
+    if (document.fonts?.ready) await document.fonts.ready.catch(() => {});
+    await imagesReady();
+
+    const deadline = Date.now() + 15000;
+    while (pendingFetches > 0 && Date.now() < deadline) {
+      await new Promise(resolve => setTimeout(resolve, 50));
+    }
+
+    // Give charts, cards and fetched article content two paint cycles to finish rendering.
+    await new Promise(requestAnimationFrame);
+    await new Promise(requestAnimationFrame);
+    await new Promise(resolve => setTimeout(resolve, 80));
+    hide();
+  };
+
+  show();
+  waitForPageReady();
+
   document.addEventListener('submit', event => {
     if (event.target instanceof HTMLFormElement && event.target.method.toLowerCase() !== 'dialog') show();
   });
+
   document.addEventListener('click', event => {
     const link = event.target.closest('a[href]');
     if (!link || link.target === '_blank' || link.hasAttribute('download') || link.origin !== window.location.origin) return;
