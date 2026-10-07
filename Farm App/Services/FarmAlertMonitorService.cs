@@ -190,7 +190,7 @@ public sealed class FarmAlertMonitorService(
                         ? $"{title}. Open Fuel Prices to review the latest Namibia fuel-price announcement."
                         : $"{title}. This story may affect livestock markets, animal health, movement, or farm costs.";
 
-                    await SendToAllAsync(db, push, notificationTitle, body, isFuel ? "/FuelPrices" : "/News");
+                    await SendToAllAsync(db, push, notificationTitle, body, isFuel ? "/FuelPrices" : link);
                     state[stateKey] = DateTime.UtcNow.ToString("O");
                     TrimState(state);
                     alertSettings.AlertStateJson = JsonSerializer.Serialize(state);
