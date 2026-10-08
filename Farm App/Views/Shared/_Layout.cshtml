@@ -182,9 +182,7 @@
     (() => {
         const isPhone = /Android|iPhone|iPod/i.test(navigator.userAgent);
         if (!isPhone) {
-            document.querySelectorAll('a[href*="/Account/Passkey"]').forEach(link => {
-                link.closest('.nav-item')?.remove();
-            });
+            document.getElementById('phonePasskeySettingsLink')?.remove();
         }
     })();
     </script>
