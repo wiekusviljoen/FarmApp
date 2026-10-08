@@ -1,51 +1,187 @@
 @{
-    ViewData["Title"] = "Namibia Fuel Prices";
+    ViewData["Title"] = "Fuel Prices";
 }
 <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-4">
     <div>
-        <p class="text-uppercase small text-muted mb-1">Namibia · Local fuel price</p>
+        <p class="text-uppercase small text-muted mb-1">Namibia · Fuel price</p>
         <h1>Fuel prices</h1>
-        <p class="text-muted mb-0">Current regulated pump prices for <strong>Koës / ǁKaras</strong>.</p>
+        <p class="text-muted mb-0">Farm uses your phone's location to show the regulated fuel price for the nearest supported town.</p>
     </div>
     <span class="badge text-bg-success fs-6">Effective 7 October 2026</span>
 </div>
-<div class="alert alert-success" role="note">
-    <strong>Koës price:</strong> These are the regulated Koës prices, including the published inland transport differential. Petrol 95 increased by N$1.50/litre from 7 October; diesel prices were held unchanged for October. <a href="https://informante.web.na/?p=401816" target="_blank" rel="noopener">Latest October fuel announcement</a>.
+
+<div class="card p-4 mb-4">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <div>
+            <div class="small text-muted">Your fuel-price location</div>
+            <div id="fuelLocationName" class="h4 mb-1">Finding your location…</div>
+            <div id="fuelLocationStatus" class="small text-muted">Allow location access to get the nearest town price.</div>
+        </div>
+        <button type="button" id="fuelUseLocation" class="btn btn-success">Use my location</button>
+    </div>
 </div>
+
+<div class="alert alert-info" role="note">
+    <strong>How it works:</strong> Namibia's Ministry publishes separate regulated prices by town. Farm uses the latest town differential from the September 2026 Gazette, then applies the October Petrol 95 increase of N$1.50/L while keeping both diesel grades unchanged. <a href="https://informante.web.na/?p=401816" target="_blank" rel="noopener">MME October announcement</a>.
+</div>
+
 <div class="row g-3 mb-4">
-    <div class="col-md-4"><section class="card p-4 h-100"><div class="small text-muted">Petrol 95 (ULP)</div><div class="display-6 fw-bold">N$27.62</div><div class="small text-muted">per litre · Koës</div></section></div>
-    <div class="col-md-4"><section class="card p-4 h-100"><div class="small text-muted">Diesel 50ppm</div><div class="display-6 fw-bold">N$28.90</div><div class="small text-muted">per litre · Koës</div></section></div>
-    <div class="col-md-4"><section class="card p-4 h-100"><div class="small text-muted">Diesel 10ppm</div><div class="display-6 fw-bold">N$29.00</div><div class="small text-muted">per litre · Koës</div></section></div>
+    <div class="col-md-4"><section class="card p-4 h-100"><div class="small text-muted">Petrol 95 (ULP)</div><div class="display-6 fw-bold" id="petrolPrice">—</div><div class="small text-muted">per litre</div></section></div>
+    <div class="col-md-4"><section class="card p-4 h-100"><div class="small text-muted">Diesel 50ppm</div><div class="display-6 fw-bold" id="diesel50Price">—</div><div class="small text-muted">per litre</div></section></div>
+    <div class="col-md-4"><section class="card p-4 h-100"><div class="small text-muted">Diesel 10ppm</div><div class="display-6 fw-bold" id="diesel10Price">—</div><div class="small text-muted">per litre</div></section></div>
 </div>
+
 <div class="card p-4 mb-4">
     <h2 class="h3">Fuel cost calculator</h2>
-    <p class="text-muted">Estimate the cost of filling a tank or buying fuel for a trip. Change the price to match your local station.</p>
+    <p class="text-muted">The calculator starts with the fuel price for your detected location.</p>
     <div class="row g-3">
-        <div class="col-md-4"><label class="form-label" for="fuelType">Fuel type</label><select id="fuelType" class="form-select"><option value="27.62">Petrol 95 — N$27.62/L</option><option value="28.90" selected>Diesel 50ppm — N$28.90/L</option><option value="29.00">Diesel 10ppm — N$29.00/L</option></select></div>
-        <div class="col-md-4"><label class="form-label" for="fuelPrice">Price per litre (N$)</label><input id="fuelPrice" class="form-control" type="number" min="0" step="0.01" value="28.90" /></div>
-        <div class="col-md-4"><label class="form-label" for="fuelLitres">Litres</label><input id="fuelLitres" class="form-control" type="number" min="0" step="1" value="80" /></div>
+        <div class="col-md-4">
+            <label class="form-label" for="fuelType">Fuel type</label>
+            <select id="fuelType" class="form-select">
+                <option value="petrol">Petrol 95</option>
+                <option value="diesel50" selected>Diesel 50ppm</option>
+                <option value="diesel10">Diesel 10ppm</option>
+            </select>
+        </div>
+        <div class="col-md-4">
+            <label class="form-label" for="fuelPrice">Price per litre (N$)</label>
+            <input id="fuelPrice" class="form-control" type="number" min="0" step="0.01" />
+        </div>
+        <div class="col-md-4">
+            <label class="form-label" for="fuelLitres">Litres</label>
+            <input id="fuelLitres" class="form-control" type="number" min="0" step="1" value="80" />
+        </div>
     </div>
-    <div class="mt-4 p-3 rounded bg-light"><span class="text-muted">Estimated total</span><div class="display-6 fw-bold" id="fuelTotal">N$2,312.00</div></div>
+    <div class="mt-4 p-3 rounded bg-light">
+        <span class="text-muted">Estimated total</span>
+        <div class="display-6 fw-bold" id="fuelTotal">—</div>
+    </div>
 </div>
-<div class="small text-muted">Last checked: 8 October 2026 · Koës regulated prices effective 7 October 2026. Source: Namibia Ministry of Industries, Mines and Energy pricing schedule and October fuel-price announcement.</div>
-<p class="mt-2"><a href="https://informante.web.na/?p=401816" target="_blank" rel="noopener">Read the October fuel-price announcement</a></p>
+
+<div class="small text-muted">Last checked: 8 October 2026. Town prices are based on the Namibia Government Gazette No. 9015 (2 September 2026), with the October 2026 MME Petrol 95 adjustment applied.</div>
+<p class="mt-2">
+    <a href="https://informante.web.na/?p=401816" target="_blank" rel="noopener">October 2026 fuel announcement</a>
+    · <a href="https://bazulo.com/na/gazettes/2026/9015" target="_blank" rel="noopener">Government Gazette No. 9015</a>
+</p>
+
 @section Scripts {
 <script>
 (() => {
+    // October 2026 town prices: September Gazette town differential,
+    // +N$1.50/L to Petrol 95 only; diesel grades remain unchanged.
+    // Coordinates are town-centres used only to select the nearest published price.
+    const towns = [
+        { name: 'Koës', lat: -26.9167, lon: 18.3850, petrol: 27.62, diesel50: 29.00, diesel10: 29.00 },
+        { name: 'Helmeringhausen', lat: -26.4467, lon: 17.9300, petrol: 27.30, diesel50: 28.68, diesel10: 28.68 },
+        { name: 'Keetmanshoop', lat: -26.5833, lon: 18.1333, petrol: 27.62, diesel50: 29.00, diesel10: 29.00 },
+        { name: 'Karasburg', lat: -28.0167, lon: 18.7500, petrol: 27.68, diesel50: 29.06, diesel10: 29.06 },
+        { name: 'Bethanien', lat: -26.5000, lon: 17.1667, petrol: 27.12, diesel50: 28.90, diesel10: 29.00 },
+        { name: 'Lüderitz', lat: -26.6481, lon: 15.1594, petrol: 27.14, diesel50: 28.52, diesel10: 29.00 },
+        { name: 'Windhoek', lat: -22.5609, lon: 17.0658, petrol: 27.07, diesel50: 28.35, diesel10: 28.45 },
+        { name: 'Rehoboth', lat: -23.3170, lon: 17.0900, petrol: 27.27, diesel50: 28.65, diesel10: 28.65 },
+        { name: 'Mariental', lat: -24.6270, lon: 17.9630, petrol: 27.30, diesel50: 28.68, diesel10: 28.68 },
+        { name: 'Gobabis', lat: -22.4500, lon: 18.9700, petrol: 27.25, diesel50: 28.53, diesel10: 28.63 },
+        { name: 'Otjiwarongo', lat: -20.4637, lon: 16.6477, petrol: 27.08, diesel50: 28.46, diesel10: 28.46 },
+        { name: 'Tsumeb', lat: -19.2333, lon: 17.7167, petrol: 27.29, diesel50: 28.57, diesel10: 28.67 },
+        { name: 'Oshakati', lat: -17.7883, lon: 15.7044, petrol: 27.44, diesel50: 28.72, diesel10: 28.82 },
+        { name: 'Rundu', lat: -17.9333, lon: 19.7667, petrol: 27.26, diesel50: 28.64, diesel10: 28.74 },
+        { name: 'Katima Mulilo', lat: -17.5000, lon: 24.2667, petrol: 27.26, diesel50: 28.64, diesel10: 28.74 },
+        { name: 'Swakopmund', lat: -22.6833, lon: 14.5333, petrol: 26.67, diesel50: 27.95, diesel10: 28.05 },
+        { name: 'Walvis Bay', lat: -22.9575, lon: 14.5053, petrol: 26.58, diesel50: 27.86, diesel10: 27.96 }
+    ];
+
+    const locationName = document.getElementById('fuelLocationName');
+    const locationStatus = document.getElementById('fuelLocationStatus');
+    const useLocation = document.getElementById('fuelUseLocation');
+    const petrol = document.getElementById('petrolPrice');
+    const diesel50 = document.getElementById('diesel50Price');
+    const diesel10 = document.getElementById('diesel10Price');
     const type = document.getElementById('fuelType');
     const price = document.getElementById('fuelPrice');
     const litres = document.getElementById('fuelLitres');
     const total = document.getElementById('fuelTotal');
-    const money = value => 'N$' + value.toLocaleString('en-NA', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    const update = () => {
+
+    const money = value => 'N$' + Number(value).toLocaleString('en-NA', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+    const distanceKm = (lat1, lon1, lat2, lon2) => {
+        const r = 6371;
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLon = (lon2 - lon1) * Math.PI / 180;
+        const a = Math.sin(dLat / 2) ** 2 +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) ** 2;
+        return 2 * r * Math.asin(Math.sqrt(a));
+    };
+
+    let selectedTown = towns[0];
+
+    const updateCalculator = () => {
         const p = Math.max(0, Number(price.value) || 0);
         const l = Math.max(0, Number(litres.value) || 0);
         total.textContent = money(p * l);
     };
-    type.addEventListener('change', () => { price.value = type.value; update(); });
-    price.addEventListener('input', update);
-    litres.addEventListener('input', update);
-    update();
+
+    const selectTown = town => {
+        selectedTown = town;
+        locationName.textContent = town.name;
+        locationStatus.textContent = 'Nearest supported regulated fuel-price town.';
+        petrol.textContent = money(town.petrol);
+        diesel50.textContent = money(town.diesel50);
+        diesel10.textContent = money(town.diesel10);
+        price.value = town.diesel50.toFixed(2);
+        updateCalculator();
+        localStorage.setItem('farm.fuel.town', town.name);
+    };
+
+    const findNearestTown = (lat, lon) => {
+        return towns.reduce((nearest, town) =>
+            distanceKm(lat, lon, town.lat, town.lon) < distanceKm(lat, lon, nearest.lat, nearest.lon)
+                ? town : nearest, towns[0]);
+    };
+
+    const locate = () => {
+        if (!navigator.geolocation) {
+            locationName.textContent = 'Location unavailable';
+            locationStatus.textContent = 'Your browser does not provide GPS location.';
+            return;
+        }
+
+        locationName.textContent = 'Finding your location…';
+        locationStatus.textContent = 'Waiting for GPS permission…';
+        useLocation.disabled = true;
+
+        navigator.geolocation.getCurrentPosition(
+            position => {
+                const town = findNearestTown(position.coords.latitude, position.coords.longitude);
+                selectTown(town);
+                useLocation.disabled = false;
+            },
+            error => {
+                useLocation.disabled = false;
+                locationName.textContent = 'Location permission needed';
+                locationStatus.textContent = error.code === 1
+                    ? 'Allow location access for Farm to show the nearest town fuel price.'
+                    : 'Could not get your location. You can use the last saved town.';
+                const saved = localStorage.getItem('farm.fuel.town');
+                const fallback = towns.find(t => t.name === saved) || towns[0];
+                selectTown(fallback);
+            },
+            { enableHighAccuracy: true, timeout: 10000, maximumAge: 300000 }
+        );
+    };
+
+    type.addEventListener('change', () => {
+        const values = { petrol: selectedTown.petrol, diesel50: selectedTown.diesel50, diesel10: selectedTown.diesel10 };
+        price.value = values[type.value].toFixed(2);
+        updateCalculator();
+    });
+    price.addEventListener('input', updateCalculator);
+    litres.addEventListener('input', updateCalculator);
+    useLocation.addEventListener('click', locate);
+
+    const saved = localStorage.getItem('farm.fuel.town');
+    const initial = towns.find(t => t.name === saved);
+    if (initial) selectTown(initial);
+    locate();
 })();
 </script>
 }
