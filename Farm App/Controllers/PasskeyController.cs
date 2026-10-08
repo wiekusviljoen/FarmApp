@@ -105,20 +105,23 @@ public class PasskeyController : Controller
         return Ok(new { success = true });
     }
 
-    [AllowAnonymous]
+    [Authorize]
     [ValidateAntiForgeryToken]
     [HttpPost("PasskeyRequestOptions")]
-    public async Task<IActionResult> RequestOptions([FromForm] string? username)
+    public async Task<IActionResult> RequestOptions()
     {
-        IdentityUser? user = null;
-        if (!string.IsNullOrWhiteSpace(username))
-            user = await _userManager.FindByNameAsync(username);
+        // The phone is already signed in with its normal Farm session. Generate
+        // request options for that exact account so Android only offers passkeys
+        // registered to this Farm account, rather than unrelated discoverable keys.
+        var user = await _userManager.GetUserAsync(User);
+        if (user is null)
+            return Unauthorized();
 
         var optionsJson = await _signInManager.MakePasskeyRequestOptionsAsync(user);
         return Content(optionsJson, "application/json");
     }
 
-    [AllowAnonymous]
+    [Authorize]
     [ValidateAntiForgeryToken]
     [HttpPost("PasskeyLogin")]
     public async Task<IActionResult> Login([FromBody] PasskeyCredentialRequest request)
@@ -126,15 +129,27 @@ public class PasskeyController : Controller
         if (string.IsNullOrWhiteSpace(request.CredentialJson))
             return BadRequest("Missing passkey credential.");
 
-        var result = await _signInManager.PasskeySignInAsync(request.CredentialJson);
+        var currentUser = await _userManager.GetUserAsync(User);
+        if (currentUser is null)
+            return Unauthorized("Your Farm session has expired. Please sign in again.");
 
-        if (result.Succeeded)
-            return Ok(new { success = true, redirect = Url.Content("~/") });
+        // Verify the assertion against the passkey options generated for the
+        // current Farm account. This avoids ambiguous discoverable credentials
+        // when the phone has more than one passkey for the same website.
+        var result = await _signInManager.PerformPasskeyAssertionAsync(request.CredentialJson);
+        if (!result.Succeeded || result.User is null)
+            return Unauthorized("Fingerprint/passkey authentication failed.");
 
-        if (result.IsLockedOut)
-            return StatusCode(StatusCodes.Status423Locked, "Account is temporarily locked.");
+        var currentUserId = await _userManager.GetUserIdAsync(currentUser);
+        var assertedUserId = await _userManager.GetUserIdAsync(result.User);
+        if (!string.Equals(currentUserId, assertedUserId, StringComparison.Ordinal))
+            return Unauthorized("That fingerprint belongs to a different Farm account.");
 
-        return Unauthorized("Fingerprint/passkey authentication failed.");
+        var updateResult = await _userManager.AddOrUpdatePasskeyAsync(result.User, result.Passkey!);
+        if (!updateResult.Succeeded)
+            return BadRequest(string.Join(" ", updateResult.Errors.Select(e => e.Description)));
+
+        return Ok(new { success = true });
     }
 
     public sealed class PasskeyCredentialRequest
