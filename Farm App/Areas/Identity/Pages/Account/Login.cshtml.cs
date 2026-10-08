@@ -71,7 +71,11 @@ public class LoginModel : PageModel
                 return LocalRedirect($"{ReturnUrl}{separator}passkeyPrompt=1");
             }
 
-            return LocalRedirect(ReturnUrl);
+            // If the user deliberately chose the email/password fallback from
+            // the phone fingerprint gate, mark the new browser session as
+            // verified so the gate does not immediately appear again.
+            var passwordSeparator = ReturnUrl.Contains('?') ? "&" : "?";
+            return LocalRedirect($"{ReturnUrl}{passwordSeparator}passwordLogin=1");
         }
 
         if (result.RequiresTwoFactor)

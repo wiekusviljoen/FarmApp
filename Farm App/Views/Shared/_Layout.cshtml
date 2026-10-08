@@ -63,7 +63,7 @@
             <span>Farming…</span>
         </div>
     </div>
-    @if (isAuthenticated)
+    @if (isAuthenticated && !isAuthPage)
     {
         <div id="farmPhonePasskeyGate" class="farm-phone-passkey-gate" hidden>
             <div class="farm-phone-passkey-card" role="dialog" aria-modal="true" aria-labelledby="farmPhonePasskeyTitle">
@@ -126,6 +126,17 @@
         // never receive this gate, even if a passkey exists on the PC.
         const isPhone = /Android|iPhone|iPod/i.test(navigator.userAgent);
         const passkeyEnabled = localStorage.getItem('farm.passkey.enabled') === '1';
+        const passwordLogin = new URLSearchParams(window.location.search).get('passwordLogin') === '1';
+
+        // A deliberate email/password login is a valid unlock. Remember that
+        // verification for this browser session and remove the one-time URL flag.
+        if (passwordLogin) {
+            sessionStorage.setItem('farm.passkey.sessionVerified', '1');
+            const cleanUrl = new URL(window.location.href);
+            cleanUrl.searchParams.delete('passwordLogin');
+            window.history.replaceState({}, document.title, cleanUrl.pathname + cleanUrl.search + cleanUrl.hash);
+        }
+
         const sessionVerified = sessionStorage.getItem('farm.passkey.sessionVerified') === '1';
 
         if (!gate || !button || !status || !isPhone || !passkeyEnabled || sessionVerified) return;
