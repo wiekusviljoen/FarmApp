@@ -8,8 +8,59 @@ namespace Farm_App.Services;
 
 public sealed class SmtpEmailSender(IConfiguration configuration, ILogger<SmtpEmailSender> logger) : IEmailSender, IEmailSender<IdentityUser>
 {
-    public Task SendConfirmationLinkAsync(IdentityUser user, string email, string confirmationLink) =>
-        SendEmailAsync(email, "Confirm your Farm App account", $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(confirmationLink)}'>clicking here</a>.");
+    public Task SendConfirmationLinkAsync(IdentityUser user, string email, string confirmationLink)
+    {
+        var safeLink = HtmlEncoder.Default.Encode(confirmationLink);
+        var html = $@"
+<!doctype html>
+<html lang='en'>
+<head>
+  <meta charset='utf-8'>
+  <meta name='viewport' content='width=device-width,initial-scale=1'>
+  <title>Confirm your Farm account</title>
+</head>
+<body style='margin:0;padding:0;background:#eef2ed;font-family:Arial,Helvetica,sans-serif;color:#243229;'>
+  <table role='presentation' width='100%' cellpadding='0' cellspacing='0' style='background:#eef2ed;padding:32px 12px;'>
+    <tr><td align='center'>
+      <table role='presentation' width='100%' cellpadding='0' cellspacing='0' style='max-width:620px;background:#ffffff;border-radius:18px;overflow:hidden;box-shadow:0 8px 30px rgba(25,55,35,.12);'>
+        <tr>
+          <td style='background:#183d2a;padding:30px 36px;text-align:center;'>
+            <div style='font-size:30px;font-weight:800;letter-spacing:-1px;color:#ffffff;'>Farm</div>
+            <div style='margin-top:7px;font-size:13px;color:#cbdccf;letter-spacing:.5px;'>SMART FARM MANAGEMENT</div>
+          </td>
+        </tr>
+        <tr>
+          <td style='padding:42px 40px 34px;'>
+            <div style='font-size:12px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:#64816d;margin-bottom:12px;'>Welcome to Farm</div>
+            <h1 style='margin:0 0 16px;font-size:30px;line-height:1.2;color:#183d2a;'>Confirm your email address</h1>
+            <p style='margin:0 0 24px;font-size:16px;line-height:1.65;color:#526158;'>Thanks for creating your Farm account. Confirm your email address to finish setting up your account and start managing your farm from one place.</p>
+            <table role='presentation' cellpadding='0' cellspacing='0' style='margin:0 auto 28px;'>
+              <tr><td align='center' style='border-radius:10px;background:#2f6b45;'>
+                <a href='{safeLink}' style='display:inline-block;padding:15px 30px;font-size:16px;font-weight:700;color:#ffffff;text-decoration:none;border-radius:10px;'>Confirm my email</a>
+              </td></tr>
+            </table>
+            <div style='border-top:1px solid #e3e9e4;padding-top:22px;'>
+              <p style='margin:0 0 8px;font-size:12px;font-weight:700;color:#526158;'>Button not working?</p>
+              <p style='margin:0;font-size:12px;line-height:1.6;color:#78847c;word-break:break-all;'>{safeLink}</p>
+            </div>
+            <div style='margin-top:26px;padding:15px 16px;background:#f5f8f5;border-radius:10px;'>
+              <p style='margin:0;font-size:12px;line-height:1.6;color:#68756d;'>If you did not create a Farm account, you can safely ignore this email.</p>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td style='padding:20px 36px;background:#f7f9f7;text-align:center;border-top:1px solid #e5ebe6;'>
+            <div style='font-size:12px;color:#78847c;'>Farm &bull; Your farm, managed smarter.</div>
+          </td>
+        </tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>";
+
+        return SendEmailAsync(email, "Confirm your Farm account", html);
+    }
 
     public Task SendPasswordResetLinkAsync(IdentityUser user, string email, string resetLink) =>
         SendEmailAsync(email, "Reset your Farm App password", $"Reset your password by <a href='{HtmlEncoder.Default.Encode(resetLink)}'>clicking here</a>.");
