@@ -22,6 +22,14 @@ public class PasskeyController : Controller
     [HttpGet("Passkey")]
     public IActionResult Index(string? returnUrl = null)
     {
+        var userAgent = Request.Headers.UserAgent.ToString();
+        var isPhone = userAgent.Contains("Android", StringComparison.OrdinalIgnoreCase)
+            || userAgent.Contains("iPhone", StringComparison.OrdinalIgnoreCase)
+            || userAgent.Contains("iPod", StringComparison.OrdinalIgnoreCase);
+
+        if (!isPhone)
+            return LocalRedirect("~/");
+
         ViewData["ReturnUrl"] = !string.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl)
             ? returnUrl
             : Url.Content("~/");
