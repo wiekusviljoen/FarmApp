@@ -20,8 +20,11 @@ public class PasskeyController : Controller
 
     [Authorize]
     [HttpGet("Passkey")]
-    public IActionResult Index()
+    public IActionResult Index(string? returnUrl = null)
     {
+        ViewData["ReturnUrl"] = !string.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl)
+            ? returnUrl
+            : Url.Content("~/");
         return View();
     }
 

@@ -1,17 +1,28 @@
 @{
     ViewData["Title"] = "Fingerprint login";
+    var returnUrl = ViewData["ReturnUrl"]?.ToString() ?? Url.Content("~/");
 }
 
 <div class="row justify-content-center">
     <div class="col-12 col-md-8 col-lg-6">
         <div class="card shadow-sm border-0">
-            <div class="card-body p-4">
-                <h1 class="h3 mb-2">Fingerprint login</h1>
-                <p class="text-muted mb-4">Set up a passkey on this device. Your phone's fingerprint, face unlock, or device PIN will be used to unlock Farm without typing your password.</p>
+            <div class="card-body p-4 text-center">
+                <div style="font-size:3rem;" aria-hidden="true">🔐</div>
+                <h1 class="h3 mb-2">Use fingerprint next time?</h1>
+                <p class="text-muted mb-4">
+                    You are logged in. Would you like to set up fingerprint login on this device?
+                    Your fingerprint stays on your phone.
+                </p>
+
                 @Html.AntiForgeryToken()
-                <button id="register-passkey" type="button" class="btn btn-primary w-100"><span aria-hidden="true">🔐</span> Set up fingerprint login</button>
-                <div id="passkey-status" class="mt-3" role="status" aria-live="polite"></div>
-                <div class="mt-4"><a asp-controller="Home" asp-action="Index">Back to Farm</a></div>
+
+                <button id="register-passkey" type="button" class="btn btn-primary w-100">
+                    Set up fingerprint login
+                </button>
+
+                <a id="skip-passkey" href="@returnUrl" class="btn btn-link mt-2">Not now</a>
+
+                <div id="passkey-status" class="mt-3 small" role="status" aria-live="polite"></div>
             </div>
         </div>
     </div>
@@ -22,31 +33,58 @@
 (() => {
     const button = document.getElementById("register-passkey");
     const status = document.getElementById("passkey-status");
+    const skip = document.getElementById("skip-passkey");
     const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
-    const setStatus = (message, isError = false) => { status.textContent = message; status.className = "mt-3 " + (isError ? "text-danger" : "text-success"); };
-    if (!window.PublicKeyCredential || !navigator.credentials) { button.disabled = true; setStatus("This browser or device does not support fingerprint/passkey login.", true); return; }
+    const returnUrl = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(returnUrl));
+
+    const setStatus = (message, isError = false) => {
+        status.textContent = message;
+        status.className = "mt-3 small " + (isError ? "text-danger" : "text-success");
+    };
+
+    if (!window.PublicKeyCredential || !navigator.credentials) {
+        button.disabled = true;
+        setStatus("Fingerprint/passkey login is not supported by this browser.", true);
+        return;
+    }
+
     button.addEventListener("click", async () => {
         button.disabled = true;
-        setStatus("Preparing fingerprint login…");
+        skip.style.pointerEvents = "none";
+        setStatus("Waiting for fingerprint…");
+
         try {
-            const optionsResponse = await fetch("/Account/PasskeyCreationOptions", { method: "POST", headers: { "RequestVerificationToken": token } });
+            const optionsResponse = await fetch("/Account/PasskeyCreationOptions", {
+                method: "POST",
+                headers: { "RequestVerificationToken": token }
+            });
+
             if (!optionsResponse.ok) throw new Error(await optionsResponse.text());
+
             const optionsJson = await optionsResponse.json();
             const options = PublicKeyCredential.parseCreationOptionsFromJSON(optionsJson);
             const credential = await navigator.credentials.create({ publicKey: options });
+
             if (!credential) throw new Error("No passkey was created.");
+
             const registrationResponse = await fetch("/Account/PasskeyRegistration", {
                 method: "POST",
-                headers: { "Content-Type": "application/json", "RequestVerificationToken": token },
+                headers: {
+                    "Content-Type": "application/json",
+                    "RequestVerificationToken": token
+                },
                 body: JSON.stringify({ credentialJson: JSON.stringify(credential) })
             });
+
             if (!registrationResponse.ok) throw new Error(await registrationResponse.text());
-            setStatus("Fingerprint login is ready. Next time, tap “Fingerprint login” on the Farm login page.");
+
+            setStatus("Fingerprint login is ready.");
+            setTimeout(() => window.location.href = returnUrl || "/", 700);
         } catch (error) {
             console.error(error);
             setStatus(error?.message || "Fingerprint setup was cancelled or failed.", true);
-        } finally {
             button.disabled = false;
+            skip.style.pointerEvents = "";
         }
     });
 })();
