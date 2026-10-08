@@ -24,7 +24,7 @@
     <div class="hero-emblem"><img src="/FarmIcon-512.png?v=20261001-exact" alt="Farm wind-pump logo" /></div>
 </section>
 
-@if (User.Identity?.IsAuthenticated == true && (Context.Request.Query["fingerprint"] == "1" || (Context.Request.Query["passkeyPrompt"] == "1" && !Context.Request.Cookies.ContainsKey("farm.passkey.prompted")))
+@if (User.Identity?.IsAuthenticated == true && (Context.Request.Query["fingerprint"] == "1" || (Context.Request.Query["passkeyPrompt"] == "1" && !Context.Request.Cookies.ContainsKey("farm.passkey.prompted"))))
 {
 <div class="farm-passkey-modal-backdrop" id="farmPasskeyPrompt" role="presentation">
     <div class="farm-passkey-modal card shadow-lg border-0" role="dialog" aria-modal="true" aria-labelledby="farmPasskeyTitle">
