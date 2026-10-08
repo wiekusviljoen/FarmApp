@@ -1,3 +1,8 @@
+.farm-passkey-modal-backdrop{position:fixed;inset:0;z-index:2000;display:flex;align-items:center;justify-content:center;padding:1rem;background:rgba(20,35,28,.62);backdrop-filter:blur(4px)}
+.farm-passkey-modal{width:min(100%,460px);border-radius:1.25rem}
+.farm-passkey-icon{font-size:3rem;margin-bottom:.5rem}
+@media(max-width:575.98px){.farm-passkey-modal{max-height:90vh;overflow:auto}.farm-passkey-modal .card-body{padding:1.5rem!important}}
+
 :root {
   --farm-green: #234d3f;
   --farm-green-soft: #eaf7ee;
@@ -437,7 +442,7 @@ img, canvas, svg { max-width: 100%; }
   .navbar > .container-fluid { padding-left: .8rem; padding-right: .8rem; }
   .brand-icon { margin-right: .35rem; }
   .page-shell { padding-top: .85rem; }
-  .dashboard-section { margin-top: 1.8rem; }
+.dashboard-section { margin-top: 1.8rem; }
   .dashboard-note { align-items: flex-start; }
   .footer .container { font-size: .9rem; }
   .auction-calendar-wrap, .table-responsive { max-width: 100%; }

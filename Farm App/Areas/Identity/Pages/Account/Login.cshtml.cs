@@ -63,14 +63,12 @@ public class LoginModel : PageModel
         {
             _logger.LogInformation("User logged in.");
 
-            // Do not query the passkey table during login. The optional fingerprint
-            // prompt is shown once after a successful password login.
+            // Keep the password login itself simple. The optional fingerprint
+            // prompt is rendered on the dashboard after the successful redirect.
             if (!Request.Cookies.ContainsKey("farm.passkey.prompted"))
             {
-                return RedirectToAction(
-                    "Index",
-                    "Passkey",
-                    new { returnUrl = ReturnUrl });
+                var separator = ReturnUrl.Contains('?') ? "&" : "?";
+                return LocalRedirect($"{ReturnUrl}{separator}passkeyPrompt=1");
             }
 
             return LocalRedirect(ReturnUrl);

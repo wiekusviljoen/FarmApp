@@ -24,6 +24,23 @@
     <div class="hero-emblem"><img src="/FarmIcon-512.png?v=20261001-exact" alt="Farm wind-pump logo" /></div>
 </section>
 
+@if (User.Identity?.IsAuthenticated == true && Context.Request.Query["passkeyPrompt"] == "1" && !Context.Request.Cookies.ContainsKey("farm.passkey.prompted"))
+{
+<div class="farm-passkey-modal-backdrop" id="farmPasskeyPrompt" role="presentation">
+    <div class="farm-passkey-modal card shadow-lg border-0" role="dialog" aria-modal="true" aria-labelledby="farmPasskeyTitle">
+        <div class="card-body p-4 text-center">
+            <div class="farm-passkey-icon" aria-hidden="true">🔐</div>
+            <h2 id="farmPasskeyTitle" class="h3 mb-2">Use fingerprint next time?</h2>
+            <p class="text-muted mb-4">You're logged in. Set up fingerprint login on this device for faster sign-in. Your fingerprint stays on your phone.</p>
+            <form id="farmPasskeyAntiForgery" method="post" style="display:none">@Html.AntiForgeryToken()</form>
+            <button type="button" id="farmPasskeyRegister" class="btn btn-success btn-lg w-100">Set up fingerprint login</button>
+            <a id="farmPasskeySkip" href="@Url.Action("Skip", "Passkey", new { returnUrl = "/" })" class="btn btn-link mt-2">Not now</a>
+            <div id="farmPasskeyStatus" class="small mt-2" role="status" aria-live="polite"></div>
+        </div>
+    </div>
+</div>
+}
+
 @if (User.Identity?.IsAuthenticated == true)
 {
 <section class="dashboard-section notification-promo" aria-labelledby="notifications-heading">
@@ -118,6 +135,55 @@
 </section>
 
 @section Scripts {
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const modal = document.getElementById('farmPasskeyPrompt');
+    const register = document.getElementById('farmPasskeyRegister');
+    const skip = document.getElementById('farmPasskeySkip');
+    const status = document.getElementById('farmPasskeyStatus');
+    const token = document.querySelector('#farmPasskeyAntiForgery input[name="__RequestVerificationToken"]')?.value;
+
+    if (modal && register && skip && status) {
+        if (!window.PublicKeyCredential || !navigator.credentials) {
+            modal.remove();
+        } else {
+            register.addEventListener('click', async () => {
+                register.disabled = true;
+                skip.style.pointerEvents = 'none';
+                status.textContent = 'Waiting for fingerprint…';
+                try {
+                    const optionsResponse = await fetch('/Account/PasskeyCreationOptions', {
+                        method: 'POST',
+                        headers: { 'RequestVerificationToken': token }
+                    });
+                    if (!optionsResponse.ok) throw new Error(await optionsResponse.text());
+                    const options = PublicKeyCredential.parseCreationOptionsFromJSON(await optionsResponse.json());
+                    const credential = await navigator.credentials.create({ publicKey: options });
+                    if (!credential) throw new Error('No passkey was created.');
+
+                    const registrationResponse = await fetch('/Account/PasskeyRegistration', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'RequestVerificationToken': token
+                        },
+                        body: JSON.stringify({ credentialJson: JSON.stringify(credential) })
+                    });
+                    if (!registrationResponse.ok) throw new Error(await registrationResponse.text());
+
+                    status.textContent = 'Fingerprint login is ready.';
+                    setTimeout(() => window.location.href = '/', 600);
+                } catch (error) {
+                    console.error(error);
+                    status.textContent = error?.message || 'Fingerprint setup was cancelled or failed.';
+                    register.disabled = false;
+                    skip.style.pointerEvents = '';
+                }
+            });
+        }
+    }
+});
+</script>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
     const enable = document.getElementById('enablePushButton');
