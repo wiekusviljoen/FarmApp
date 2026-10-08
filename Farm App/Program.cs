@@ -23,6 +23,7 @@ public class Program
         builder.Services.AddDefaultIdentity<IdentityUser>(options =>
         {
             options.SignIn.RequireConfirmedAccount = false;
+            options.Stores.SchemaVersion = IdentitySchemaVersions.Version3;
             options.User.RequireUniqueEmail = true;
             options.Password.RequiredLength = 8;
             options.Password.RequireDigit = true;
@@ -32,6 +33,13 @@ public class Program
             options.Lockout.MaxFailedAccessAttempts = 5;
             options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(10);
         }).AddEntityFrameworkStores<ApplicationDbContext>();
+
+        builder.Services.Configure<IdentityPasskeyOptions>(options =>
+        {
+            // Require biometric/PIN verification from the device authenticator.
+            options.UserVerificationRequirement = "required";
+            options.ResidentKeyRequirement = "preferred";
+        });
 
         builder.Services.AddAuthorization(options =>
         {

@@ -27,6 +27,8 @@
                 </label>
             </div>
             <button id="login-submit" type="submit" class="w-100">Log in</button>
+            <button id="passkey-login" type="button" class="w-100 mt-2 btn btn-outline-primary">🔐 Fingerprint login</button>
+            <div id="passkey-login-status" class="text-center mt-2 small" role="status" aria-live="polite"></div>
             <div class="text-center mt-4">
                 <p class="mb-2">Don't have an account? <a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl">Register</a></p>
                 <p class="mb-0"><a asp-page="./ForgotPassword">Forgot your password?</a></p>
@@ -38,4 +40,66 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+    (() => {
+        const button = document.getElementById("passkey-login");
+        const status = document.getElementById("passkey-login-status");
+        const email = document.getElementById("Input_Email");
+        const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+
+        if (!window.PublicKeyCredential || !navigator.credentials) {
+            button.disabled = true;
+            status.textContent = "Fingerprint/passkey login is not supported by this browser.";
+            return;
+        }
+
+        button.addEventListener("click", async () => {
+            button.disabled = true;
+            status.textContent = "Waiting for fingerprint…";
+            try {
+                const username = email?.value?.trim() || "";
+                const body = new URLSearchParams();
+                if (username) body.set("username", username);
+
+                const optionsResponse = await fetch("/Account/PasskeyRequestOptions", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded",
+                        "RequestVerificationToken": token
+                    },
+                    body
+                });
+
+                if (!optionsResponse.ok) throw new Error(await optionsResponse.text());
+
+                const optionsJson = await optionsResponse.json();
+                const options = PublicKeyCredential.parseRequestOptionsFromJSON(optionsJson);
+                const credential = await navigator.credentials.get({
+                    publicKey: options
+                });
+
+                if (!credential) throw new Error("No fingerprint credential was returned.");
+
+                const loginResponse = await fetch("/Account/PasskeyLogin", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "RequestVerificationToken": token
+                    },
+                    body: JSON.stringify({ credentialJson: JSON.stringify(credential) })
+                });
+
+                if (!loginResponse.ok) throw new Error(await loginResponse.text());
+
+                const result = await loginResponse.json();
+                window.location.href = result.redirect || "/";
+            } catch (error) {
+                console.error(error);
+                status.textContent = error?.message || "Fingerprint login was cancelled or failed.";
+            } finally {
+                button.disabled = false;
+            }
+        });
+    })();
+    </script>
 }

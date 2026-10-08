@@ -6,7 +6,7 @@
 @if (SignInManager.IsSignedIn(User))
 {
     <li class="nav-item">
-        <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Manage/Index" title="Signed in" aria-label="Signed in"><span aria-hidden="true" style="color: #198754; font-size: 1.25rem; font-weight: 700;">&#10003;</span></a>
+        <a class="nav-link text-dark" asp-controller="Passkey" asp-action="Index" title="Set up fingerprint login" aria-label="Set up fingerprint login"><span aria-hidden="true" style="font-size: 1.1rem;">🔐</span></a>
     </li>
     <li class="nav-item">
         <form  class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
