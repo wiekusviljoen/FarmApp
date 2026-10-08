@@ -174,8 +174,10 @@
             }
         };
 
+        // Do not start WebAuthn automatically on page load. Android requires a
+        // user interaction for the biometric/passkey ceremony; starting it in
+        // a timer can be rejected or time out after the first successful unlock.
         button.addEventListener('click', unlock);
-        setTimeout(unlock, 250);
     })();
     </script>
     <script>
