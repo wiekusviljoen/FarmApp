@@ -157,9 +157,13 @@
                 const credential = await navigator.credentials.get({ publicKey: options });
                 if (!credential) throw new Error('Fingerprint verification was cancelled.');
 
+                const antiForgeryToken = document.querySelector('#farmPhonePasskeyAntiForgery input[name="__RequestVerificationToken"]')?.value || '';
                 const loginResponse = await fetch('/Account/PasskeyLogin', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': antiForgeryToken
+                    },
                     body: JSON.stringify({ credentialJson: JSON.stringify(credential) })
                 });
                 if (!loginResponse.ok) throw new Error(await loginResponse.text());
