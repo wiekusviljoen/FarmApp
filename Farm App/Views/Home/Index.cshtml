@@ -171,6 +171,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     });
                     if (!registrationResponse.ok) throw new Error(await registrationResponse.text());
 
+                    localStorage.setItem('farm.passkey.enabled', '1');
+                    sessionStorage.setItem('farm.passkey.sessionVerified', '1');
                     status.textContent = 'Fingerprint login is ready.';
                     setTimeout(() => window.location.href = '/', 600);
                 } catch (error) {

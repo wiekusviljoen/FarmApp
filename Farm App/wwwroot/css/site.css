@@ -1,3 +1,9 @@
+.farm-phone-passkey-gate{position:fixed;inset:0;z-index:2500;display:flex;align-items:center;justify-content:center;padding:1rem;background:rgba(20,35,28,.72);backdrop-filter:blur(7px)}
+.farm-phone-passkey-gate[hidden]{display:none}
+.farm-phone-passkey-card{width:min(100%,420px);padding:2rem 1.5rem;text-align:center;background:#fff;border-radius:1.25rem;box-shadow:0 1.5rem 4rem rgba(0,0,0,.25)}
+body.farm-phone-passkey-locked{overflow:hidden}
+@media(max-width:575.98px){.farm-phone-passkey-card{max-height:90vh;overflow:auto;padding:1.5rem 1.25rem}}
+
 .farm-passkey-modal-backdrop{position:fixed;inset:0;z-index:2000;display:flex;align-items:center;justify-content:center;padding:1rem;background:rgba(20,35,28,.62);backdrop-filter:blur(4px)}
 .farm-passkey-modal{width:min(100%,460px);border-radius:1.25rem}
 .farm-passkey-icon{font-size:3rem;margin-bottom:.5rem}

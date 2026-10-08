@@ -63,6 +63,19 @@
             <span>Farming…</span>
         </div>
     </div>
+    @if (isAuthenticated)
+    {
+        <div id="farmPhonePasskeyGate" class="farm-phone-passkey-gate" hidden>
+            <div class="farm-phone-passkey-card" role="dialog" aria-modal="true" aria-labelledby="farmPhonePasskeyTitle">
+                <div class="farm-passkey-icon" aria-hidden="true">🔐</div>
+                <h2 id="farmPhonePasskeyTitle">Unlock Farm</h2>
+                <p id="farmPhonePasskeyMessage">Use your fingerprint to continue.</p>
+                <button type="button" id="farmPhonePasskeyButton" class="btn btn-success btn-lg w-100">Use fingerprint</button>
+                <div id="farmPhonePasskeyStatus" class="small mt-3" role="status" aria-live="polite"></div>
+                <form id="farmPhonePasskeyAntiForgery" method="post" style="display:none">@Html.AntiForgeryToken()</form>
+            </div>
+        </div>
+    }
     <div class="container">
         <main role="main" class="pb-3 page-shell">
             @RenderBody()
@@ -102,6 +115,69 @@
     })();
     </script>
     @await RenderSectionAsync("Scripts", required: false)
+    <script>
+    (() => {
+        const gate = document.getElementById('farmPhonePasskeyGate');
+        const button = document.getElementById('farmPhonePasskeyButton');
+        const status = document.getElementById('farmPhonePasskeyStatus');
+
+        // Fingerprint/passkey unlock is intentionally phone-only. Desktop browsers
+        // never receive this gate, even if a passkey exists on the PC.
+        const isPhone = /Android|iPhone|iPod/i.test(navigator.userAgent);
+        const passkeyEnabled = localStorage.getItem('farm.passkey.enabled') === '1';
+        const sessionVerified = sessionStorage.getItem('farm.passkey.sessionVerified') === '1';
+
+        if (!gate || !button || !status || !isPhone || !passkeyEnabled || sessionVerified) return;
+
+        gate.hidden = false;
+        document.body.classList.add('farm-phone-passkey-locked');
+
+        const setStatus = (message, error = false) => {
+            status.textContent = message;
+            status.className = 'small mt-3 ' + (error ? 'text-danger' : 'text-success');
+        };
+
+        const unlock = async () => {
+            button.disabled = true;
+            setStatus('Waiting for fingerprint…');
+
+            try {
+                if (!window.PublicKeyCredential || !navigator.credentials) {
+                    throw new Error('Fingerprint login is not supported on this phone.');
+                }
+
+                const optionsResponse = await fetch('/Account/PasskeyRequestOptions', {
+                    method: 'POST',
+                    headers: { 'RequestVerificationToken': document.querySelector('#farmPhonePasskeyAntiForgery input[name="__RequestVerificationToken"]')?.value || '' }
+                });
+                if (!optionsResponse.ok) throw new Error(await optionsResponse.text());
+
+                const optionsJson = await optionsResponse.json();
+                const options = PublicKeyCredential.parseRequestOptionsFromJSON(optionsJson);
+                const credential = await navigator.credentials.get({ publicKey: options });
+                if (!credential) throw new Error('Fingerprint verification was cancelled.');
+
+                const loginResponse = await fetch('/Account/PasskeyLogin', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ credentialJson: JSON.stringify(credential) })
+                });
+                if (!loginResponse.ok) throw new Error(await loginResponse.text());
+
+                sessionStorage.setItem('farm.passkey.sessionVerified', '1');
+                gate.hidden = true;
+                document.body.classList.remove('farm-phone-passkey-locked');
+            } catch (error) {
+                console.error(error);
+                setStatus(error?.message || 'Fingerprint verification failed. Try again.', true);
+                button.disabled = false;
+            }
+        };
+
+        button.addEventListener('click', unlock);
+        setTimeout(unlock, 250);
+    })();
+    </script>
     <script>
     (() => {
         const cleanInjectedDebugText = () => {
