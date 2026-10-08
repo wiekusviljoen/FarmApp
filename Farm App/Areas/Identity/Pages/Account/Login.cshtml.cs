@@ -63,17 +63,14 @@ public class LoginModel : PageModel
         {
             _logger.LogInformation("User logged in.");
 
-            var user = await _signInManager.UserManager.FindByEmailAsync(Input.Email);
-            if (user is not null)
+            // Do not query the passkey table during login. The optional fingerprint
+            // prompt is shown once after a successful password login.
+            if (!Request.Cookies.ContainsKey("farm.passkey.prompted"))
             {
-                var passkeys = await _signInManager.UserManager.GetPasskeysAsync(user);
-                if (!passkeys.Any())
-                {
-                    return RedirectToAction(
-                        "Index",
-                        "Passkey",
-                        new { returnUrl = ReturnUrl });
-                }
+                return RedirectToAction(
+                    "Index",
+                    "Passkey",
+                    new { returnUrl = ReturnUrl });
             }
 
             return LocalRedirect(ReturnUrl);

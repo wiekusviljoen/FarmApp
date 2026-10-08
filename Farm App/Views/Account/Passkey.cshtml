@@ -20,7 +20,7 @@
                     Set up fingerprint login
                 </button>
 
-                <a id="skip-passkey" href="@returnUrl" class="btn btn-link mt-2">Not now</a>
+                <a id="skip-passkey" href="@Url.Action("Skip", "Passkey", new { returnUrl })" class="btn btn-link mt-2">Not now</a>
 
                 <div id="passkey-status" class="mt-3 small" role="status" aria-live="polite"></div>
             </div>

@@ -29,6 +29,29 @@ public class PasskeyController : Controller
     }
 
     [Authorize]
+    [HttpGet("PasskeySkip")]
+    public IActionResult Skip(string? returnUrl = null)
+    {
+        MarkPrompted();
+        var destination = !string.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl)
+            ? returnUrl
+            : Url.Content("~/");
+        return LocalRedirect(destination!);
+    }
+
+    private void MarkPrompted()
+    {
+        Response.Cookies.Append("farm.passkey.prompted", "1", new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = Request.IsHttps,
+            SameSite = SameSiteMode.Lax,
+            IsEssential = true,
+            Expires = DateTimeOffset.UtcNow.AddYears(5)
+        });
+    }
+
+    [Authorize]
     [ValidateAntiForgeryToken]
     [HttpPost("PasskeyCreationOptions")]
     public async Task<IActionResult> CreationOptions()
@@ -70,6 +93,7 @@ public class PasskeyController : Controller
         if (!addResult.Succeeded)
             return BadRequest(string.Join(" ", addResult.Errors.Select(e => e.Description)));
 
+        MarkPrompted();
         return Ok(new { success = true });
     }
 
