@@ -1,4 +1,4 @@
-[Reading 314 lines from start (total: 314 lines, 0 remaining)]
+﻿[Reading 314 lines from start (total: 314 lines, 0 remaining)]
 
 @model IEnumerable<Farm_App.Models.Livestock>
 @{ ViewData["Title"] = "Livestock"; }
@@ -46,31 +46,47 @@
 </section>
 </section>
 <section id="feedTabPanel" class="livestock-tab-panel d-none">
-<section class="card p-4 mt-4"><h2>Animal feed & cost calculator</h2><p class="text-muted">Feed products, bag prices, mix costs, and feeding estimates.</p><div class="row g-4"><div class="col-12"><div class="card p-4 h-100">
-  <h2>Animal feed cost calculator</h2>
-  <p>Choose a Feedmaster product, keep its bag price up to date, and calculate mix costs.</p>
-  <div class="mb-3"><div class="d-flex justify-content-between align-items-center gap-2"><label class="form-label" for="feedName">Feed product</label><button type="button" class="btn btn-sm btn-outline-secondary" onclick="refreshFeedProducts()">Refresh products</button></div><select id="feedName" class="form-select"><option value="">Loading product list...</option></select><small class="text-muted d-block mt-1" id="feedCatalogStatus">Feedmaster product catalog</small></div>
-  <div class="row g-2 mb-3"><div class="col-sm-7"><label class="form-label">Current bag price (NAD)</label><input id="bagPrice" type="number" min="0" step="0.01" class="form-control" placeholder="Enter current supplier price" /></div><div class="col-sm-5"><label class="form-label">Bag size (kg)</label><input id="bagKg" type="number" min="1" step="1" class="form-control" value="50" /></div></div>
-  <p class="small text-muted" id="feedPriceStatus">Enter the current supplier price; it will be saved for this product on this device.</p>
-  <div class="mb-3"><label class="form-label">Amount used (kg)</label><input id="amountKg" type="number" min="0" step="0.1" class="form-control" placeholder="Kg in your mix" /></div>
-  <p class="small fw-bold" id="ingredientPreview">Enter bag price and kg to preview ingredient cost.</p>
-  <button class="btn btn-primary" onclick="addIngredient()">Add ingredient</button>
-  <div class="table-responsive mt-4"><table class="table" id="ingredients"><thead><tr><th>Ingredient</th><th>Kg</th><th>Cost (NAD)</th></tr></thead><tbody></tbody></table></div>
-  <p class="fw-bold" id="mixTotals">Mix total: NAD 0.00  |  Cost per kg: NAD 0.00</p>
-  <button class="btn btn-outline-secondary" onclick="clearMix()">Clear mix</button>
-  <hr class="my-4" />
-  <h3>Feeding duration estimator</h3>
-  <p>Estimate feed required and total cost for a selected product over a feeding period.</p>
-  <div class="row g-3">
-   <div class="col-6"><label class="form-label" for="animalCount">Number of active animals</label><input id="animalCount" type="number" min="0" step="1" value="@ViewBag.ActiveCount" class="form-control" readonly /><small class="text-muted">Automatically counted from active livestock records.</small></div>
-   <div class="col-12"><div id="speciesCountSummary" class="small text-muted"></div></div>
-   <div class="col-12"><h4 class="h6">Daily supplement by species</h4><div id="feedRationsBySpecies" class="table-responsive"><p class="text-muted small">Loading species rations...</p></div><small class="text-muted">Set the supplement amount in kg per head per day for each species. These are your ration settings, not total grazing intake.</small></div>
-   <div class="col-12"><label class="form-label" for="seasonFactor">Rainfall-based supplement factor</label><div class="input-group"><input id="seasonFactor" type="number" min="0" max="2" step="0.05" value="1" class="form-control" /><span class="input-group-text">x</span></div><small class="text-muted" id="seasonFactorNote">Adjust after checking actual grazing and animal condition. Rainfall alone cannot determine feed needs.</small></div>
-   <div class="col-8"><label class="form-label" for="durationValue">Feeding duration</label><input id="durationValue" type="number" min="1" step="1" value="30" class="form-control" /></div>
-   <div class="col-4"><label class="form-label" for="durationUnit">Unit</label><select id="durationUnit" class="form-select"><option value="1">Days</option><option value="7">Weeks</option><option value="30">Months (30 days)</option></select></div>
+<section class="card p-4 mt-4 feed-budget-card">
+  <h2>Feed cost planner</h2>
+  <p class="text-muted">Choose the animals, enter their average body mass, and estimate feed quantities and costs for the period you plan to feed them.</p>
+  <div class="row g-3 mb-4">
+    <div class="col-12 col-md-5"><label class="form-label" for="feedName">Feed product</label><select id="feedName" class="form-select"><option value="">Loading feed products...</option></select><small id="feedCatalogStatus" class="text-muted d-block mt-1">Choose the feed you plan to use.</small></div>
+    <div class="col-12 col-md-3"><label class="form-label" for="feedBasis">Feed amount basis</label><select id="feedBasis" class="form-select"><option value="complete" selected>Complete feed (% body mass)</option><option value="supplement">Lick / supplement (kg per head)</option></select><small id="feedBasisHelp" class="text-muted d-block mt-1">Complete-feed percentages are estimates. Follow the product label.</small></div>
+    <div class="col-7 col-md-2"><label class="form-label" for="bagPrice">Bag price (NAD)</label><input id="bagPrice" type="number" min="0" step="0.01" class="form-control" placeholder="Price" /><small class="text-muted d-block mt-1">Feedmaster does not publish live retail bag prices online. Enter your supplier price or <a href="https://www.feedmaster.com.na/contact-us" target="_blank" rel="noopener">ask Feedmaster</a>.</small></div>
+    <div class="col-5 col-md-2"><label class="form-label" for="bagKg">Bag size (kg)</label><input id="bagKg" type="number" min="1" step="1" value="50" class="form-control" /></div>
   </div>
-  <div class="alert alert-light border mt-3 mb-0"><div id="feedingEstimate" class="fw-bold">Choose a product and enter its price to estimate feed cost.</div><small class="text-muted">Planning estimate only. Rations are entered separately by species. Rainfall is only a rough signalâ€”check actual veld condition, animal body condition and feed-label guidance before feeding.</small></div>
- </div></div></div></div></section>
+  <div class="mb-3"><button type="button" id="findFeedPrice" class="btn btn-outline-primary">Find current price online</button><div id="feedPriceSearchResult" class="alert alert-light border mt-2 mb-0 d-none" role="status" aria-live="polite"></div></div>
+  <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2"><h3 class="h5 mb-0">Animals to feed</h3><button type="button" class="btn btn-outline-success" id="addFeedAnimal">+ Add animal type</button></div>
+  <p class="small text-muted">Add each animal type separately. For complete feeds, body-mass percentages are only planning estimates. For licks and concentrates, use the product-label rate and mixing directions.</p>
+  <div id="feedAnimalRows" class="d-grid gap-3"></div>
+  <div class="row g-3 mt-2">
+    <div class="col-6 col-md-4"><label class="form-label" for="planDuration">Feeding duration</label><input id="planDuration" type="number" min="1" step="1" value="30" class="form-control" /></div>
+    <div class="col-6 col-md-3"><label class="form-label" for="planDurationUnit">Unit</label><select id="planDurationUnit" class="form-select"><option value="1">Days</option><option value="7">Weeks</option><option value="30">Months</option></select></div>
+    <div class="col-6 col-md-3"><label class="form-label" for="feedingDaysPerWeek">Feeding days per week</label><select id="feedingDaysPerWeek" class="form-select"><option value="1">1 day</option><option value="2">2 days</option><option value="3">3 days</option><option value="4">4 days</option><option value="5">5 days</option><option value="6">6 days</option><option value="7" selected>Every day (7)</option></select></div>
+  </div>
+  <div class="mt-3">
+    <label class="form-label" for="feedAdviceContext">Extra details for feed advice (optional)</label>
+    <textarea id="feedAdviceContext" class="form-control" rows="2" placeholder="e.g. dry veld, pregnant ewes, lamb growth, maintenance, drought supplementation"></textarea>
+    <button type="button" id="getFeedAdvice" class="btn btn-outline-success mt-2">Get feed recommendation</button>
+    <div id="feedAdviceResult" class="alert alert-light border mt-3 mb-0 d-none" role="status" aria-live="polite"></div>
+    @Html.AntiForgeryToken()
+  </div>
+  <div class="card bg-light border-0 p-3 mt-4">
+    <h3 class="h5">Estimated feeding cost</h3>
+    <div class="row g-3">
+      <div class="col-6 col-lg-3"><small class="text-muted d-block">Feed per day</small><strong id="feedTotalDaily">—</strong></div>
+      <div class="col-6 col-lg-3"><small class="text-muted d-block">Feed for full period</small><strong id="feedTotalPeriod">—</strong></div>
+      <div class="col-6 col-lg-3"><small class="text-muted d-block">Estimated cost</small><strong id="feedTotalCost" class="text-success">—</strong></div>
+      <div class="col-6 col-lg-3"><small class="text-muted d-block">Whole bags to buy</small><strong id="feedTotalBags">—</strong></div>
+    </div>
+    <div class="table-responsive mt-3"><table class="table table-sm align-middle mb-0"><thead><tr><th>Animal type</th><th>Daily feed</th><th>Period feed</th><th>Period cost</th></tr></thead><tbody id="feedCostBreakdown"></tbody></table></div>
+    <small class="text-muted mt-3">Cost is prorated by kilograms used. “Whole bags” rounds up to the next bag, so the purchase cost may be higher than the feed consumed estimate. This is a planning estimate, not a veterinary ration prescription.</small>
+  </div>
+  <details class="mt-3"><summary class="small text-muted">Saved product price details</summary><p id="feedPriceStatus" class="small text-muted mt-2 mb-0">Enter a price to save it on this device.</p><button type="button" class="btn btn-sm btn-outline-secondary mt-2" onclick="refreshFeedProducts()">Refresh feed products</button></details>
+  <div hidden>
+    <input id="amountKg" value="0" /><p id="ingredientPreview"></p><table id="ingredients"><tbody></tbody></table><p id="mixTotals"></p><input id="animalCount" value="0" /><div id="speciesCountSummary"></div><div id="feedRationsBySpecies"></div><input id="seasonFactor" value="1" /><p id="seasonFactorNote"></p><input id="durationValue" value="30" /><select id="durationUnit"><option value="1">Days</option></select><div id="feedingEstimate"></div>
+  </div>
+</section>
 </section>
 @section Scripts {
 <script>
@@ -252,7 +268,7 @@ function renderFeedProductOptions(keepName = '') {
 }
 function initFeedProducts() {
  const select = document.getElementById('feedName');
- select.addEventListener('change', loadSelectedProduct);
+  select.addEventListener('change', () => { const product = selectedProduct(); const isSupplement = !!product && /lick|block|concentrate|futterfos|veefos|optimizer|cattle mix/i.test(product.name); document.getElementById('feedBasis').value = isSupplement ? 'supplement' : 'complete'; updateFeedBasisUI(true); loadSelectedProduct(); });
  renderFeedProductOptions();
  loadSelectedProduct();
 }
@@ -336,8 +352,127 @@ function updatePreviews() {
 document.getElementById('bagPrice').addEventListener('change', saveSelectedFeedPrice);
 document.getElementById('bagKg').addEventListener('change', saveSelectedFeedPrice);
 document.getElementById('durationUnit').addEventListener('change', updatePreviews);
+
+const feedAnimalDefaults = {
+ 'Sheep': {weight:45, percent:3}, 'Goats': {weight:40, percent:3},
+ 'Cattle': {weight:450, percent:2.5}, 'Horses': {weight:450, percent:2},
+ 'Pigs': {weight:80, percent:3}, 'Poultry': {weight:2, percent:4},
+ 'Calves': {weight:120, percent:3}, 'Other': {weight:50, percent:2.5}
+};
+let feedAnimalRowCounter = 0;
+function addFeedAnimalRow(species = 'Sheep', count = 100, weight, percent) {
+ const id = ++feedAnimalRowCounter, defaults = feedAnimalDefaults[species] || feedAnimalDefaults.Other;
+ const row = document.createElement('div');
+ row.className = 'border rounded-3 p-3 feed-animal-row';
+ row.innerHTML = '<div class="d-flex justify-content-between align-items-center mb-3"><strong>Animal group ' + id + '</strong><button type="button" class="btn btn-sm btn-outline-danger remove-feed-animal">Remove</button></div>' +
+ '<div class="row g-2">' +
+ '<div class="col-6 col-md-3"><label class="form-label" for="feedSpecies' + id + '">Animal type</label><select id="feedSpecies' + id + '" class="form-select feed-species">' + Object.keys(feedAnimalDefaults).map(x => '<option value="' + x + '"' + (x === species ? ' selected' : '') + '>' + x + '</option>').join('') + '</select></div>' +
+ '<div class="col-6 col-md-3"><label class="form-label" for="feedCount' + id + '">Number of animals</label><input id="feedCount' + id + '" class="form-control feed-count" type="number" min="1" step="1" value="' + count + '"></div>' +
+ '<div class="col-6 col-md-3"><label class="form-label" for="feedWeight' + id + '">Average body mass (kg)</label><input id="feedWeight' + id + '" class="form-control feed-weight" type="number" min="0.1" step="0.1" value="' + (weight ?? defaults.weight) + '"></div>' +
+  '<div class="col-6 col-md-3"><label class="form-label feed-rate-label" id="feedRateLabel' + id + '" for="feedPercent' + id + '">Feed % of body mass/day</label><div class="input-group"><input id="feedPercent' + id + '" class="form-control feed-percent" type="number" min="0" max="100" step="0.1" value="' + (percent ?? (document.getElementById("feedBasis")?.value === "supplement" ? 0 : defaults.percent)) + '"><span class="input-group-text feed-rate-unit" id="feedRateUnit' + id + '">%</span></div></div></div>';
+ document.getElementById('feedAnimalRows').appendChild(row);
+  row.querySelectorAll('input,select').forEach(el => el.addEventListener('input', () => {
+    if (el.classList.contains('feed-species')) {
+      const d = feedAnimalDefaults[el.value];
+      row.querySelector('.feed-weight').value = d.weight;
+      row.querySelector('.feed-percent').value = document.getElementById('feedBasis').value === 'supplement' ? 0 : d.percent;
+      updateFeedBasisUI(false);
+    }
+    calculateFeedBudget();
+  }));
+ row.querySelector('.remove-feed-animal').addEventListener('click', () => { row.remove(); calculateFeedBudget(); });
+ calculateFeedBudget();
+}
+async function findFeedPrice() {
+ const button=document.getElementById('findFeedPrice'), target=document.getElementById('feedPriceSearchResult');
+ const product=selectedProduct();
+ if(!product){target.classList.remove('d-none');target.textContent='Choose a feed product first.';return;}
+ button.disabled=true;button.textContent='Searching current prices...';target.classList.remove('d-none');target.textContent='Searching the web for a verifiable Namibian price. This can take up to a minute.';
+ try {
+  const token=document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+  const response=await fetch('/FeedAdvice/FindPrice',{method:'POST',headers:{'Content-Type':'application/json',...(token?{'RequestVerificationToken':token}:{})},body:JSON.stringify({productName:product.name,bagKg:Number(document.getElementById('bagKg').value)||product.bagKg,location:'Namibia'})});
+  const data=await response.json();if(!response.ok)throw new Error(data.error||'Price search failed.');
+  target.replaceChildren();
+  const report=document.createElement('div');report.textContent=data.report||data.message||'No price report returned.';target.appendChild(report);
+  if(data.found && Number(data.price)>0 && data.currency==='NAD' && data.sourceUrl){
+   const source=document.createElement('p');source.className='small mt-2 mb-2';source.textContent='Source: '+(data.seller||'Supplier')+' | '+data.sourceUrl+(data.asOf?' | Price date: '+data.asOf:'');target.appendChild(source);
+   const apply=document.createElement('button');apply.type='button';apply.className='btn btn-success btn-sm mt-2';apply.textContent='Use verified price: '+money(data.price)+' per bag';
+   apply.addEventListener('click',()=>{document.getElementById('bagPrice').value=data.price;if(Number(data.bagKg)>0)document.getElementById('bagKg').value=data.bagKg;saveSelectedFeedPrice();calculateFeedBudget();apply.disabled=true;apply.textContent='Price applied';});target.appendChild(apply);
+  }
+  const note=document.createElement('p');note.className='small text-muted mt-2 mb-0';note.textContent=data.message||'Verify supplier pricing before purchasing.';target.appendChild(note);
+ } catch(e){target.textContent='Could not find feed price: '+e.message;}
+ finally{button.disabled=false;button.textContent='Find current price online';}
+}
+
+async function requestFeedAdvice() {
+ const target=document.getElementById('feedAdviceResult'), button=document.getElementById('getFeedAdvice');
+ const animals=[...document.querySelectorAll('.feed-animal-row')].map(row=>({species:row.querySelector('.feed-species').value,count:Number(row.querySelector('.feed-count').value)||0,bodyMassKg:Number(row.querySelector('.feed-weight').value)||0,enteredRate:Number(row.querySelector('.feed-percent').value)||0})).filter(a=>a.count>0&&a.bodyMassKg>0);
+ if(!animals.length){target.classList.remove('d-none');target.textContent='Add at least one animal group with a count and body mass first.';return;}
+ button.disabled=true;button.textContent='Preparing recommendation...';target.classList.remove('d-none');target.textContent='Checking feed guidance...';
+ try {
+  const token=document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+  const product=selectedProduct();
+  const response=await fetch('/FeedAdvice/Recommend',{method:'POST',headers:{'Content-Type':'application/json',...(token?{'RequestVerificationToken':token}:{})},body:JSON.stringify({animals,productName:product?.name||'Not selected',bagPrice:Number(document.getElementById('bagPrice').value)||null,bagKg:Number(document.getElementById('bagKg').value)||null,feedingDaysPerWeek:Number(document.getElementById('feedingDaysPerWeek').value)||7,context:document.getElementById('feedAdviceContext').value,feedBasis:document.getElementById('feedBasis').value})});
+  const data=await response.json();if(!response.ok)throw new Error(data.error||'Recommendation could not be generated.');
+  if(data.recommendation) target.textContent=(data.mode === 'AI' ? 'AI guidance: ' : 'AI is not configured — built-in planning estimate: ') + data.recommendation;
+  else target.textContent=[data.mode === 'built-in guidance' ? ((data.recommendations||[]).length ? 'AI is not configured. Built-in planning estimates only; not a product-specific ration.' : 'AI is not configured.') : 'AI guidance:',data.message,...(data.recommendations||[]).map(x=>x.species+': '+x.suggestedPercentBodyMass+'% of body mass/day (about '+x.estimatedKgPerFeedingDay+' kg for this group per feeding day).')].filter(Boolean).join(' ');
+ } catch(e){target.textContent='Feed advice unavailable: '+e.message;}
+ finally{button.disabled=false;button.textContent='Get feed recommendation';}
+}
+function updateFeedBasisUI(resetRates = false) {
+  const basis = document.getElementById('feedBasis')?.value || 'complete';
+  const supplement = basis === 'supplement';
+  const help = document.getElementById('feedBasisHelp');
+  if (help) help.textContent = supplement ? 'Enter the product-label rate in kg per head per feeding day. Do not use body-mass percentages for licks, blocks, or concentrates.' : 'Percentages are planning estimates for complete feeds only; use the product label and account for grazing/roughage.';
+  document.querySelectorAll('.feed-animal-row').forEach(row => {
+    const species = row.querySelector('.feed-species').value;
+    const defaults = feedAnimalDefaults[species] || feedAnimalDefaults.Other;
+    const label = row.querySelector('.feed-rate-label');
+    const unit = row.querySelector('.feed-rate-unit');
+    const rate = row.querySelector('.feed-percent');
+    if (label) label.textContent = supplement ? 'Supplement kg/head/feeding day' : 'Feed % of body mass/day';
+    if (unit) unit.textContent = supplement ? 'kg/head' : '%';
+    if (rate) {
+      rate.step = supplement ? '0.01' : '0.1';
+      rate.placeholder = supplement ? 'Use bag label' : String(defaults.percent);
+      if (resetRates) rate.value = supplement ? '0' : String(defaults.percent);
+    }
+  });
+  calculateFeedBudget();
+}
+function calculateFeedBudget() {
+ const bagPrice = Number(document.getElementById('bagPrice').value);
+ const bagKg = Number(document.getElementById('bagKg').value);
+ const duration = Number(document.getElementById('planDuration').value) * Number(document.getElementById('planDurationUnit').value);
+ const feedingDaysPerWeek = Number(document.getElementById('feedingDaysPerWeek').value) || 7;
+ const equivalentFeedingDays = duration * feedingDaysPerWeek / 7;
+  const feedBasis = document.getElementById('feedBasis')?.value || 'complete';
+ const rows = [...document.querySelectorAll('.feed-animal-row')];
+ let dailyKg = 0, periodKg = 0, totalCost = 0;
+ const validPrice = Number.isFinite(bagPrice) && bagPrice > 0 && Number.isFinite(bagKg) && bagKg > 0;
+ const validDuration = Number.isFinite(duration) && duration > 0;
+ const breakdown = [];
+ rows.forEach(row => {
+   const species = row.querySelector('.feed-species').value;
+   const count = Math.max(0, Number(row.querySelector('.feed-count').value) || 0);
+   const weight = Math.max(0, Number(row.querySelector('.feed-weight').value) || 0);
+   const percent = Math.max(0, Number(row.querySelector('.feed-percent').value) || 0);
+    const daily = feedBasis === 'supplement' ? count * percent : count * weight * percent / 100;
+   const total = validDuration ? daily * equivalentFeedingDays : 0;
+   const cost = validPrice ? total / bagKg * bagPrice : 0;
+   dailyKg += daily; periodKg += total; totalCost += cost;
+   breakdown.push('<tr><td>' + escapeHtml(species) + ' (' + count.toLocaleString() + ')</td><td>' + daily.toLocaleString(undefined,{maximumFractionDigits:2}) + ' kg/feed day</td><td>' + total.toLocaleString(undefined,{maximumFractionDigits:1}) + ' kg</td><td>' + (validPrice && validDuration ? money(cost) : '—') + '</td></tr>');
+ });
+ document.getElementById('feedTotalDaily').textContent = dailyKg.toLocaleString(undefined,{maximumFractionDigits:2}) + ' kg/feed day';
+ document.getElementById('feedTotalPeriod').textContent = validDuration ? periodKg.toLocaleString(undefined,{maximumFractionDigits:1}) + ' kg' : 'Enter duration';
+ document.getElementById('feedTotalCost').textContent = validPrice && validDuration ? money(totalCost) : 'Enter bag price';
+ document.getElementById('feedTotalBags').textContent = validPrice && validDuration ? Math.ceil(periodKg / bagKg).toLocaleString() + ' bags' : '—';
+ document.getElementById('feedCostBreakdown').innerHTML = breakdown.join('');
+ if (!rows.length) document.getElementById('feedCostBreakdown').innerHTML = '<tr><td colspan="4" class="text-muted">Add an animal type to start calculating.</td></tr>';
+}
+
 window.addEventListener('farm-location-changed',()=>{rainCoords=null;loadRainfallWeather();});
-document.addEventListener('DOMContentLoaded', () => { const city=localStorage.getItem('farmRainCity') || 'Koes'; const select=document.getElementById('rainCity'); if(select) select.value=city; renderSpeciesCountSummary(); renderRationTable(); initFeedProducts(); updatePreviews(); refreshFeedProducts(); loadRainfallWeather(); });
+document.addEventListener('DOMContentLoaded', () => { document.getElementById('addFeedAnimal')?.addEventListener('click', () => addFeedAnimalRow('Sheep', 1)); addFeedAnimalRow('Sheep', 100); document.getElementById('planDuration')?.addEventListener('input', calculateFeedBudget); document.getElementById('planDurationUnit')?.addEventListener('change', calculateFeedBudget); document.getElementById('feedingDaysPerWeek')?.addEventListener('change', calculateFeedBudget); document.getElementById('feedBasis')?.addEventListener('change', () => updateFeedBasisUI(true)); document.getElementById('getFeedAdvice')?.addEventListener('click', requestFeedAdvice); document.getElementById('findFeedPrice')?.addEventListener('click', findFeedPrice); document.getElementById('bagPrice')?.addEventListener('input', calculateFeedBudget); document.getElementById('bagKg')?.addEventListener('input', calculateFeedBudget); document.getElementById('feedName')?.addEventListener('change', calculateFeedBudget); const city=localStorage.getItem('farmRainCity') || 'Koes'; const select=document.getElementById('rainCity'); if(select) select.value=city; renderSpeciesCountSummary(); renderRationTable(); initFeedProducts(); updatePreviews(); refreshFeedProducts(); loadRainfallWeather(); });
 </script>
 }
 
