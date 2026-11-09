@@ -25,7 +25,6 @@ public class LivestockController(ApplicationDbContext db, WebPushService push) :
         ViewBag.Query = q;
         var allActive = await db.Livestock.AsNoTracking().Where(a => a.OwnerId == CurrentUserId && a.Status == "Active").ToListAsync();
         ViewBag.ActiveCount = allActive.Count;
-        ViewBag.ManualRain30 = await db.RainfallRecords.AsNoTracking().Where(r => r.OwnerId == CurrentUserId && r.Date >= DateTime.Today.AddDays(-30)).SumAsync(r => (decimal?)r.Millimeters) ?? 0m;
         ViewBag.SpeciesCountsJson = JsonSerializer.Serialize(allActive.GroupBy(a => a.Species).OrderBy(g => g.Key).Select(g => new { species = g.Key, count = g.Count() }));
         ViewBag.RainfallEntries = await db.RainfallRecords.AsNoTracking().Where(r => r.OwnerId == CurrentUserId).OrderByDescending(r => r.Date).ThenBy(r => r.Camp).Take(100).ToListAsync();
         return View(await animals.OrderBy(a => a.Species).ThenBy(a => a.TagNumber).ToListAsync());
