@@ -100,7 +100,7 @@ const manualRain30 = @ViewBag.ManualRain30.ToString(System.Globalization.Culture
 const livestockCounts = @Html.Raw(ViewBag.SpeciesCountsJson);
 function renderSpeciesCountSummary() {
  const el=document.getElementById('speciesCountSummary');
- el.textContent=livestockCounts.length ? 'Registered active stock: '+livestockCounts.map(x=>`${x.species}: ${x.count}`).join(' &middot; ') : 'No active livestock is registered.';
+ el.textContent=livestockCounts.length ? 'Registered active stock: '+livestockCounts.map(x=>`${x.species}: ${x.count}`).join(' \u00B7 ') : 'No active livestock is registered.';
 }
 const rationStoreKey='farmflow.dailyRations.v1';
 function renderRationTable() {
@@ -202,12 +202,12 @@ async function loadRainfallTrend() {
   const data=await response.json();if(!response.ok)throw new Error(data.error||'Historical data unavailable');
   drawRainfallTrend(data.records,period);
   document.getElementById('rainTrendDates').textContent=data.season
-    ? `Rain season ${data.season} &middot; October to July &middot; ${location.label}`
-    : `${data.startDate} to ${data.endDate} &middot; ${location.label}`;
+    ? `Rain season ${data.season} \u00B7 October to July \u00B7 ${location.label}`
+    : `${data.startDate} to ${data.endDate} \u00B7 ${location.label}`;
   const total=data.records.reduce((sum,r)=>sum+(Number(r.rainMm)||0),0);
   status.textContent=period==='season'
-    ? `${data.records.length} daily observations grouped into monthly season totals &middot; Total: ${total.toFixed(1)} mm &middot; Source: ${data.source}`
-    : `${data.records.length} daily observations &middot; Total: ${total.toFixed(1)} mm &middot; Source: ${data.source}`;
+    ? `${data.records.length} daily observations grouped into monthly season totals \u00B7 Total: ${total.toFixed(1)} mm \u00B7 Source: ${data.source}`
+    : `${data.records.length} daily observations \u00B7 Total: ${total.toFixed(1)} mm \u00B7 Source: ${data.source}`;
  } catch(error){status.textContent='Could not load farm rain register: '+error.message;}
 }
 async function loadRainfallWeather() {
@@ -339,7 +339,7 @@ function updateFeedingEstimate() {
  const target=document.getElementById('feedingEstimate');
  if(!product || price<=0 || count<=0 || !Number.isFinite(factor) || factor<0 || days<=0){target.textContent='Choose a product, enter its current bag price, and complete the feeding details.';return;}
  const dailyKg=dailyBaseKg*factor, totalKg=dailyKg*days, bags=Math.ceil(totalKg/bagKg), totalCost=totalKg/bagKg*price, bagCost=bags*price;
- target.textContent=`${count} active animals &middot; ${days.toLocaleString()} days &middot; ${dailyKg.toLocaleString(undefined,{maximumFractionDigits:1})} kg/day &middot; ${totalKg.toLocaleString(undefined,{maximumFractionDigits:1})} kg total &middot; ${bags.toLocaleString()} bags of ${bagKg} kg &middot; Estimated cost: ${money(totalCost)} (full bags: ${money(bagCost)})`;
+ target.textContent=`${count} active animals \u00B7 ${days.toLocaleString()} days \u00B7 ${dailyKg.toLocaleString(undefined,{maximumFractionDigits:1})} kg/day \u00B7 ${totalKg.toLocaleString(undefined,{maximumFractionDigits:1})} kg total \u00B7 ${bags.toLocaleString()} bags of ${bagKg} kg \u00B7 Estimated cost: ${money(totalCost)} (full bags: ${money(bagCost)})`;
 }
 function updatePreviews() {
  const bag = Number(document.getElementById('bagPrice').value) || 0;
