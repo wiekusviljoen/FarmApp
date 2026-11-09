@@ -1,0 +1,31 @@
+@model Farm_App.Models.RainfallRecord
+@{ ViewData["Title"] = "Edit rainfall entry"; }
+<h1>Edit rainfall entry</h1>
+<form asp-action="EditRainfall" asp-route-id="@Model.Id" method="post" class="row g-3">
+    @Html.AntiForgeryToken()
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="col-6 col-md-3">
+        <label asp-for="Date" class="form-label"></label>
+        <input asp-for="Date" type="date" class="form-control" required />
+        <span asp-validation-for="Date" class="text-danger"></span>
+    </div>
+    <div class="col-6 col-md-3">
+        <label asp-for="Camp" class="form-label">Camp / gauge</label>
+        <input asp-for="Camp" class="form-control" maxlength="60" placeholder="e.g. Camp 1" />
+        <span asp-validation-for="Camp" class="text-danger"></span>
+    </div>
+    <div class="col-6 col-md-3">
+        <label asp-for="Millimeters" class="form-label"></label>
+        <input asp-for="Millimeters" type="number" class="form-control" min="0" max="2000" step="0.1" required />
+        <span asp-validation-for="Millimeters" class="text-danger"></span>
+    </div>
+    <div class="col-12">
+        <label asp-for="Notes" class="form-label"></label>
+        <textarea asp-for="Notes" class="form-control" maxlength="500" rows="3"></textarea>
+        <span asp-validation-for="Notes" class="text-danger"></span>
+    </div>
+    <div class="col-12">
+        <button type="submit" class="btn btn-primary">Save changes</button>
+        <a asp-action="Index" asp-route-tab="rain" class="btn btn-outline-secondary">Cancel</a>
+    </div>
+</form>

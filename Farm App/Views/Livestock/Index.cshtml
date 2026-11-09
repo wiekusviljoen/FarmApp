@@ -23,6 +23,18 @@
 <section class="card p-4 mt-4" id="rainfallRegister">
  <h2>Rain register</h2>
  <p class="text-muted mb-3">Record measured rainfall by date and camp or gauge.</p>
+ <div class="bg-light rounded p-3 mb-3">
+  <div class="fw-semibold">Average rainfall per saved entry</div>
+  @if (ViewBag.AverageRainfall is decimal averageRainfall)
+  {
+   <div class="fs-4 text-success">@averageRainfall.ToString("0.0") mm</div>
+   <small class="text-muted">Based on all @ViewBag.RainfallEntryCount of your saved entries across all dates and camps/gauges, including entries of 0 mm.</small>
+  }
+  else
+  {
+   <div class="text-muted">Save a rainfall entry to see your average.</div>
+  }
+ </div>
  <form asp-action="LogRainfall" method="post" class="row g-2 mb-3">
   @Html.AntiForgeryToken()
   <div class="col-6 col-md-3"><label class="form-label" for="rainDate">Date</label><input class="form-control" id="rainDate" name="date" type="date" value="@DateTime.Today.ToString("yyyy-MM-dd")" required /></div>
@@ -33,7 +45,7 @@
  </form>
  @if (TempData["RainError"] is string rainError) { <div class="alert alert-danger">@rainError</div> }
  <div class="table-responsive"><table class="table table-sm align-middle"><thead><tr><th>Date</th><th>Camp / gauge</th><th>Rain (mm)</th><th>Notes</th><th></th></tr></thead><tbody>
- @foreach (var rain in (IEnumerable<Farm_App.Models.RainfallRecord>)ViewBag.RainfallEntries) { <tr><td>@rain.Date.ToString("yyyy-MM-dd")</td><td>@(string.IsNullOrWhiteSpace(rain.Camp) ? "Farm gauge" : rain.Camp)</td><td>@rain.Millimeters.ToString("0.0")</td><td>@rain.Notes</td><td><form asp-action="DeleteRainfall" method="post" onsubmit="return confirm('Delete this rainfall entry?');">@Html.AntiForgeryToken()<input type="hidden" name="id" value="@rain.Id" /><button class="btn btn-sm btn-outline-danger" type="submit">Delete</button></form></td></tr> }
+ @foreach (var rain in (IEnumerable<Farm_App.Models.RainfallRecord>)ViewBag.RainfallEntries) { <tr><td>@rain.Date.ToString("yyyy-MM-dd")</td><td>@(string.IsNullOrWhiteSpace(rain.Camp) ? "Farm gauge" : rain.Camp)</td><td>@rain.Millimeters.ToString("0.0")</td><td>@rain.Notes</td><td><div class="d-flex gap-2"><a asp-action="EditRainfall" asp-route-id="@rain.Id" class="btn btn-sm btn-outline-primary">Edit</a><form asp-action="DeleteRainfall" method="post" onsubmit="return confirm('Delete this rainfall entry?');">@Html.AntiForgeryToken()<input type="hidden" name="id" value="@rain.Id" /><button class="btn btn-sm btn-outline-danger" type="submit">Delete</button></form></div></td></tr> }
  @if (!((IEnumerable<Farm_App.Models.RainfallRecord>)ViewBag.RainfallEntries).Any()) { <tr><td colspan="5" class="text-center text-muted">No rainfall entries yet.</td></tr> }
  </tbody></table></div>
 </section>
@@ -341,7 +353,7 @@ function calculateFeedBudget() {
  if (!rows.length) document.getElementById('feedCostBreakdown').innerHTML = '<tr><td colspan="4" class="text-muted">Add an animal type to start calculating.</td></tr>';
 }
 
-document.addEventListener('DOMContentLoaded', () => { document.getElementById('addFeedAnimal')?.addEventListener('click', () => addFeedAnimalRow('Sheep', 1)); addFeedAnimalRow('Sheep', 100); document.getElementById('planDuration')?.addEventListener('input', calculateFeedBudget); document.getElementById('planDurationUnit')?.addEventListener('change', calculateFeedBudget); document.getElementById('feedingDaysPerWeek')?.addEventListener('change', calculateFeedBudget); document.getElementById('feedBasis')?.addEventListener('change', () => updateFeedBasisUI(true)); document.getElementById('getFeedAdvice')?.addEventListener('click', requestFeedAdvice); document.getElementById('findFeedPrice')?.addEventListener('click', findFeedPrice); document.getElementById('bagPrice')?.addEventListener('input', calculateFeedBudget); document.getElementById('bagKg')?.addEventListener('input', calculateFeedBudget); document.getElementById('feedName')?.addEventListener('change', calculateFeedBudget); renderSpeciesCountSummary(); renderRationTable(); initFeedProducts(); updatePreviews(); refreshFeedProducts(); });
+document.addEventListener('DOMContentLoaded', () => { if (new URLSearchParams(window.location.search).get('tab') === 'rain') showLivestockTab('rainTabPanel', document.querySelector('[aria-controls="rainTabPanel"]'));  document.getElementById('addFeedAnimal')?.addEventListener('click', () => addFeedAnimalRow('Sheep', 1)); addFeedAnimalRow('Sheep', 100); document.getElementById('planDuration')?.addEventListener('input', calculateFeedBudget); document.getElementById('planDurationUnit')?.addEventListener('change', calculateFeedBudget); document.getElementById('feedingDaysPerWeek')?.addEventListener('change', calculateFeedBudget); document.getElementById('feedBasis')?.addEventListener('change', () => updateFeedBasisUI(true)); document.getElementById('getFeedAdvice')?.addEventListener('click', requestFeedAdvice); document.getElementById('findFeedPrice')?.addEventListener('click', findFeedPrice); document.getElementById('bagPrice')?.addEventListener('input', calculateFeedBudget); document.getElementById('bagKg')?.addEventListener('input', calculateFeedBudget); document.getElementById('feedName')?.addEventListener('change', calculateFeedBudget); renderSpeciesCountSummary(); renderRationTable(); initFeedProducts(); updatePreviews(); refreshFeedProducts(); });
 </script>
 }
 

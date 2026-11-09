@@ -26,6 +26,9 @@ public class LivestockController(ApplicationDbContext db, WebPushService push) :
         var allActive = await db.Livestock.AsNoTracking().Where(a => a.OwnerId == CurrentUserId && a.Status == "Active").ToListAsync();
         ViewBag.ActiveCount = allActive.Count;
         ViewBag.SpeciesCountsJson = JsonSerializer.Serialize(allActive.GroupBy(a => a.Species).OrderBy(g => g.Key).Select(g => new { species = g.Key, count = g.Count() }));
+        var registeredRainfall = await db.RainfallRecords.AsNoTracking().Where(r => r.OwnerId == CurrentUserId).Select(r => r.Millimeters).ToListAsync();
+        ViewBag.RainfallEntryCount = registeredRainfall.Count;
+        ViewBag.AverageRainfall = registeredRainfall.Count == 0 ? (decimal?)null : registeredRainfall.Average();
         ViewBag.RainfallEntries = await db.RainfallRecords.AsNoTracking().Where(r => r.OwnerId == CurrentUserId).OrderByDescending(r => r.Date).ThenBy(r => r.Camp).Take(100).ToListAsync();
         return View(await animals.OrderBy(a => a.Species).ThenBy(a => a.TagNumber).ToListAsync());
     }
@@ -36,12 +39,42 @@ public class LivestockController(ApplicationDbContext db, WebPushService push) :
         if (date == default || millimeters < 0 || millimeters > 2000)
         {
             TempData["RainError"] = "Enter a valid date and rainfall amount between 0 and 2,000 mm.";
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction(nameof(Index), new { tab = "rain" });
         }
         db.RainfallRecords.Add(new RainfallRecord { OwnerId = CurrentUserId, Date = date.Date, Camp = string.IsNullOrWhiteSpace(camp) ? null : camp.Trim(), Millimeters = millimeters, Notes = string.IsNullOrWhiteSpace(notes) ? null : notes.Trim() });
         await db.SaveChangesAsync();
         TempData["Message"] = "Rainfall entry saved.";
-        return RedirectToAction(nameof(Index));
+        return RedirectToAction(nameof(Index), new { tab = "rain" });
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> EditRainfall(int id)
+    {
+        var record = await db.RainfallRecords.AsNoTracking().FirstOrDefaultAsync(r => r.Id == id && r.OwnerId == CurrentUserId);
+        return record == null ? NotFound() : View(record);
+    }
+
+    [HttpPost, ValidateAntiForgeryToken]
+    public async Task<IActionResult> EditRainfall(int id, [Bind("Date,Camp,Millimeters,Notes")] RainfallRecord input)
+    {
+        var record = await db.RainfallRecords.FirstOrDefaultAsync(r => r.Id == id && r.OwnerId == CurrentUserId);
+        if (record == null) return NotFound();
+        if (!ModelState.ContainsKey(nameof(input.Date)) || input.Date == default)
+            ModelState.AddModelError(nameof(input.Date), "Enter a valid date.");
+        if (!ModelState.ContainsKey(nameof(input.Millimeters)))
+            ModelState.AddModelError(nameof(input.Millimeters), "Enter a rainfall amount.");
+        if (!ModelState.IsValid)
+        {
+            input.Id = record.Id;
+            return View(input);
+        }
+        record.Date = input.Date.Date;
+        record.Camp = string.IsNullOrWhiteSpace(input.Camp) ? null : input.Camp.Trim();
+        record.Millimeters = input.Millimeters;
+        record.Notes = string.IsNullOrWhiteSpace(input.Notes) ? null : input.Notes.Trim();
+        await db.SaveChangesAsync();
+        TempData["Message"] = "Rainfall entry updated.";
+        return RedirectToAction(nameof(Index), new { tab = "rain" });
     }
 
     [HttpPost, ValidateAntiForgeryToken]
@@ -50,7 +83,7 @@ public class LivestockController(ApplicationDbContext db, WebPushService push) :
         var record = await db.RainfallRecords.FirstOrDefaultAsync(r => r.Id == id && r.OwnerId == CurrentUserId);
         if (record != null) { db.RainfallRecords.Remove(record); await db.SaveChangesAsync(); }
         TempData["Message"] = "Rainfall entry deleted.";
-        return RedirectToAction(nameof(Index));
+        return RedirectToAction(nameof(Index), new { tab = "rain" });
     }
 
     [HttpGet]
