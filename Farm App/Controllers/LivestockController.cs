@@ -20,8 +20,17 @@ public class LivestockController(ApplicationDbContext db, WebPushService push) :
     public async Task<IActionResult> Index(string? q)
     {
         var animals = db.Livestock.AsNoTracking().Where(a => a.OwnerId == CurrentUserId);
-        if (!string.IsNullOrWhiteSpace(q))
-            animals = animals.Where(a => a.TagNumber.Contains(q) || a.Species.Contains(q) || (a.Camp != null && a.Camp.Contains(q)));
+        q = q?.Trim();
+        if (!string.IsNullOrEmpty(q))
+        {
+            var search = q.ToLowerInvariant();
+            animals = animals.Where(a => a.TagNumber.ToLower().Contains(search)
+                || a.Species.ToLower().Contains(search)
+                || (a.Breed != null && a.Breed.ToLower().Contains(search))
+                || (a.Sex != null && a.Sex.ToLower().Contains(search))
+                || (a.Camp != null && a.Camp.ToLower().Contains(search))
+                || a.Status.ToLower().Contains(search));
+        }
         ViewBag.Query = q;
         var allActive = await db.Livestock.AsNoTracking().Where(a => a.OwnerId == CurrentUserId && a.Status == "Active").ToListAsync();
         ViewBag.ActiveCount = allActive.Count;
